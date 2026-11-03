@@ -1267,7 +1267,7 @@ function renderLayout() {
     <a class="skip-link" href="${esc(location.pathname + location.search)}#main">Skip to content</a>
     <header class="header" data-header>
       <a class="logo" href="./" aria-label="Mimi Food home">
-        <span class="logo-word" style="font:600 20px/1 Instrument Sans,Arial,sans-serif;letter-spacing:.12em;color:#111">MIMI FOOD</span>
+        <img class="logo-img" src="assets/logo-full.png" alt="Mimi Food USA" width="174" height="30" style="display:block;height:30px;width:auto">
       </a>
       ${
         page === "checkout"

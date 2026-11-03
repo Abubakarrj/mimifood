@@ -902,6 +902,15 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
     return f;
   }
 
+  async function deleteFoods(ids) {
+    const want = new Set((Array.isArray(ids) ? ids : []).map(String));
+    const gone = db.foods.filter((f) => want.has(f.id));
+    if (!gone.length) throw new CatalogError("Choose at least one product to delete.");
+    db.photos = db.photos.filter((p) => !gone.some((f) => f.photo === p.id));
+    db.foods = db.foods.filter((f) => !want.has(f.id));
+    await save();
+    return gone.map((f) => f.id);
+  }
   async function moveFood(id, dir) {
     const list = sortedFoods();
     const i = list.findIndex((f) => f.id === id);
@@ -970,6 +979,7 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
     createFood,
     updateFood,
     deleteFood,
+    deleteFoods,
     moveFood,
     setFoodPhoto,
     removeFoodPhoto,

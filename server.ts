@@ -1107,7 +1107,9 @@ async function serveStatic(req, res) {
       "Cache-Control": new URL(req.url, "http://localhost").searchParams.has("v") && [".css", ".js"].includes(ext)
         ? "public, max-age=31536000, immutable"
         : [".png", ".jpg", ".jpeg", ".webp", ".ico", ".mp4"].includes(ext)
-          ? "public, max-age=86400, stale-while-revalidate=604800"
+          ? rel.startsWith(path.join("assets", "products"))
+            ? "public, max-age=300, must-revalidate" // product photos change in the back office: checked every 5 minutes
+            : "public, max-age=86400, stale-while-revalidate=604800"
           : "no-cache",
       ETag: etag,
       "X-Content-Type-Options": "nosniff",
@@ -12227,6 +12229,7 @@ async function handleCatalog(req, res, pathname) {
     }
     // Food products: shop only, so a save just updates the site.
     if (pathname === "/api/admin/foods" && method === "POST") return done(201, { food: await catalog.createFood(body) });
+    if (pathname === "/api/admin/foods/bulk-delete" && method === "POST") return done(200, { deleted: await catalog.deleteFoods(body.ids) });
     m = /^\/api\/admin\/foods\/([\w-]+)(?:\/(move|photo))?$/.exec(pathname);
     if (m) {
       const [, id, part] = m;
@@ -13024,7 +13027,7 @@ const logoPixels = () =>
     try {
       const { default: sharp } = await import("sharp");
       const mine = setting("documentLogo")?.value;
-      const src = mine?.data ? Buffer.from(mine.data, "base64") : path.join(ROOT, "assets", "logo.svg");
+      const src = mine?.data ? Buffer.from(mine.data, "base64") : path.join(ROOT, "assets", "logo-full.png");
       const { data, info } = await sharp(src, { density: 600 }).resize({ height: 180, width: 720, fit: "inside" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
       return { width: info.width, height: info.height, rgba: data };
     } catch (error) {

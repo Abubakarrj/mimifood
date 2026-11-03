@@ -11,7 +11,7 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 // absolute, since back office pages live under /admin/….
 const imgSrc = (u) => esc(u && !/^([a-z]+:|\/)/i.test(u) ? `/${u}` : u);
 
-const LOGO = `<svg viewBox="0 0 46 62" aria-hidden="true"><ellipse cx="23" cy="31" rx="21" ry="29" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="currentColor"/></svg>`;
+const LOGO = `<img src="/assets/logo-mark.png" alt="" style="display:block;width:100%;height:auto">`;
 
 // Icons: Lucide (outlined), loaded from /vendor/lucide.min.js. Markup is built from
 // Lucide's own icon data so the page can render as strings.
@@ -7869,6 +7869,8 @@ const productThumb = (p) =>
     ? `<span class="thumb"><img src="${imgSrc(p.image)}" alt="" loading="lazy"></span>`
     : `<span class="thumb"><img src="/assets/bag-kraft.webp" alt="" loading="lazy"></span>`;
 // A tea's cup, with its lid colour.
+const foodPick = new Set<string>(); // products ticked in the Food list, for Delete Selected
+const foodBarHtml = () => (foodPick.size ? `<span><strong>${foodPick.size}</strong> selected</span><button type="button" class="btn btn-danger-ghost btn-sm" data-food-bulk-delete>${icon("trash")}<span>Delete Selected</span></button><button type="button" class="btn btn-ghost btn-sm" data-food-pick-clear>Clear</button>` : "");
 const foodThumb = (f) => (f.image ? `<span class="thumb"><img src="${imgSrc(f.image)}" alt="" loading="lazy"></span>` : `<span class="thumb thumb-kind" aria-hidden="true">${icon("products")}</span>`);
 const teaThumb = (t) =>
   t.image ? `<span class="thumb"><img src="${imgSrc(t.image)}" alt="" loading="lazy"></span>` : `<span class="thumb tea-thumb" style="--lid:${esc(t.color || "#d8d2c4")}"><img src="/assets/tea-cup.webp" alt="" loading="lazy"></span>`;
@@ -7958,11 +7960,12 @@ function productsView() {
     const q = state.query.toLowerCase();
     const foods = (c.foods || []).filter((x) => !q || `${x.name} ${x.category}`.toLowerCase().includes(q));
     body = foods.length
-      ? `<table class="table products-table teas-table">
-          <thead><tr><th>Product</th><th>Category</th><th class="num">Price</th><th>Status</th><th class="actions-col"><span class="sr-only">Order</span></th></tr></thead>
+      ? `<div class="bulk-bar" data-food-bar>${foodBarHtml()}</div><table class="table products-table teas-table">
+          <thead><tr><th class="c-select"><input type="checkbox" data-food-pick-all aria-label="Select all shown" ${foods.length && foods.every((x) => foodPick.has(x.id)) ? "checked" : ""}></th><th>Product</th><th>Category</th><th class="num">Price</th><th>Status</th><th class="actions-col"><span class="sr-only">Order</span></th></tr></thead>
           <tbody>${foods
             .map(
               (x, i) => `<tr data-food="${esc(x.id)}" class="clickable${x.visible ? "" : " is-hidden"}">
+                <td class="c-select"><input type="checkbox" data-food-pick="${esc(x.id)}" aria-label="Select ${esc(x.short || x.name)}" ${foodPick.has(x.id) ? "checked" : ""}></td>
                 <td class="c-product">${foodThumb(x)}<span><strong>${esc(x.short || x.name)}</strong><small>${esc(x.pack || "")}</small></span></td>
                 <td>${esc(x.category)}</td>
                 <td class="num c-price">${x.price == null ? `<span class="muted">Coming Soon</span>` : money(x.price)}</td>
@@ -12181,7 +12184,47 @@ app.addEventListener("click", async (e) => {
   }
   const optEdit = t.closest("[data-option-edit]");
   if (optEdit) return optionSetForm(state.menu.optionSets.find((o) => o.id === optEdit.dataset.optionEdit));
-  const foodSoldOut = t.closest("[data-food-sold-out]");
+  const foodPickAll = t.closest("[data-food-pick-all]");
+  if (foodPickAll) {
+    e.stopPropagation();
+    const ids = $$("[data-food]").map((r) => r.dataset.food);
+    for (const id of ids) (foodPickAll.checked ? foodPick.add(id) : foodPick.delete(id));
+    $$("[data-food-pick]").forEach((c) => (c.checked = foodPick.has(c.dataset.foodPick)));
+    $("[data-food-bar]").innerHTML = foodBarHtml();
+    return;
+  }
+  const foodPicked = t.closest("[data-food-pick]");
+  if (foodPicked) {
+    e.stopPropagation();
+    if (foodPicked.checked) foodPick.add(foodPicked.dataset.foodPick);
+    else foodPick.delete(foodPicked.dataset.foodPick);
+    $("[data-food-bar]").innerHTML = foodBarHtml();
+    const all = $("[data-food-pick-all]");
+    if (all) all.checked = $$("[data-food-pick]").every((c) => c.checked);
+    return;
+  }
+  if (t.closest("[data-food-pick-clear]")) {
+    foodPick.clear();
+    $$("[data-food-pick], [data-food-pick-all]").forEach((c) => (c.checked = false));
+    $("[data-food-bar]").innerHTML = "";
+    return;
+  }
+  const foodBulk = t.closest("[data-food-bulk-delete]");
+  if (foodBulk) {
+    const ids = [...foodPick];
+    if (!ids.length || !confirm(`Delete ${ids.length} product${ids.length === 1 ? "" : "s"}? They disappear from the shop and from carts at checkout. Past orders keep their details.\n\nTo take products off sale for now, untick "Show in the shop" on each instead.`)) return;
+    foodBulk.disabled = true;
+    try {
+      state.catalog = (await api("/api/admin/foods/bulk-delete", { method: "POST", body: { ids } })).catalog;
+      foodPick.clear();
+      render();
+      toast(`${ids.length} product${ids.length === 1 ? "" : "s"} deleted`);
+    } catch (error) {
+      foodBulk.disabled = false;
+      toast(error.message);
+    }
+    return;
+  }  const foodSoldOut = t.closest("[data-food-sold-out]");
   if (foodSoldOut) {
     e.stopPropagation();
     const x = state.catalog.foods.find((y) => y.id === foodSoldOut.dataset.foodSoldOut);
