@@ -364,7 +364,7 @@ export function invoicePdf({ site, account: a, order: o, today, payLink, logo = 
     say("Pay by card or bank transfer online:");
     const shown = payLink.replace(/^https?:\/\//, "");
     for (const w of wrap(shown, 260, 9)) {
-      p.text(M, py, w, { size: 9, color: hex("#1d4ed8") });
+      p.text(M, py, w, { size: 9, color: hex("#2f7a34") });
       p.link(M, py - 9, textWidth(w, 9), 12, payLink);
       py += 12.5;
     }

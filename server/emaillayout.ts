@@ -4,7 +4,7 @@
 // dark-mode mail apps leave it as it is, and the logo sits on its own white badge
 // (email-logo-badge.png), so it still shows on a dark background in apps that invert anyway.
 
-export const BLUE = "#2457f5";
+export const BLUE = "#2f7a34";
 export const INK = "#111111";
 export const MUTED = "#666666";
 export const LINE = "#e4e4e4";
