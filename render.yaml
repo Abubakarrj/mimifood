@@ -3,11 +3,11 @@
 # and the Postgres database that keeps the shop's data.
 services:
   # A web service (not a static site): it runs server.ts (via server.js) for checkout, payments,
-  # accounts and the back office. Named Mimi Food-coffee because "black-paper" was
+  # accounts and the back office. Named mimi-food (it was "Mimi Food-coffee" before; keep that name if the service already exists) because "black-paper" was
   # first created as a static site, and Render can't change a service's type.
   - type: web
     runtime: node
-    name: Mimi Food-coffee
+    name: mimi-food
     plan: free
     buildCommand: npm ci
     startCommand: npm start
@@ -51,7 +51,7 @@ services:
       # files in ./data, which Render wipes on every deploy: fine locally, not live.)
       - key: DATABASE_URL
         fromDatabase:
-          name: Mimi Food-db
+          name: mimi-food-db
           property: connectionString
       # Private key for the admin downloads:
       #   https://<your-site>/admin/subscriptions.csv?key=<ADMIN_KEY>
@@ -193,9 +193,9 @@ services:
         sync: false
 
 databases:
-  - name: Mimi Food-db
-    databaseName: Mimi Food
-    user: Mimi Food
+  - name: mimi-food-db
+    databaseName: mimi_food
+    user: mimi_food
     # Render's free Postgres expires after 30 days, so use a paid plan for real
     # orders. basic-256mb is the smallest paid plan and is backed up by Render
     # (see render.com/pricing for the current price).
