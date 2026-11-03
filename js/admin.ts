@@ -11,7 +11,7 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 // absolute, since back office pages live under /admin/….
 const imgSrc = (u) => esc(u && !/^([a-z]+:|\/)/i.test(u) ? `/${u}` : u);
 
-const LOGO = `<img src="/assets/logo-mark.png" alt="" style="display:block;width:100%;height:auto">`;
+const LOGO = `<img class="mark-img" src="/assets/logo-mark.png" alt="">`;
 
 // Icons: Lucide (outlined), loaded from /vendor/lucide.min.js. Markup is built from
 // Lucide's own icon data so the page can render as strings.

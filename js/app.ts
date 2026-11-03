@@ -1088,6 +1088,15 @@ function accessoryPage(a) {
         </fieldset>`
             : ""
         }
+        ${comingSoon(a) || a.soldOut ? "" : `<fieldset class="options">
+          <legend>Who's it for?</legend>
+          <label><input type="radio" name="who" value="me" checked><span>For me</span></label>
+          <label><input type="radio" name="who" value="gift"><span>A gift</span></label>
+        </fieldset>
+        <div class="form gift-fields" data-pdp-gift hidden>
+          <label>Recipient's Name<input name="recipient" maxlength="80" autocomplete="off"></label>
+          <label>Gift Message<textarea name="giftNote" maxlength="300" rows="3" placeholder="We'll print it on a card in the box."></textarea></label>
+        </div>`}
         <p class="stock-note" data-stock-note hidden></p>
         <div class="buy-row">
           ${comingSoon(a) ? "" : `<div class="stepper" role="group" aria-label="Quantity">
@@ -1131,9 +1140,23 @@ function accessoryPage(a) {
       stockRefresh();
     })
   );
+  const giftBox = $("[data-pdp-gift]");
+  const recipient = giftBox && $("input[name=recipient]", giftBox);
+  $$("input[name=who]").forEach((r) =>
+    r.addEventListener("change", () => {
+      giftBox.hidden = r.value !== "gift" || !r.checked;
+      if (!giftBox.hidden) recipient.focus();
+    })
+  );
   const addBtn = $("[data-pdp-add]");
   addBtn?.addEventListener("click", () => {
-    addLine(accessoryLine(a, { size: $("input[name=accSize]:checked")?.value || "", color: colorNow() }, qty));
+    const isGift = $("input[name=who]:checked")?.value === "gift";
+    if (isGift && !recipient.value.trim()) {
+      fieldError(recipient, "Add the recipient's name.");
+      return;
+    }
+    const gift = isGift ? { recipient: recipient.value.trim(), note: $("textarea[name=giftNote]", giftBox).value.trim() } : null;
+    addLine(accessoryLine(a, { size: $("input[name=accSize]:checked")?.value || "", color: colorNow() }, qty, gift));
     addBtn.querySelector(".buy-added")?.remove();
     addBtn.insertAdjacentHTML("beforeend", `<span class="buy-added">Added</span>`);
     addBtn.classList.add("is-added");
@@ -1859,12 +1882,14 @@ function shopifyCartUrl() {
   const domain = SITE.shopify?.domain;
   if (!domain || !cart.length) return "";
   const parts = [];
+  const notes = [];
   for (const l of cart) {
     const variant = l.kind === "accessory" ? ACCESSORIES.find((a) => a.id === lineProduct(l))?.shopify : "";
     if (!variant) return "";
     parts.push(`${variant}:${l.qty}`);
+    if (l.gift) notes.push(`Gift for ${l.recipient || "someone"}${l.note ? `: ${l.note}` : ""} (${String(l.title).split(",")[0]})`);
   }
-  return `https://${domain}/cart/${parts.join(",")}?return_to=/checkout`;
+  return `https://${domain}/cart/${parts.join(",")}?return_to=/checkout${notes.length ? `&note=${encodeURIComponent(notes.join(" | ").slice(0, 500))}` : ""}`;
 }
 function cartSuggestions() {
   if (!cart.length || cart.some((l) => l.kind === "pickup") || cart.every((l) => l.kind === "sub" || l.kind === "class")) return [];
