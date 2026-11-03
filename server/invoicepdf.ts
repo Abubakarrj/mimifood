@@ -281,7 +281,7 @@ export function invoicePdf({ site, account: a, order: o, today, payLink, logo = 
   };
   const ad = a.address || {};
   const billEnd = block(M, "Bill to", [a.business, a.contactName || "", a.email || ""], 150);
-  const shipEnd = block(M + 170, pickup ? "Pickup" : "Deliver to", pickup ? ["Roastery House"] : ad.street ? [a.business, ad.street, `${ad.city}, ${ad.state} ${ad.postcode}`] : ["—"], 150);
+  const shipEnd = block(M + 170, pickup ? "Pickup" : "Deliver to", pickup ? ["our office"] : ad.street ? [a.business, ad.street, `${ad.city}, ${ad.state} ${ad.postcode}`] : ["—"], 150);
   const facts = [
     ["Issued", longDate(o.placedAt)],
     ["Due", o.dueDate ? longDate(o.dueDate) : "On receipt"],

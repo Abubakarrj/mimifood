@@ -34,7 +34,7 @@ export function createTrade({ store, data }) {
   const db = store.data;
   const save = store.save;
   const { SITE, PRODUCTS, ACCESSORIES = [], US_STATES, LOCATIONS = [] } = data;
-  // Where a café can collect: Roastery House, and the café bars once they're live (on the map).
+  // Where a café can collect: our office, and the café bars once they're live (on the map).
   // By quote: a Limited Drop coffee (allocated, so priced per café) or one with no wholesale
   // price. It shows "By Quote" in the portal and is only ordered through an accepted quote.
   const byQuote = (p) => Boolean(p) && ((p.labels || []).some((l) => /^limited drop$/i.test(typeof l === "string" ? l : l?.name || "")) || (p.regular1kg ?? p.price1kg) == null);

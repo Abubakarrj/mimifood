@@ -236,7 +236,7 @@ export function squareOrder(order: OrderForSquare, { currency, customerId, picku
       },
     });
   } else if (order.fulfilment === "Pickup") {
-    fulfillments.push({ type: "PICKUP", state: "PROPOSED", pickup_details: { recipient, schedule_type: "ASAP", pickup_at: pickupAt, note: "Collect at Roastery House" } });
+    fulfillments.push({ type: "PICKUP", state: "PROPOSED", pickup_details: { recipient, schedule_type: "ASAP", pickup_at: pickupAt, note: "Collect at our office" } });
   }
   const discounted = (l: SquareLine) => (order.discount?.subscriber ? l.kind === "coffee" : !["sub", "prepaid", "giftcard"].includes(l.kind));
   return {

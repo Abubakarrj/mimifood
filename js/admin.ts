@@ -440,7 +440,7 @@ function readHash() {
   if (linked) state.open = linked;
   if (state.page === "customers") state.customerFilter = tab === "all" || tab === "vip" ? tab : "active";
   if (state.page === "wholesale") state.sub = ["orders", "quotes", "accounts", "pricelists", "enquiries", "samples", "documents", "prospects"].includes(tab) ? tab : tab === "contracts" ? "documents" : "orders";
-  if (state.page === "purchasing") state.sub = ["orders", "suppliers", "bills", "samples"].includes(tab) ? tab : "stock";
+  if (state.page === "purchasing") state.sub = ["orders", "suppliers", "bills"].includes(tab) ? tab : "orders";
   if (state.page === "products") state.sub = ["foods", "teas", "stock", "bulk", "giftcards", "labels", "codes"].includes(tab) ? tab : "foods";
   if (state.page === "languages") state.sub = ["catalog", "corrected"].includes(tab) ? tab : "all";
   if (state.page === "salestax") state.sub = tab === "all" ? "all" : "active";
@@ -818,8 +818,8 @@ const GROUP_ICON = { Sell: "Handshake", Wholesale: "wholesale", Make: "Hammer", 
 // Pages that hold different kinds of records are a sidebar page each (Peasy's), not tabs:
 // [sub, label, icon, the page's count shown here].
 const SUB_NAV = {
-  wholesale: [["accounts", "Accounts", "building"], ["pricelists", "Price Lists", "Tags"], ["orders", "Wholesale Orders", "orders"], ["quotes", "Quotes", "quote"], ["enquiries", "Inquiries", "imessage"], ["samples", "Samples", "FlaskConical"], ["documents", "Documents", "doc"], ["prospects", "Prospects", "search"]],
-  purchasing: [["stock", "Ingredients", "purchasing"], ["orders", "Purchase Orders", "doc"], ["bills", "Bills", "receipt", true], ["suppliers", "Suppliers", "building"]],
+  wholesale: [["accounts", "Accounts", "building"], ["pricelists", "Price Lists", "Tags"], ["orders", "Wholesale Orders", "orders"], ["quotes", "Quotes", "quote"], ["enquiries", "Inquiries", "imessage"], ["samples", "Samples", "FlaskConical"], ["documents", "Documents", "doc"]],
+  purchasing: [["orders", "Purchase Orders", "doc"], ["bills", "Bills", "receipt", true], ["suppliers", "Suppliers", "building"]],
 };
 const subLabel = (page) => (page.id === "overview" ? greeting() : SUB_NAV[page.id]?.find(([sub]) => sub === state.sub)?.[1] || page.label);
 const sideOpen = () => {
@@ -1416,7 +1416,7 @@ function overviewView() {
 const CHANNELS = [
   ["shop", "Online Store"],
   ["wholesale", "Wholesale"],
-  ["cafe", "Café"],
+  ["cafe", "Pickup"],
   ["subscriptions", "Subscriptions"],
   ["pos", "Point of Sale"],
 ];
@@ -1534,7 +1534,7 @@ function ordersToolbar() {
     "filter",
     [
       { head: "Channel" },
-      ...["", "Online Store", "Wholesale", "Café", "Subscription", "Point of Sale"].map((k) => ({ pick: `orderChannel:${k}`, label: k || "Any", on: (state.orderChannel || "") === k })),
+      ...["", "Online Store", "Wholesale", "Pickup", "Subscription", "Point of Sale"].map((k) => ({ pick: `orderChannel:${k}`, label: k || "Any", on: (state.orderChannel || "") === k })),
       { head: "Fulfillment" },
       ...[["", "Any"], ["ship", "Ship"], ["pickup", "Pickup"], ["courier", "Courier"]].map(([k, label]) => ({ pick: `orderLeaves:${k}`, label, on: (state.orderLeaves || "") === k })),
     ],
@@ -1957,7 +1957,7 @@ function wholesaleView() {
               </tr>`
             )
             .join("")}</tbody></table>`
-      : `<div class="empty empty-lg">${icon("Tags", "i i-xl")}<p><strong>No price lists yet</strong></p><p class="empty-line">Set prices once for every café on a list.</p><button type="button" class="btn btn-primary" data-pricelist-new>${icon("plus")}<span>New Price List</span></button></div>`;
+      : `<div class="empty empty-lg">${icon("Tags", "i i-xl")}<p><strong>No price lists yet</strong></p><p class="empty-line">Set prices once for every account on a list.</p><button type="button" class="btn btn-primary" data-pricelist-new>${icon("plus")}<span>New Price List</span></button></div>`;
   } else if (state.sub === "accounts") {
     const la = t.locationAlerts || [];
     alerts = la.length
@@ -4172,7 +4172,7 @@ function greenStock() {
               </tr>`
             )
             .join("")}</tbody></table>`
-      : `<div class="empty empty-lg">${icon("purchasing", "i i-xl")}<p><strong>${f === "low" ? "Nothing running low" : "No green coffee yet"}</strong></p>${f === "low" ? "" : `<button type="button" class="btn btn-primary" data-green-new>${icon("plus")}<span>New Ingredient</span></button>`}</div>`
+      : `<div class="empty empty-lg">${icon("purchasing", "i i-xl")}<p><strong>${f === "low" ? "Nothing running low" : "No ingredients yet"}</strong></p>${f === "low" ? "" : `<button type="button" class="btn btn-primary" data-green-new>${icon("plus")}<span>New Ingredient</span></button>`}</div>`
   }</section>`;
 }
 
@@ -5231,7 +5231,7 @@ async function wholesaleOrderForm(pre: any = {}) {
   const open = t.accounts.filter((a) => !a.archivedAt);
   // Where it goes: the account's address, each of its other locations, or pickup.
   const whereOptions = (acct) =>
-    `<option value="Delivery">${acct?.address?.street ? `Ship to ${esc(acct.address.street)}` : "Ship to the account address"}</option>${(acct?.locations || []).map((l) => `<option value="Delivery:${esc(l.id)}">Ship to ${esc(l.name)} · ${esc(l.street)}</option>`).join("")}<option value="Pickup">Pickup at Roastery House</option>`;
+    `<option value="Delivery">${acct?.address?.street ? `Ship to ${esc(acct.address.street)}` : "Ship to the account address"}</option>${(acct?.locations || []).map((l) => `<option value="Delivery:${esc(l.id)}">Ship to ${esc(l.name)} · ${esc(l.street)}</option>`).join("")}<option value="Pickup">Pickup at our office</option>`;
   const drawer = openPanel("New Wholesale Order", `
     <form class="form-stack" id="wo-form" data-wo-form>
       <label class="field"><span>Account</span><select name="accountId" required>${open.length > 1 ? `<option value="">Choose an account…</option>` : ""}${open.map((a) => `<option value="${a.id}" ${pre.accountId === a.id ? "selected" : ""}>${esc(a.business)}</option>`).join("")}</select></label>
@@ -9255,13 +9255,13 @@ function calendarEditor() {
         <div class="nl-compose">
           <section class="card nl-meta"><div class="form-stack">
             <label class="field"><span>Kind</span><select data-cal-field="kind"><option value="event"${x.kind === "event" ? " selected" : ""}>Event</option><option value="class"${x.kind === "class" ? " selected" : ""}>Class</option></select></label>
-            ${field("title", "Title", `maxlength="120" placeholder="${x.kind === "class" ? "e.g. Espresso Basics" : "e.g. Cupping at Roastery House"}"`)}
+            ${field("title", "Title", `maxlength="120" placeholder="${x.kind === "class" ? "e.g. Espresso Basics" : "e.g. Cupping at our office"}"`)}
             <div class="form-row-2">
               ${field("startsAt", "Starts", 'type="datetime-local"')}
               ${field("endsAt", "Ends (optional)", 'type="datetime-local"')}
             </div>
             <div class="form-row-2">
-              ${field("place", "Place", 'maxlength="80" placeholder="e.g. Roastery House"')}
+              ${field("place", "Place", 'maxlength="80" placeholder="e.g. our office"')}
               ${field("address", "Address (optional)", 'maxlength="160" placeholder="e.g. 327 S Western Ave, Los Angeles"')}
             </div>
             <label class="field"><span>Summary</span><textarea data-cal-field="summary" rows="2" maxlength="300" placeholder="One or two sentences">${esc(x.summary)}</textarea></label>
@@ -12885,7 +12885,7 @@ const pickupLabel = (p) => {
 };
 const addressLines = (o) => {
   if (o.shipTo) return [o.shipTo.name || o.contact.name, o.shipTo.address, `${o.shipTo.city}${o.shipTo.state ? `, ${o.shipTo.state}` : ""} ${o.shipTo.postcode}`];
-  return [o.contact.name, o.wholesale?.pickupAt?.placeName || "Roastery House", ...(o.wholesale?.pickupAt ? [pickupLabel(o.wholesale.pickupAt)] : [])];
+  return [o.contact.name, o.wholesale?.pickupAt?.placeName || "our office", ...(o.wholesale?.pickupAt ? [pickupLabel(o.wholesale.pickupAt)] : [])];
 };
 // Collected from us: no address to send it to, and not a café order or a courier.
 const isPickup = (o) => !o.shipTo && !o.cafe && o.fulfilment !== "Local delivery" && o.fulfilment !== "Shipping";
@@ -12906,7 +12906,7 @@ function nextActions(o) {
 }
 
 // Where an order came from and how it goes out, for the order page.
-const orderChannel = (o) => (o.source === "wholesale" ? "Wholesale" : o.source === "renewal" ? "Subscription" : o.source === "pos" ? "Point of Sale" : o.cafe ? "Café" : "Online Store");
+const orderChannel = (o) => (o.source === "wholesale" ? "Wholesale" : o.source === "renewal" ? "Subscription" : o.source === "pos" ? "Point of Sale" : o.cafe ? "Pickup" : "Online Store");
 // What happened after the sale: returns, problems reported, a delivery that came back. Each opens
 // on the Returns page, where it's handled.
 function afterSale(o) {
@@ -14046,7 +14046,7 @@ async function importPanel(id) {
         .map((i) => `<div class="line-row im-line" data-line><select name="product" aria-label="Item">${options(i.product)}</select><select name="size" aria-label="Size">${sizes(i.product, i.size)}</select><input name="qty" inputmode="numeric" value="${i.qty}" aria-label="Quantity"><small class="im-written">${esc(i.asWritten)}</small></div>`)
         .join("")}</div></div>
       <div class="form-row-2">
-        <label class="field"><span>Delivery</span><select name="fulfilment"><option value="Delivery">Ship to the account address</option><option value="Pickup" ${o.pickup ? "selected" : ""}>Pickup at Roastery House</option></select></label>
+        <label class="field"><span>Delivery</span><select name="fulfilment"><option value="Delivery">Ship to the account address</option><option value="Pickup" ${o.pickup ? "selected" : ""}>Pickup at our office</option></select></label>
         <label class="field"><span>Their PO number</span><input name="poRef" value="${esc(o.poRef)}"></label>
       </div>
       <label class="field"><span>Notes</span><textarea name="notes" rows="2">${esc(o.notes)}</textarea></label>

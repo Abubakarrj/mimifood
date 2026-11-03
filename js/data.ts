@@ -31,10 +31,10 @@ const SITE: any = {
   // Order Ahead "as soon as possible": ready in `minutes` (delivery: cafeDelivery.leadMinutes),
   // plus perCup minutes for each drink ahead in that bar's queue ("2 cups ahead of you").
   cafeQueue: { minutes: 15, perCup: 2 },
-  // Coffee bags going to an address within radiusMiles of Roastery House (327 S Western Ave) go by
+  // Coffee bags going to an address within radiusMiles of our office (327 S Western Ave) go by
   // Uber Direct courier, booked when the order is marked packed; further away, they ship
   // (Shippo labels, see postage).
-  // Local delivery goes the same day when ordered at least sameDayMinutes before Roastery House
+  // Local delivery goes the same day when ordered at least sameDayMinutes before our office
   // closes; later orders wait for the courier's morningPickup the next day it's open.
   // The customer pays the courier's fee, or nothing when the order ships free anyway (over
   // freeShippingOver, a free-shipping code, subscriptions); maxFee caps what they pay (the shop
@@ -47,7 +47,7 @@ const SITE: any = {
   // once registered there. Each kind of item is taxed as its state taxes it (see taxClass):
   // in California, coffee beans are food (not taxed), accessories and café food and drinks
   // are; shipping and delivery charges and class seats aren't. California's rate is the
-  // address's own, from the CDTFA's tax rate lookup; defaultRate (Roastery House's, Los Angeles)
+  // address's own, from the CDTFA's tax rate lookup; defaultRate (our office's, Los Angeles)
   // stands in when that can't be reached.
   salesTax: { state: "CA", defaultRate: 0.0975 },
   // Shipping by post costs the cheapest carrier's price for the parcel to the customer's address,
@@ -61,7 +61,7 @@ const SITE: any = {
   // under freeShippingOver). Internal: customers only see the price.
   postage: { customerShare: 0.5, maxFee: 5.95, autoLabels: true, maxDays: 3, mailClass: "USPS_GROUND_ADVANTAGE", priceType: "COMMERCIAL", box: { length: 9, width: 6, height: 4 } },
   // Where parcels ship from (shipping labels). Check the ZIP and add a phone: UPS and FedEx
-  // require one on the label (Roastery House's phone is used when this is empty).
+  // require one on the label (our office's phone is used when this is empty).
   shipFrom: {
     name: "Mimi Food",
     street1: "1415 Maple Ave Suite 220",
@@ -1193,7 +1193,7 @@ const BREW_GUIDES: any = {
 // beans only. The server checks orders against this too.
 const ROAST_TYPES = ["Espresso", "Filter"];
 // The day a local courier delivery goes out, in the shop's time zone: { date: "2026-10-15",
-// today: true, cutoff: "5:30 PM" } today when there's time, else the next day Roastery House opens,
+// today: true, cutoff: "5:30 PM" } today when there's time, else the next day our office opens,
 // picked up at morningPickup ({ today: false, pickup: "7:00 AM" }).
 function courierDay(now = new Date()) {
   const tz = SITE.timezone || "America/Los_Angeles";
@@ -1339,7 +1339,7 @@ function subscriptionPrice(coffee, sizeId) {
 // page and Order Ahead (left out, assets/<id>.jpg).
 const LOCATIONS: any[] = [
   {
-    id: "warehouse",
+    id: "roastery",
     coords: null,
     name: "Mimi Food",
     cafe: false,

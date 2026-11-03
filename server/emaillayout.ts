@@ -29,7 +29,7 @@ export function emailPage({ siteUrl, siteName, title = "", preheader = "", body,
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(preheader)}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background:#ffffff"><tr><td align="center" style="padding:28px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:568px;background:#ffffff"><tr><td style="padding:0 16px;color:${INK}">
-${logo ? `<a href="${siteUrl}/"><img src="${siteUrl}/assets/email-logo-badge.png" alt="${esc(siteName)}" width="36" height="50" style="display:block;border:0;margin:0 0 28px;font:700 8px/50px ${FONT};color:${INK}"></a>` : ""}
+${logo ? `<a href="${siteUrl}/"><img src="${siteUrl}/assets/email-logo-badge.png" alt="${esc(siteName)}" width="44" height="44" style="display:block;border:0;margin:0 0 28px;font:700 8px/50px ${FONT};color:${INK}"></a>` : ""}
 ${body}
 ${rule ? `<hr style="margin:28px 0 18px;border:0;border-top:1px solid ${LINE}">` : ""}
 ${footer}

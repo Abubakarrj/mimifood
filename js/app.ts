@@ -35,7 +35,7 @@ const LOCALE_US = { en: "en-US", es: "es-US", ko: "ko-KR" }[LANG];
 // The current page in another language.
 const langHref = (lang) => `${lang === "en" ? "" : `/${lang}`}${location.pathname.replace(/^\/(es|ko)(?=\/|$)/, "") || "/"}${location.search}${location.hash}`;
 // Only once a language has its translations (SITE.langs, from the server).
-// The footer's link groups: Shop, Discover, Help, and Visit (Roastery House and Instagram).
+// The footer's link groups: Shop, Discover, Help, and Visit (our office and Instagram).
 function footerColumns() {
   const col = (title, items) => `<div class="footer-col"><h2>${title}</h2><ul>${items.filter(Boolean).map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
   const roastery = LOCATIONS.find((l) => l.cafe === false);
@@ -660,7 +660,7 @@ function giftCardsPage() {
         <ul class="pdp-perks">
           <li><strong>Sent by email</strong>As soon as you've paid</li>
           <li><strong>No expiry</strong>Use it any time</li>
-          <li><strong>Online or in store</strong>At Roastery House too</li>
+          <li><strong>Online or in store</strong>In store too</li>
         </ul>
       </div>
     </div>
@@ -2052,7 +2052,7 @@ async function mountExpress({ box, apple, google, error, totals, prefer = () => 
   // Shipping costs USPS's price to the ZIP code the wallet gives (once it's in).
   let walletZip = "";
   let walletWhere = null; // { city, state, postcode } once the wallet gives an address
-  // Sales tax on the cart: at Roastery House for pickup, else at the wallet's address (the
+  // Sales tax on the cart: at our office for pickup, else at the wallet's address (the
   // default rate until it's in, for a cart that has taxable items).
   const taxFor = (option, off) => {
     if (!cart.some(taxClass)) return 0;
@@ -2072,7 +2072,7 @@ async function mountExpress({ box, apple, google, error, totals, prefer = () => 
     const list = [
       ["courier", (t) => t.label || "Local delivery"],
       ["delivery", (t) => (t.ship ? "Shipping" : "Free shipping")],
-      ["pickup", () => "Pick up at Roastery House"],
+      ["pickup", () => "Pick up at our office"],
     ]
       .map(([id, label]: any) => {
         const t = tot(id);
@@ -2562,7 +2562,7 @@ const gmaps = {
   directions: (l) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(l.coords ? l.coords.join(",") : [SITE.name, ...l.address].join(", "))}`,
 };
 
-// Contact: Roastery House on a muted street map you can drag and zoom. Leaflet and the
+// Contact: our office on a muted street map you can drag and zoom. Leaflet and the
 // OpenStreetMap tiles load in the browser; the static pin on grey stays if they fail.
 function contactMap() {
   const box = $("[data-contact-map]");
@@ -2823,12 +2823,12 @@ function courierWhen(minutes) {
   const timeLocale = LANG === "en" ? "en-US" : LOCALE; // 4:50 PM, not 16:50
   const clock = (t) => t.toLocaleTimeString(timeLocale, { hour: "numeric", minute: "2-digit", timeZone: SITE.timezone || "America/Los_Angeles" });
   const roundUp = (ms) => new Date(Math.ceil(ms / 3e5) * 3e5); // to 5 minutes
-  if (d.today) return `Today from Roastery House · Arrives about ${clock(roundUp(Date.now() + drive * 60e3))}`;
+  if (d.today) return `Today from our office · Arrives about ${clock(roundUp(Date.now() + drive * 60e3))}`;
   const [h, m] = (SITE.localDelivery?.morningPickup || "07:00").split(":").map(Number);
   const arrive = new Date(Date.UTC(2000, 0, 1, h, m + (minutes ?? 25)));
   const at = roundUp(arrive.getTime()).toLocaleTimeString(timeLocale, { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
   const day = d.tomorrow ? "Tomorrow" : new Date(`${d.date}T12:00:00Z`).toLocaleDateString(LOCALE, { weekday: "long", timeZone: "UTC" });
-  return `${day} from Roastery House · Arrives about ${at}`;
+  return `${day} from our office · Arrives about ${at}`;
 }
 
 // Shipping by post: the cheapest carrier's price for the parcel to an address (server.js
@@ -3014,7 +3014,7 @@ function trackHeadline(o) {
     if (done(2)) return [p.eta ? `Arriving ${trackDay(p.eta)}` : "On its way", o.to ? `To ${o.to.city}, ${o.to.state}` : ""];
     return ["Getting it ready", "We'll email you when it ships."];
   }
-  const place = o.place?.name || "Roastery House";
+  const place = o.place?.name || "our office";
   if (o.status === "completed") return ["Collected", ""];
   if (done(2)) return [`Ready at ${place}`, o.place?.address?.join(", ") || ""];
   return ["Getting it ready", `We'll email you when it's ready at ${place}.`];
@@ -3124,7 +3124,7 @@ function returnsHtml(o) {
         ? `<p class="return-done">Returned: ${what(r)} · ${done[r.status](r)}</p>`
         : `<div class="return-card">
             <p><strong>Return started</strong><br>${what(r)}${r.resolution === "exchange" ? `<br><span class="muted">Swapping for ${r.items.map((i) => esc(i.swapTo)).join(", ")}</span>` : ""}</p>
-            ${r.method === "mail" ? mailSteps(r) : `<p class="muted">Bring it to Roastery House and show this code. We'll ${afterIn(r)} once it's checked in.</p><img src="${esc(r.qr)}" width="160" height="160" alt="Return code">`}
+            ${r.method === "mail" ? mailSteps(r) : `<p class="muted">Bring it to our office and show this code. We'll ${afterIn(r)} once it's checked in.</p><img src="${esc(r.qr)}" width="160" height="160" alt="Return code">`}
           </div>`
     )
     .join("");
@@ -3152,7 +3152,7 @@ function returnsHtml(o) {
           ${swappable ? `<label class="return-line"><input type="radio" name="want" value="exchange"><span>Swap for another size or color</span></label>` : ""}
         </fieldset>
         <fieldset><legend>How?</legend>
-          <label class="return-line"><input type="radio" name="method" value="dropoff" checked><span>Drop off at Roastery House</span></label>
+          <label class="return-line"><input type="radio" name="method" value="dropoff" checked><span>Drop off at our office</span></label>
           <label class="return-line"><input type="radio" name="method" value="mail"><span>Mail it back, free label</span></label>
         </fieldset>
         <p class="sub-error" data-return-error></p>
@@ -3705,7 +3705,7 @@ const pages = {
     }
   },
   // True Specialty: the origins map switches between coffee and tea.
-  // About: the bags and cups on the shelf, a Coffee/Tea switch, and whether Roastery House is open.
+  // About: the bags and cups on the shelf, a Coffee/Tea switch, and whether our office is open.
   about() {
     for (const el of $$("[data-about-art]")) {
       const [kind, id] = el.dataset.aboutArt.split(":");
@@ -5644,10 +5644,10 @@ const pages = {
     const wayCard = (value, on, title, where, price, loc = "", how = "", edit = "") =>
       `<label class="tp-way${on ? " is-on" : ""}"><input type="radio" name="fulfilment" value="${value}"${loc ? ` data-location="${esc(loc)}"` : ""} ${on ? "checked" : ""}><span class="tp-way-text"><strong>${title}</strong>${where.map((l) => `<small>${esc(l)}</small>`).join("")}${how ? `<em class="tp-way-how">${how}</em>` : ""}</span><span class="tp-way-side"><span class="tp-way-price${price === "Free" ? " is-free" : ""}">${esc(price)}</span>${edit ? `<button type="button" class="tp-way-edit" data-loc-edit="${esc(edit)}">Edit</button>` : ""}</span></label>`;
     // How a place is reached: by courier when it's local, else by USPS.
-    // When it's ready: the next day Roastery House opens after today (it's roasted and packed for
+    // When it's ready: the next day our office opens after today (it's roasted and packed for
     // them), then its days and hours for a pickup, in the shop's time zone.
     const SHOP_TZ = SITE.timezone || "America/Los_Angeles";
-    // Where they can collect: Roastery House, and the café bars once they're live (on the map).
+    // Where they can collect: our office, and the café bars once they're live (on the map).
     const PICK_PLACES = LOCATIONS.filter((l) => l.cafe === false || (SITE.cafesLive !== false && Array.isArray(l.coords)));
     let pickPlace = (PICK_PLACES.find((l) => l.cafe === false) || PICK_PLACES[0])?.id || "";
     let pickView = "list";
@@ -5776,7 +5776,7 @@ const pages = {
         const mi = placeMiles(l);
         return `<label class="tp-way${l.id === pickPlace ? " is-on" : ""}"><input type="radio" name="pickPlace" value="${esc(l.id)}" ${l.id === pickPlace ? "checked" : ""}><span class="tp-way-text"><strong>${esc(l.name)}${mi != null && mi >= 0.1 ? ` <span class="tp-way-mi">(${mi < 10 ? mi.toFixed(1) : Math.round(mi)} mi)</span>` : ""}</strong>${l.address.map((x) => `<small>${esc(x)}</small>`).join("")}<em class="tp-way-how">${howLine(esc(hoursToday(l)))}</em></span><span class="tp-way-price is-free">Free</span></label>`;
       };
-      // One pickup point (Roastery House, until the café bars are live): the Pick Up card already
+      // One pickup point (our office, until the café bars are live): the Pick Up card already
       // names it, so there's nothing to choose. More than one: the list (or map), nearest the café.
       if (PICK_PLACES.length > 1) placesFromCafe();
       const pointHtml =
@@ -5809,7 +5809,7 @@ const pages = {
     const courierMark = (name) => (/uber/i.test(name || "") ? `<span class="courier-uber" role="img" aria-label="${esc(name)}"></span>` : esc(name || "Courier"));
     const shipHow = (p) => (p?.ship === "local" ? howLine(courierMark(p.courier), `${esc(dayLabel(readyDay()))} · by ${arrivesBy(p.miles)}`) : p?.ship === "usps" ? howLine(`<strong class="tp-usps">USPS</strong>`, "2 to 5 business days") : "");
     // Where the order goes, as one row: "Deliver to Downtown", who brings it and when, and what it
-    // costs; or "Pick Up · Roastery House" and its day and time. Change opens the choices.
+    // costs; or "Pick Up · our office" and its day and time. Change opens the choices.
     const fixWhere = () => {
       if (shipLoc && !shipPlace()) shipLoc = "";
       if (!shipLoc && !a.address?.street && a.locations?.length) shipLoc = a.locations[0].id;
@@ -6413,7 +6413,7 @@ const pages = {
         <p class="muted trade-invoice-stage">Placed ${esc(shortDate(o.placedAt))}${o.poRef ? ` · PO ${esc(o.poRef)}` : ""}</p>
         <div class="tp-where tp-where-order"><span class="tp-where-text">${
           o.fulfilment === "Pickup"
-            ? `<strong>Pick Up · ${esc(o.pickupAt?.placeName || "Roastery House")}</strong>${o.pickupAt ? `<span class="tp-where-how">${howLine(`${esc(dayLabel(new Date(`${o.pickupAt.day}T12:00:00Z`)))}, ${clock12(o.pickupAt.time)}`)}</span>` : ""}`
+            ? `<strong>Pick Up · ${esc(o.pickupAt?.placeName || "our office")}</strong>${o.pickupAt ? `<span class="tp-where-how">${howLine(`${esc(dayLabel(new Date(`${o.pickupAt.day}T12:00:00Z`)))}, ${clock12(o.pickupAt.time)}`)}</span>` : ""}`
             : `<strong>Delivering to ${esc(o.where?.name || mainName())} · ${esc(o.where?.street || a.address?.street || "")}</strong>${orderHow(o) ? `<span class="tp-where-how">${orderHow(o)}</span>` : ""}`
         }</span>${trackUrl(o) ? `<a class="tp-btn" href="${esc(trackUrl(o))}" target="_blank" rel="noopener">Track</a>` : ""}</div>
         <ul class="trade-invoice-lines">${o.lines.map((l) => `<li><div><strong>${esc(l.title)}</strong><small class="muted">${esc(sizeName(l))} × ${l.qty}</small></div><span>${money(l.price * l.qty)}</span></li>`).join("")}</ul>
@@ -6468,7 +6468,7 @@ const pages = {
         </header>
         <section class="inv-meta">
           <div><h2>Bill To</h2><p>${[a.business, a.contactName, a.email].filter(Boolean).map(esc).join("<br>")}</p></div>
-          <div><h2>${pickup ? "Pickup" : "Deliver To"}</h2><p>${pickup ? "Roastery House" : ad.street ? `${esc(a.business)}<br>${esc(ad.street)}<br>${esc(`${ad.city}, ${ad.state} ${ad.postcode}`)}` : "—"}</p></div>
+          <div><h2>${pickup ? "Pickup" : "Deliver To"}</h2><p>${pickup ? "our office" : ad.street ? `${esc(a.business)}<br>${esc(ad.street)}<br>${esc(`${ad.city}, ${ad.state} ${ad.postcode}`)}` : "—"}</p></div>
           <table class="inv-facts"><tbody>
             ${row("Issued", esc(shortDate(o.placedAt)))}
             ${row("Due", o.dueDate ? esc(shortDate(o.dueDate)) : "On receipt")}
@@ -10759,7 +10759,7 @@ const pages = {
     // Where a price isn't known yet: what to show instead.
     const notYet = (to) => `<span class="ship-pending">${addressDone(to) ? "Calculating…" : "Add your address"}</span>`;
     // Sales tax: the customer's own lines where they go (café items at their bar, pickup at The
-    // Roastery House), each gift at its recipient's address. undefined until every rate is in.
+    // our office), each gift at its recipient's address. undefined until every rate is in.
     const ownTaxWhere = (): any => {
       if (hasCafe()) {
         const c = cart.find((l) => l.kind === "pickup");
@@ -11041,7 +11041,7 @@ const pages = {
             .join("")}</ul>
           ${total != null ? `<p class="confirmation-total"><span>Total</span><strong>${money(total)}</strong></p>` : ""}
           ${ordered.some((l) => l.kind === "giftcard") ? `<p>We've emailed the gift card${ordered.filter((l) => l.kind === "giftcard").reduce((n, l) => n + l.qty, 0) > 1 ? "s" : ""} to ${esc([...new Set(ordered.filter((l) => l.kind === "giftcard").map((l) => l.giftcard.toName))].join(" and "))}.</p>` : ""}
-          ${ordered.some((l) => l.kind === "coffee" || l.kind === "accessory") ? `<p>${collecting ? "We'll email you when it's ready to collect at Roastery House." : "We'll email you when it ships."}</p>` : ""}
+          ${ordered.some((l) => l.kind === "coffee" || l.kind === "accessory") ? `<p>${collecting ? "We'll email you when it's ready to collect at our office." : "We'll email you when it ships."}</p>` : ""}
           ${track ? `<a class="button" href="${esc(track)}">Track Your Order</a>` : ""}`}
           ${ordered
             .filter((l) => l.kind === "class")
@@ -11079,7 +11079,7 @@ const pages = {
     currentUser.then((user) => user && fillIn({ name: user.name, email: user.email }));
 
     // How it gets there, as one set of cards under the address: local delivery by courier (when
-    // the address is close enough, at the courier's fee), shipping, or pickup at Roastery House.
+    // the address is close enough, at the courier's fee), shipping, or pickup at our office.
     const zone = $("[data-delivery-zone]");
     const modeBox = $("[data-delivery-mode]");
     let zoneTimer = null;
