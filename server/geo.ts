@@ -37,7 +37,8 @@ export function createGeocoder({ contact, countryCodes = process.env.GEOCODE_COU
 
   // Returns [lat, lon] or null when the address can't be found (or Nominatim is unreachable).
   async function geocode(query) {
-    const key = String(query || "").replace(/\s+/g, " ").trim().toLowerCase().slice(0, 200);
+    // A suite or unit number makes Nominatim find nothing, so it's dropped.
+    const key = String(query || "").replace(/\s+/g, " ").replace(/,?\s+(?:suite|ste\.?|unit|apt\.?|apartment|floor|fl\.?|#)\s*[\w-]+/gi, "").trim().toLowerCase().slice(0, 200);
     if (key.length < 4) return null;
     const hit = cache.get(key);
     if (hit && hit.at > Date.now() - CACHE_DAYS * 864e5) return hit.result;
