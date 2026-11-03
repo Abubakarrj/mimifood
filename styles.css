@@ -15,7 +15,7 @@
   --ink-muted: #666666;    /* secondary text: 4.5:1+ on white, panels and tiles */
   --line: #e4e4e4;
   --paper: #ffffff;
-  --tile: #e6f3d6;         /* product image background */
+  --tile: #eef0ea;         /* product image background */
   --open: #3a9d5d;         /* "open now" dot */
   --open-text: #2f7d4c;    /* green text, readable on white */
   --error: #c4231a;        /* wrong or missing input */
@@ -18558,7 +18558,7 @@ body.is-app-login .auth-card > * {
     --ink-muted: #666666;
     --paper: #ffffff;
     --line: #e4e4e4;
-    --tile: #e6f3d6;
+    --tile: #eef0ea;
     color-scheme: light;
     background: #ffffff;
     color: #111111;
@@ -21326,5 +21326,12 @@ body[data-page="checkout"].is-placed .header-actions {
   max-height: 72px;
   padding: 6px 10px;
   border-radius: 6px;
+  background: #ffffff;
+}
+
+/* Product pictures float on white: the photo has no background of its own. */
+.product-image,
+.pdp-image,
+.about-item-art {
   background: #ffffff;
 }
