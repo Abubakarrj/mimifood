@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mimi Food Ambassadors</title>
+  <meta name="description" content="Apply to be an Mimi Food Ambassador: your own code for your followers, for creators who brew and talk about specialty coffee and tea.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mimi Food">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimi Food">
+  <meta property="og:title" content="Mimi Food Ambassadors">
+  <meta property="og:description" content="Apply to be an Mimi Food Ambassador: your own code for your followers, for creators who brew and talk about specialty coffee and tea.">
+  <meta property="og:image" content="%SITE_URL%/assets/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="ambassadors">
+  <main id="main">
+    <div class="page wholesale-page amb-page">
+      <section class="sub-hero">
+        <div class="sub-hero-copy" data-reveal>
+          <h1>Share the coffee and tea you love.</h1>
+          <p class="lede">Your own code for your followers.</p>
+          <a class="button is-outline sub-hero-cta" href="#apply" data-amb-open hidden>Apply Now</a>
+        </div>
+        <div class="sub-hero-art photo-hero" data-reveal style="--i:1">
+          <img src="assets/library/iced-pour-sun-shadow.jpg" alt="Coffee poured over ice and milk in a glass, casting a long shadow">
+        </div>
+      </section>
+
+      <section class="ws-offer" aria-labelledby="amb-offer-title" data-amb-open hidden>
+        <h2 id="amb-offer-title" class="ws-title" data-reveal>What you get</h2>
+        <ul class="ws-cards" data-amb-cards></ul>
+      </section>
+
+      <section class="ws-how" aria-labelledby="amb-how-title">
+        <h2 id="amb-how-title" class="ws-title" data-reveal>How it works</h2>
+        <ol class="ws-steps">
+          <li data-reveal style="--i:0"><strong>Send an application</strong><span>Tell us where you post.</span></li>
+          <li data-reveal style="--i:1"><strong>We review it</strong><span>We reply by email.</span></li>
+          <li data-reveal style="--i:2"><strong>Get your code</strong><span>Made for you.</span></li>
+          <li data-reveal style="--i:3"><strong>Share it</strong><span>Followers use it at checkout.</span></li>
+        </ol>
+      </section>
+
+      <section class="ws-enquire" id="apply" aria-labelledby="amb-form-title">
+        <div data-reveal>
+          <h2 id="amb-form-title" class="ws-title">Application</h2>
+          <p class="muted" data-amb-open hidden>Questions? <a data-email-link="email" href="#"></a></p>
+          <p class="muted" data-amb-closed>Applications open soon. Follow <a data-instagram href="#"></a> for updates.</p>
+        </div>
+        <form class="form ws-form" data-amb-form data-reveal style="--i:1" novalidate hidden>
+          <div class="form-grid">
+            <label>Your name<input name="name" required maxlength="80" autocomplete="name"></label>
+            <label>Email<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+          </div>
+          <div class="form-grid">
+            <label data-required>Instagram<input name="instagram" maxlength="60" placeholder="@yourname" autocapitalize="off"></label>
+            <label data-required>TikTok<input name="tiktok" maxlength="60" placeholder="@yourname" autocapitalize="off"></label>
+          </div>
+          <div class="form-grid">
+            <label data-required>YouTube<input name="youtube" maxlength="120" placeholder="Channel link" autocapitalize="off"></label>
+            <label>Followers, all accounts
+              <select name="followers">
+                <option value="Under 1,000">Under 1,000</option><option value="1,000–10,000">1,000–10,000</option><option value="10,000–50,000">10,000–50,000</option><option value="50,000–250,000">50,000–250,000</option><option value="250,000+">250,000+</option>
+              </select>
+            </label>
+          </div>
+          <label>City<input name="city" maxlength="80" autocomplete="address-level2"></label>
+          <label>Why Mimi Food?<textarea name="why" maxlength="2000" placeholder="What you post and who follows you"></textarea></label>
+          <label class="amb-agree"><input type="checkbox" name="agree" required><span>I'm 18 or older and agree to the <a href="terms#ambassadors" target="_blank" rel="noopener">Terms</a> and <a href="privacy" target="_blank" rel="noopener">Policy</a>.</span></label>
+          <p class="sub-error" data-amb-error role="alert"></p>
+          <button class="button" type="submit">Send Application</button>
+        </form>
+        <div class="ws-sent" data-amb-sent hidden role="status">
+          <h3>Application sent.</h3>
+          <p>We'll reply by email.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

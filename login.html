@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base href="%BASE%">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Log In — Mimi Food</title>
+  <meta name="description" content="Log in to manage your Mimi Food subscription.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mimi Food">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimi Food">
+  <meta property="og:title" content="Log In — Mimi Food">
+  <meta property="og:description" content="Log in to manage your Mimi Food subscription.">
+  <meta property="og:image" content="%SITE_URL%/assets/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="login">
+  <main id="main">
+
+    <div class="page auth-page">
+      <header class="page-head" data-reveal>
+        <h1>Log In or Sign Up</h1>
+      </header>
+      <div class="auth-card" data-reveal style="--i:1">
+        <!-- Log in or sign up with a code, by email or text (the toggle, as on Luma). An account
+             gets the code at once (six boxes); someone new fills in their details first. -->
+        <form class="form" data-code-form novalidate>
+          <div class="auth-tabs" role="group" aria-label="Continue with" data-via-tabs>
+            <button type="button" data-via="email" aria-pressed="true">Email</button>
+            <button type="button" data-via="phone" aria-pressed="false">Phone</button>
+          </div>
+          <div class="auth-step" data-step="contact">
+            <label data-via-field="email">Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+            <label data-via-field="phone" hidden>Mobile number<input name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required></label>
+          </div>
+          <div class="auth-step" data-step="signup" hidden>
+            <label>Name<input name="name" autocomplete="name" maxlength="80" required></label>
+            <label>Email<input name="newEmail" type="email" autocomplete="email" maxlength="254" required></label>
+            <label>Mobile number<input name="newPhone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required></label>
+          </div>
+          <div class="auth-step" data-step="code" hidden>
+            <p class="auth-new"><strong data-code-sent>Enter your code</strong></p>
+            <div class="auth-to"><span data-code-to></span><button type="button" class="link-button" data-code-change>Change</button></div>
+            <div class="otp" data-otp role="group" aria-label="6-digit code">
+              <input inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="Digit 1">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 2">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 3">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 4">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 5">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 6">
+            </div>
+            <p class="auth-resend"><span class="muted" data-resend-wait></span><button type="button" class="link-button" data-code-resend hidden>Resend Code</button></p>
+          </div>
+          <p class="sub-error" data-code-error role="alert"></p>
+          <button class="button" type="submit">Continue</button>
+          <p class="auth-resend" data-signup-back hidden><button type="button" class="link-button" data-code-change>Use a Different Email or Number</button></p>
+        </form>
+        <p class="auth-hint" data-wholesale-link>Wholesale customer? <a href="login/wholesale">Wholesale login</a></p>
+
+        <div class="auth-alt" data-passkey-block hidden>
+          <button type="button" class="button is-outline" data-passkey>Sign In With Passkey</button>
+          <p class="sub-error" data-passkey-error role="alert"></p>
+        </div>
+        <p class="auth-hint auth-foot" data-wholesale-new hidden>New to wholesale? <a href="wholesale#enquire">Make an inquiry</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/data.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

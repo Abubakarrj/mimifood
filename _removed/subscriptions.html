@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base href="%BASE%">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Coffee & Tea Subscriptions — Mimi Food</title>
+  <meta name="description" content="Fresh Mimi Food coffee or tea on your schedule: espresso, filter, house blend or one of our teas, delivered weekly, bi-weekly or monthly. Save up to 18% every delivery.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mimi Food">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimi Food">
+  <meta property="og:title" content="Coffee & Tea Subscriptions — Mimi Food">
+  <meta property="og:description" content="Fresh Mimi Food coffee or tea on your schedule: espresso, filter, house blend or one of our teas, delivered weekly, bi-weekly or monthly. Save up to 18% every delivery.">
+  <meta property="og:image" content="%SITE_URL%/assets/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body data-page="subscriptions">
+  <main id="main">
+
+    <div class="page sub-page">
+      <section class="sub-hero">
+        <div class="sub-hero-copy" data-reveal>
+          <h1>Coffee and tea, on repeat.</h1>
+          <a class="button is-outline sub-hero-cta" href="subscriptions/build">Build Your Subscription</a>
+          <p class="sub-finder-link">Not sure? <a href="find-your-coffee">Find your coffee</a> or <a href="find-your-tea">find your tea</a></p>
+        </div>
+        <div class="sub-hero-art" data-sub-hero aria-hidden="true" data-reveal style="--i:1"></div>
+      </section>
+
+      <form class="sub-builder" id="build" data-sub-form>
+        <div class="sub-steps">
+          <section class="sub-step" data-sub-kind-step hidden>
+            <h2>Coffee or tea?</h2>
+            <div class="pick-grid pick-grid--two" data-sub-kind role="radiogroup" aria-label="Coffee or tea"></div>
+          </section>
+
+          <section class="sub-step">
+            <h2><b data-sub-pick-title>Choose your coffee</b></h2>
+            <div class="pick-grid pick-grid--coffee" data-sub-coffee role="radiogroup" aria-label="Coffee"></div>
+          </section>
+
+          <section class="sub-step">
+            <h2>Who's it for?</h2>
+            <div class="pick-grid pick-grid--two" data-sub-who role="radiogroup" aria-label="Who it's for"></div>
+            <div class="form gift-fields" data-gift-fields hidden>
+              <label>Recipient's Name<input name="recipient" maxlength="80" autocomplete="off"></label>
+              <label>Gift Message<textarea name="giftNote" maxlength="300" rows="3" placeholder="We'll print it on a card in the first delivery."></textarea></label>            </div>
+          </section>
+
+          <section class="sub-step" data-sub-size-step>
+            <h2>Choose a size</h2>
+            <div class="pick-grid pick-grid--three" data-sub-sizes role="radiogroup" aria-label="Size"></div>
+          </section>
+
+          <section class="sub-step" data-sub-length-step hidden>
+            <h2>How long?</h2>
+            <div class="pick-grid pick-grid--two" data-sub-length role="radiogroup" aria-label="How long"></div>
+            <div class="pick-grid pick-grid--three sub-months" data-sub-months role="radiogroup" aria-label="Months paid up front" hidden></div>
+          </section>
+
+          <section class="sub-step" data-sub-freq-step>
+            <h2>How often?</h2>
+            <div class="options sub-freq" data-sub-freq role="radiogroup" aria-label="Frequency"></div>
+          </section>
+        </div>
+
+        <div class="sub-bar" data-sub-bar>
+          <p data-sub-bar-price aria-live="polite"></p>
+          <button class="button" type="submit">Add Subscription</button>
+        </div>
+      </form>
+
+      <section class="ways" aria-labelledby="ways-title" data-reveal>
+        <h2 id="ways-title">Ways to save</h2>
+        <table class="ways-table">
+          <thead><tr><th scope="col"><span class="visually-hidden">Benefit</span></th><th scope="col">Subscription</th><th scope="col">One-time</th></tr></thead>
+          <tbody data-ways></tbody>
+        </table>
+      </section>
+
+      <section class="sub-faq" data-reveal>
+        <h2>Good to know</h2>
+        <div class="faq-list">
+          <details class="faq-item"><summary><span>Can I skip, pause or cancel?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Any time. Log in to your account to skip the next delivery, pause, change your coffee, size or frequency, or cancel. There's no minimum number of deliveries.</p></div></details>
+          <details class="faq-item"><summary><span>When will my first delivery arrive?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>We roast on Mondays and Thursdays and ship from fresh stock in 1–2 days, so your first bag is usually with you within a few days.</p></div></details>
+          <details class="faq-item"><summary><span>What's in a rotating subscription?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Espresso and Filter subscriptions bring a different coffee from our current range each delivery. Prefer the same coffee every time? Choose the House Blend.</p></div></details>
+          <details class="faq-item"><summary><span>Can I give a subscription as a gift?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Yes. Choose "A gift", add their name and an optional message, and enter their address at checkout. We'll print your message on a card in the first delivery. Pay as each delivery goes out, or pay for 3, 6 or 12 monthly deliveries up front.</p></div></details>
+          <div data-ask-thread aria-live="polite"></div>
+          <form class="ask-row" data-ask-form>
+            <label class="visually-hidden" for="ask-input">Ask your own question</label>
+            <input id="ask-input" name="q" maxlength="600" autocomplete="off" required placeholder="Ask your own question…">
+            <button type="submit">Ask</button>
+          </form>
+          <p class="ask-note muted"><span>AI answers can be wrong.</span> <button type="button" class="ask-person" data-handoff-open>Talk to a Person</button></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/js/data.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

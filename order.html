@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Order — Mimi Food</title>
+  <meta name="description" content="Order your coffee ahead and pick it up at an Mimi Food espresso pour bar.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mimi Food">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimi Food">
+  <meta property="og:title" content="Order — Mimi Food">
+  <meta property="og:description" content="Order your coffee ahead and pick it up at an Mimi Food espresso pour bar.">
+  <meta property="og:image" content="%SITE_URL%/assets/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="orderMenu">
+  <main id="main">
+    <div class="page order-flow">
+      <section data-menu hidden>
+        <h1 class="visually-hidden" data-order-title>Order Ahead</h1>
+        <!-- Where, how and when: browse the menu straight away; the time defaults to ASAP. -->
+        <div class="order-controls" role="group" aria-label="Your order">
+          <button type="button" class="order-control" data-open-fulfil="pickup" aria-haspopup="dialog"><small>Café</small><span data-control-cafe></span></button>
+          <button type="button" class="order-control" data-open-fulfil aria-haspopup="dialog"><small>Method</small><span data-control-method></span></button>
+          <button type="button" class="order-control" data-open-time aria-haspopup="dialog"><small data-control-time-label>Pickup time</small><span data-control-time></span></button>
+        </div>
+        <nav class="menu-tabs" data-menu-tabs aria-label="Menu categories"></nav>
+        <div data-menu-sections></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="overlay sheet" id="pickup-time" role="dialog" aria-modal="true" aria-labelledby="time-title" inert>
+    <div class="drawer-backdrop" data-close></div>
+    <div class="sheet-panel time-panel" data-schedule>
+      <div class="drawer-head">
+        <h2 id="time-title" data-time-title>Pickup Time</h2>
+        <button class="close" type="button" data-close aria-label="Close"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M1 1l24 24M25 1L1 25"/></svg></button>
+      </div>
+      <p class="muted" data-schedule-hint></p>
+      <div class="days" data-days role="group" aria-label="Day"></div>
+      <div class="slots" data-slots role="radiogroup" aria-label="Time"></div>
+      <button class="button" type="button" data-continue>Set time</button>
+    </div>
+  </div>
+
+  <div class="overlay sheet" id="item-options" role="dialog" aria-modal="true" aria-labelledby="opt-title" inert>
+    <div class="drawer-backdrop" data-close></div>
+    <div class="sheet-panel opt-panel">
+      <div class="drawer-head">
+        <h2 id="opt-title" data-opt-title></h2>
+        <button class="close" type="button" data-close aria-label="Close"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M1 1l24 24M25 1L1 25"/></svg></button>
+      </div>
+      <form data-opt-form novalidate>
+        <div data-opt-body></div>
+        <button type="submit" class="button opt-add" data-opt-add></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="overlay sheet" id="fulfil" role="dialog" aria-modal="true" aria-labelledby="fulfil-title" inert>
+    <div class="drawer-backdrop" data-close></div>
+    <div class="sheet-panel">
+      <div class="drawer-head">
+        <h2 id="fulfil-title">How would you like your order?</h2>
+        <button class="close" type="button" data-close aria-label="Close"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M1 1l24 24M25 1L1 25"/></svg></button>
+      </div>
+      <div class="segmented" role="tablist" aria-label="Pickup or delivery">
+        <button type="button" role="tab" data-fulfil-tab="pickup" aria-selected="true">Pickup</button>
+        <button type="button" role="tab" data-fulfil-tab="delivery" aria-selected="false">Delivery</button>
+      </div>
+      <form data-fulfil-form novalidate>
+        <div data-fulfil-pickup>
+          <p class="section-label">Choose a location</p>
+          <div class="choice-list" data-sheet-locations></div>
+        </div>
+        <div class="form" data-fulfil-delivery hidden>
+          <label>Street address<input name="street" autocomplete="street-address" maxlength="120"></label>
+          <div class="form-grid">
+            <label>City<input name="city" autocomplete="address-level2" maxlength="60"></label>
+            <label>ZIP code<input name="postcode" autocomplete="postal-code" maxlength="12"></label>
+          </div>
+          <label>Deliver from<select name="from"></select></label>
+          <p class="delivery-terms" data-delivery-terms></p>
+        </div>
+        <p class="sub-error" data-fulfil-error role="alert"></p>
+        <button class="button" type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1672 @@
+/* Back office look, after Medusa's admin (the default). admin.html loads it unless
+   localStorage["bo-look"] is "classic" (/admin?look=classic shows the earlier look in that browser,
+   /admin?look=medusa goes back). Everything here is scoped to :root[data-look="medusa"], over the
+   theme in admin.css. One main action per screen: only .btn-primary is dark; .btn-dark (Create
+   Shipping Label beside Mark Packed) takes Medusa's secondary style.
+
+   Values come from Medusa's design system (packages/design-system/ui-preset: colors.ts,
+   effects.ts, typography.ts, constants.ts) and its admin dashboard components. The first block
+   remaps our existing theme tokens; the second restyles the few components whose Medusa
+   treatment differs in structure (bordered containers, 32px controls, table rows, the light
+   sidebar, status badges, the drawer). The back office is light only, so only Medusa's light
+   values are used. */
+
+/* ── Tokens ── */
+
+:root[data-look="medusa"] {
+  /* Medusa's own roles, for the component rules below (light mode). */
+  --md-bg-base: #ffffff;
+  --md-bg-subtle: #fafafa;
+  --md-bg-field: #fafafa;
+  --md-bg-hover: #f4f4f5;
+  --md-bg-pressed: #e4e4e7;
+  --md-bg-overlay: rgba(24, 24, 27, 0.4);
+  --md-border-base: #e4e4e7;
+  --md-border-strong: #d4d4d8;
+  --md-fg-base: #18181b;
+  --md-fg-subtle: #52525b;
+  --md-fg-muted: #71717a;
+  --md-fg-disabled: #a1a1aa;
+  --md-fg-interactive: #3b82f6;
+  --md-fg-error: #e11d48;
+  --md-button-inverted: #27272a;
+  --md-button-inverted-hover: #3f3f46;
+  --md-button-inverted-pressed: #52525b;
+  --md-button-danger: #e11d48;
+  --md-button-danger-hover: #be123c;
+  --md-tag-neutral-icon: #a1a1aa;
+  --md-tag-green-icon: #10b981;
+  --md-tag-blue-icon: #60a5fa;
+  --md-tag-orange-icon: #f97316;
+  --md-tag-red-icon: #f43f5e;
+  --md-tag-purple-icon: #a78bfa;
+  --md-buttons-neutral: 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  --md-buttons-neutral-focus: 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+  --md-buttons-inverted: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(0, 0, 0, 0.4), 0px 0px 0px 1px rgba(24, 24, 27, 1);
+  --md-buttons-inverted-focus: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(0, 0, 0, 0.4), 0px 0px 0px 1px rgba(24, 24, 27, 1), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+  --md-buttons-danger: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(190, 18, 60, 0.4), 0px 0px 0px 1px rgba(190, 18, 60, 1);
+  --md-buttons-danger-focus: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(190, 18, 60, 0.4), 0px 0px 0px 1px rgba(190, 18, 60, 1), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+  --md-borders-base: 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  --md-borders-interactive-with-active: 0px 0px 0px 4px rgba(37, 99, 235, 0.2), 0px 0px 0px 1px rgba(37, 99, 235, 1);
+  --md-borders-error: 0px 0px 0px 1px rgba(225, 29, 72, 1), 0px 0px 0px 3px rgba(225, 29, 72, 0.15);
+  --md-borders-focus: 0px 0px 0px 1px rgba(255, 255, 255, 1), 0px 0px 0px 3px rgba(59, 130, 246, 0.6);
+  --md-elevation-card-rest: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 1px 2px -1px rgba(0, 0, 0, 0.08), 0px 2px 4px 0px rgba(0, 0, 0, 0.04);
+  --md-elevation-card-hover: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 1px 2px -1px rgba(0, 0, 0, 0.08), 0px 2px 8px 0px rgba(0, 0, 0, 0.1);
+  --md-elevation-flyout: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 4px 8px 0px rgba(0, 0, 0, 0.08), 0px 8px 16px 0px rgba(0, 0, 0, 0.08);
+  --md-elevation-modal: 0px 0px 0px 1px rgba(255, 255, 255, 1) inset, 0px 0px 0px 1.5px rgba(228, 228, 231, 0.6) inset, 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 8px 16px 0px rgba(0, 0, 0, 0.08), 0px 16px 32px 0px rgba(0, 0, 0, 0.08);
+  --md-control-height: 32px; /* Medusa's h-8 buttons, inputs and selects */
+  --md-control-height-sm: 28px; /* h-7 */
+  --md-row-height: 48px; /* table rows, h-12 */
+  --md-sidebar-width: 248px;
+  --md-nav-item-height: 28px; /* h-7 */
+
+  /* Our theme's tokens, remapped. */
+  --motion-duration: 150ms; /* Tailwind's transition default, used by transition-fg */
+  --motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-large-duration: 200ms; /* drawer duration-200 */
+  --motion-large-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-popup-scale: 0.95; /* zoom-in-95 */
+  --motion-press-distance: 0px; /* Medusa buttons darken when pressed; they don't move */
+
+  --option-badge-background: #27272a;
+  --option-badge-foreground: #ffffff;
+  --navigation-active-background: #ffffff;
+  --navigation-active-foreground: #18181b;
+  --emphasis-chart-fill: #3b82f633;
+
+  --space-xl: 32px; /* Tailwind 8 */
+  --space-xxl: 48px; /* Tailwind 12 */
+
+  /* Type: Medusa's compact scale (no tracking anywhere). */
+  --tracking-xs: 0em;
+  --tracking-s: 0em;
+  --tracking-m: 0em;
+  --tracking-l: 0em;
+  --tracking-xl: 0em;
+  --size-xxs: 12px; /* code-label: 0.75rem / 0.9375rem */
+  --line-xxs: 15px;
+  --letter-spacing-xxs: 0em;
+  --size-xs: 12px; /* txt-compact-xsmall: 0.75rem / 1.25rem */
+  --line-xs: 20px;
+  --letter-spacing-xs: 0em;
+  --size-s: 13px; /* txt-compact-small: 0.8125rem / 1.25rem, Medusa's body text */
+  --line-s: 20px;
+  --letter-spacing-s: 0em;
+  --size-m: 14px; /* txt-compact-medium / h3-core: 0.875rem / 1.25rem */
+  --line-m: 20px;
+  --letter-spacing-m: 0em;
+  --size-l: 16px; /* h2-core: 1rem / 1.5rem */
+  --line-l: 24px;
+  --letter-spacing-l: 0em;
+  --size-xl: 18px; /* h1-core: 1.125rem / 1.75rem, a page title */
+  --line-xl: 28px;
+  --letter-spacing-xl: 0em;
+  --size-xxl: 24px; /* h1-docs / h4-webs: 1.5rem / 1.875rem */
+  --line-xxl: 30px;
+  --letter-spacing-xxl: 0em;
+
+  /* Tailwind's corners: rounded (4), rounded-md (6: controls, badges), rounded-lg (8:
+     containers, drawers), rounded-xl (12). */
+  --radius-xs: 4px;
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --radius-xl: 16px;
+
+  /* Medusa draws hairlines (border-base) where Untitled separates by fill. */
+  --border-s: 1px;
+  --border-m: 1px;
+  --border-l: 2px;
+  --border-default-color: #e4e4e7;
+  --border-shadow-s: 0 0 0 1px #e4e4e7;
+  --border-shadow-m: 0 0 0 1px #d4d4d8;
+  --border-shadow-l: 0 0 0 2px #d4d4d8;
+
+  --font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-brand: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-data: Inter, ui-sans-serif, system-ui, sans-serif; /* figures stay Inter, tabular */
+  --weight-ui-heavy: 500; /* Medusa uses 400 and 500 only ("plus" = 500) */
+  --weight-brand-heavy: 500;
+  --weight-editorial-heavy: 500;
+  --weight-data-heavy: 500;
+
+  /* Color: Medusa's zinc neutrals and its tag colors. */
+  --color-1: #3b82f6; /* bg-interactive */
+  --color-1-transparent: #3b82f633;
+  --color-2: #5b21b6; /* tag-purple-text */
+  --color-2-transparent: #5b21b633;
+  --color-3: #dbeafe; /* tag-blue-bg */
+  --color-3-transparent: #dbeafe33;
+  --color-4: #ffedd5; /* tag-orange-bg */
+  --color-4-transparent: #ffedd533;
+  --neutral-1: #ffffff; /* bg-base */
+  --neutral-1-transparent: #ffffff33;
+  --neutral-2: #fafafa; /* bg-subtle, bg-field */
+  --neutral-2-transparent: #fafafa33;
+  --neutral-3: #f4f4f5; /* bg-base-hover */
+  --neutral-3-transparent: #f4f4f533;
+  --neutral-4: #e4e4e7; /* border-base, bg-base-pressed */
+  --neutral-4-transparent: #e4e4e733;
+  --neutral-5: #d4d4d8; /* border-strong */
+  --neutral-5-transparent: #d4d4d833;
+  --neutral-6: #a1a1aa; /* fg-disabled */
+  --neutral-6-transparent: #a1a1aa33;
+  --neutral-7: #71717a; /* fg-muted */
+  --neutral-7-transparent: #71717a33;
+  --neutral-8: #52525b; /* fg-subtle */
+  --neutral-8-transparent: #52525b33;
+  --neutral-9: #27272a; /* button-inverted */
+  --neutral-9-transparent: #27272a33;
+  --neutral-10: #18181b; /* fg-base */
+  --neutral-10-transparent: #18181b33;
+  --success: #065f46; /* tag-green-text: our success is mostly text */
+  --success-transparent: #065f4633;
+  --warning: #f97316; /* tag-orange-icon */
+  --warning-transparent: #f9731633;
+  --error: #e11d48; /* fg-error, button-danger */
+  --error-transparent: #e11d4833;
+
+  --shadow-s: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 1px 2px -1px rgba(0, 0, 0, 0.08), 0px 2px 4px 0px rgba(0, 0, 0, 0.04); /* elevation-card-rest */
+  --shadow-m: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 4px 8px 0px rgba(0, 0, 0, 0.08), 0px 8px 16px 0px rgba(0, 0, 0, 0.08); /* elevation-flyout */
+  --shadow-l: 0px 0px 0px 1px rgba(255, 255, 255, 1) inset, 0px 0px 0px 1.5px rgba(228, 228, 231, 0.6) inset, 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 8px 16px 0px rgba(0, 0, 0, 0.08), 0px 16px 32px 0px rgba(0, 0, 0, 0.08); /* elevation-modal */
+
+  --cte-canvas: #fafafa; /* bg-subtle: white containers sit on it */
+  --cte-surface: #ffffff;
+  --cte-surface-muted: #f4f4f5;
+  --cte-text: #18181b;
+  --cte-text-muted: #52525b; /* fg-subtle: Medusa's secondary text */
+  --cte-border: #e4e4e7;
+  --cte-accent: #27272a; /* primary buttons are "inverted" (near black), not blue */
+  --cte-accent-text: #ffffff;
+  --cte-danger: #e11d48;
+  --cte-focus: #3b82f6;
+  --cte-font: Inter, ui-sans-serif, system-ui, sans-serif;
+  --cte-font-size: 13px;
+  --cte-line-height: 20px;
+  --cte-letter-spacing: 0em;
+  --cte-detail-font-size: 12px;
+  --cte-detail-line-height: 20px;
+  --cte-detail-letter-spacing: 0em;
+}
+
+/* ── Components ── */
+
+/* Page title: h1-core. */
+:where(:root[data-look="medusa"]) .page-head h1 {
+  font-size: var(--size-xl);
+  line-height: var(--line-xl);
+  font-weight: var(--weight-brand-medium);
+}
+
+/* Containers: white, 8px corners, the card-rest shadow-border (a 1px ring and a soft drop). */
+:where(:root[data-look="medusa"]) .card,
+:where(:root[data-look="medusa"]) .kpi,
+:where(:root[data-look="medusa"]) .drawer.is-order-page .panel {
+  border-radius: var(--radius-m);
+  background: var(--md-bg-base);
+  box-shadow: var(--md-elevation-card-rest);
+}
+
+:where(:root[data-look="medusa"]) a.kpi:hover,
+:where(:root[data-look="medusa"]) a.card:hover {
+  box-shadow: var(--md-elevation-card-hover);
+}
+
+:where(:root[data-look="medusa"]) .card-head h2 {
+  font-size: var(--size-l);
+  line-height: var(--line-l);
+}
+
+:where(:root[data-look="medusa"]) .kpi-value,
+:where(:root[data-look="medusa"]) .stat-value {
+  font-size: var(--size-xxl);
+  line-height: var(--line-xxl);
+  font-weight: var(--weight-data-medium);
+}
+
+:where(:root[data-look="medusa"]) .kpi-icon,
+:where(:root[data-look="medusa"]) .todo-icon {
+  background: var(--md-bg-subtle);
+  box-shadow: var(--md-borders-base);
+}
+
+/* Buttons: 32px, 13px medium, 6px corners, Medusa's shadow-borders. */
+:where(:root[data-look="medusa"]) .btn {
+  min-height: var(--md-control-height);
+  padding: 6px 12px; /* py-1.5 px-3 */
+  gap: 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--size-s);
+  line-height: var(--line-s);
+  font-weight: var(--weight-ui-medium);
+  background: var(--md-bg-base);
+  color: var(--md-fg-base);
+  box-shadow: var(--md-buttons-neutral);
+}
+
+:where(:root[data-look="medusa"]) .btn:hover,
+:where(:root[data-look="medusa"]) .card .btn:not(.btn-primary, .btn-ghost, .btn-danger, .btn-danger-ghost),
+:where(:root[data-look="medusa"]) .card .btn:not(.btn-primary, .btn-ghost, .btn-danger, .btn-danger-ghost):hover {
+  background: var(--md-bg-base);
+  box-shadow: var(--md-buttons-neutral);
+}
+
+:where(:root[data-look="medusa"]) .btn:hover,
+:where(:root[data-look="medusa"]) .card .btn:not(.btn-primary, .btn-ghost, .btn-danger, .btn-danger-ghost):hover {
+  background: var(--md-bg-hover);
+}
+
+:where(:root[data-look="medusa"]) .btn:active {
+  background: var(--md-bg-pressed);
+}
+
+/* A destructive action that's rarely wanted (Cancel Order): quiet red text, asks to confirm. */
+:where(:root[data-look="medusa"]) .btn-danger-ghost {
+  background: none;
+  box-shadow: none;
+  color: var(--error);
+}
+
+:where(:root[data-look="medusa"]) .btn-danger-ghost:hover {
+  background: var(--md-tag-red-bg);
+}
+
+:where(:root[data-look="medusa"]) .btn:focus-visible {
+  outline: 0;
+  box-shadow: var(--md-buttons-neutral-focus);
+}
+
+:where(:root[data-look="medusa"]) .btn-primary,
+:where(:root[data-look="medusa"]) .btn-primary:hover {
+  background: var(--md-button-inverted);
+  color: var(--cte-accent-text);
+  box-shadow: var(--md-buttons-inverted);
+}
+
+:where(:root[data-look="medusa"]) .btn-primary:hover {
+  background: var(--md-button-inverted-hover);
+}
+
+:where(:root[data-look="medusa"]) .btn-primary:active {
+  background: var(--md-button-inverted-pressed);
+}
+
+:where(:root[data-look="medusa"]) .btn-primary:focus-visible {
+  box-shadow: var(--md-buttons-inverted-focus);
+}
+
+:where(:root[data-look="medusa"]) .btn-danger,
+:where(:root[data-look="medusa"]) .btn-danger:hover {
+  background: var(--md-button-danger);
+  color: var(--cte-accent-text);
+  box-shadow: var(--md-buttons-danger);
+}
+
+:where(:root[data-look="medusa"]) .btn-danger:hover {
+  background: var(--md-button-danger-hover);
+}
+
+:where(:root[data-look="medusa"]) .btn-danger:focus-visible {
+  box-shadow: var(--md-buttons-danger-focus);
+}
+
+:where(:root[data-look="medusa"]) .btn-ghost,
+:where(:root[data-look="medusa"]) .btn-danger-ghost,
+:where(:root[data-look="medusa"]) .card .btn-ghost {
+  background: var(--color-none);
+  box-shadow: none;
+}
+
+:where(:root[data-look="medusa"]) .btn-ghost:hover,
+:where(:root[data-look="medusa"]) .btn-danger-ghost:hover {
+  background: var(--md-bg-hover);
+  box-shadow: none;
+}
+
+:where(:root[data-look="medusa"]) .btn-sm {
+  min-height: var(--md-control-height-sm);
+  padding: 4px 8px; /* py-1 px-2 */
+  font-size: var(--size-s);
+  line-height: var(--line-s);
+}
+
+:where(:root[data-look="medusa"]) .btn:disabled,
+:where(:root[data-look="medusa"]) .btn:disabled:hover {
+  background: var(--md-bg-hover);
+  color: var(--md-fg-disabled);
+  box-shadow: var(--md-buttons-neutral);
+}
+
+:where(:root[data-look="medusa"]) .icon-btn:hover {
+  background: var(--md-bg-hover);
+}
+
+/* Fields: 32px, a grey field fill, the borders-base ring; focus is a blue ring, not an outline.
+   Selectors keep admin.css's own specificity (so its field variants still win where they set
+   something else), and skip the fields that are drawn without chrome (the assistant bar, quick
+   search, the stock stepper). */
+:where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]):where(:not(.sk-bar *, .quick-field *, .assist-compose *, .stock-left *)),
+:where(:root[data-look="medusa"]) select,
+:where(:root[data-look="medusa"]) textarea:where(:not(.assist-compose *)) {
+  min-height: var(--md-control-height);
+  padding-top: 6px; /* py-1.5 */
+  padding-bottom: 6px;
+  border-radius: var(--radius-s);
+  background-color: var(--md-bg-field);
+  color: var(--md-fg-base);
+  font-size: var(--size-s);
+  line-height: var(--line-s);
+  box-shadow: var(--md-borders-base);
+}
+
+/* px-2, except where a field makes room for an icon, a unit or a button inside it. */
+:where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]):where(:not(.sk-bar *, .quick-field *, .assist-compose *, .stock-left *, .key-input *, .search *, .money-input *, .line-row *, .tax-input *)),
+:where(:root[data-look="medusa"]) textarea:where(:not(.assist-compose *, .tr-table *, .msg-edit *)) {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+:where(:root[data-look="medusa"]) select {
+  padding-left: 8px;
+  padding-right: 28px;
+  background-position: right 8px center;
+}
+
+:where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]):where(:not(.sk-bar *, .quick-field *, .assist-compose *, .stock-left *)):hover,
+:where(:root[data-look="medusa"]) select:hover,
+:where(:root[data-look="medusa"]) textarea:where(:not(.assist-compose *)):hover {
+  background-color: var(--md-bg-hover);
+  box-shadow: var(--md-borders-base);
+}
+
+:where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]):where(:not(.sk-bar *, .quick-field *, .assist-compose *, .stock-left *)):focus-visible,
+:where(:root[data-look="medusa"]) select:focus-visible,
+:where(:root[data-look="medusa"]) textarea:where(:not(.assist-compose *)):focus-visible {
+  outline: 0;
+  background-color: var(--md-bg-field);
+  box-shadow: var(--md-borders-interactive-with-active);
+}
+
+:where(:root[data-look="medusa"]) input[aria-invalid="true"]:not([type="checkbox"]),
+:where(:root[data-look="medusa"]) input[aria-invalid="true"]:not([type="checkbox"]):hover,
+:where(:root[data-look="medusa"]) select[aria-invalid="true"],
+:where(:root[data-look="medusa"]) textarea[aria-invalid="true"] {
+  background-color: var(--md-bg-field);
+  box-shadow: var(--md-borders-error);
+}
+
+:where(:root[data-look="medusa"]) input::placeholder,
+:where(:root[data-look="medusa"]) textarea::placeholder {
+  color: var(--md-fg-muted);
+}
+
+:where(:root[data-look="medusa"]) .search input {
+  height: var(--md-control-height);
+  min-height: var(--md-control-height);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 32px; /* clear of the icon, as Medusa's pl-8 */
+}
+
+:where(:root[data-look="medusa"]) .search .i {
+  left: 8px;
+}
+
+:where(:root[data-look="medusa"]) .field > span:first-child {
+  font-weight: var(--weight-ui-medium);
+  color: var(--md-fg-base);
+}
+
+/* Checkbox: 16px-ish box with the borders-base ring; checked is the inverted fill. */
+:where(:root[data-look="medusa"]) input[type="checkbox"] {
+  border-radius: var(--radius-xs);
+  background-color: var(--md-bg-base);
+  box-shadow: var(--md-borders-base);
+}
+
+:where(:root[data-look="medusa"]) input[type="checkbox"]:checked,
+:where(:root[data-look="medusa"]) input[type="checkbox"]:indeterminate {
+  background-color: var(--md-button-inverted);
+  box-shadow: var(--md-buttons-inverted);
+}
+
+/* Tables: a grey header band between hairlines, 48px rows with a hairline under each. Desktop only:
+   on phones the rows are stacked cards. */
+@media (min-width: 861px) {
+  :where(:root[data-look="medusa"]) .table {
+    font-size: var(--size-s);
+    line-height: var(--line-s);
+    color: var(--md-fg-subtle);
+  }
+
+  :where(:root[data-look="medusa"]) .table th,
+  :where(:root[data-look="medusa"]) .table th:first-child,
+  :where(:root[data-look="medusa"]) .table th:last-child {
+    height: var(--md-row-height);
+    padding-top: 0;
+    padding-bottom: 0;
+    background: var(--md-bg-subtle);
+    color: var(--md-fg-subtle);
+    font-size: var(--size-s);
+    line-height: var(--line-s);
+    font-weight: var(--weight-ui-medium);
+    box-shadow: inset 0 -1px 0 var(--md-border-base);
+  }
+
+  :where(:root[data-look="medusa"]) .table td {
+    height: var(--md-row-height);
+    padding-top: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    box-shadow: inset 0 -1px 0 var(--md-border-base);
+  }
+
+  :where(:root[data-look="medusa"]) .table tbody tr:last-child td {
+    box-shadow: none;
+  }
+
+  :where(:root[data-look="medusa"]) .table td > strong,
+  :where(:root[data-look="medusa"]) .table td > a > strong,
+  :where(:root[data-look="medusa"]) .table .who-text strong,
+  :where(:root[data-look="medusa"]) .table td.num {
+    color: var(--md-fg-base);
+  }
+
+  :where(:root[data-look="medusa"]) .table th:first-child {
+    border-top-left-radius: var(--radius-m);
+  }
+
+  :where(:root[data-look="medusa"]) .table th:last-child {
+    border-top-right-radius: var(--radius-m);
+  }
+
+  @media (hover: hover) {
+    :where(:root[data-look="medusa"]) .table tbody tr:hover {
+      background: var(--md-bg-hover);
+    }
+  }
+}
+
+:where(:root[data-look="medusa"]) .avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--md-bg-subtle);
+  box-shadow: var(--md-borders-base);
+  color: var(--md-fg-subtle);
+}
+
+/* Status: Medusa's Badge, a chip tinted in the state's color (fill, edge, text), with its dot.
+   Medusa's tag colors (green, blue, purple, orange, red, neutral) and Tailwind's amber for
+   yellow, which Medusa doesn't have. Each state has one color everywhere:
+   orders  To pack orange · Awaiting payment yellow · Packed, Ready blue · Shipped purple ·
+           Completed green · Cancelled gray
+   payment Paid green · Unpaid, Overdue, Declined red · Refunded, Processing purple ·
+           Part refunded yellow
+   others  Active green · Paused yellow · a warning orange; purchase orders follow orders. */
+:root[data-look="medusa"] {
+  --md-tag-green-bg: #d1fae5;
+  --md-tag-green-border: #a7f3d0;
+  --md-tag-green-text: #065f46;
+  --md-tag-blue-bg: #dbeafe;
+  --md-tag-blue-border: #bfdbfe;
+  --md-tag-blue-text: #1e40af;
+  --md-tag-purple-bg: #ede9fe;
+  --md-tag-purple-border: #ddd6fe;
+  --md-tag-purple-text: #5b21b6;
+  --md-tag-orange-bg: #ffedd5;
+  --md-tag-orange-border: #fed7aa;
+  --md-tag-orange-text: #9a3412;
+  --md-tag-red-bg: #ffe4e6;
+  --md-tag-red-border: #fecdd3;
+  --md-tag-red-text: #9f1239;
+  --md-tag-yellow-bg: #fef3c7;
+  --md-tag-yellow-border: #fde68a;
+  --md-tag-yellow-text: #92400e;
+  --md-tag-yellow-icon: #f59e0b;
+  --md-tag-neutral-bg: #f4f4f5;
+  --md-tag-neutral-border: #e4e4e7;
+  --md-tag-neutral-text: #52525b;
+}
+
+:where(:root[data-look="medusa"]) .badge {
+  --t-bg: var(--md-tag-neutral-bg);
+  --t-border: var(--md-tag-neutral-border);
+  --t-text: var(--md-tag-neutral-text);
+  --t-icon: var(--md-tag-neutral-icon);
+  gap: 0;
+  height: 20px;
+  padding: 0 6px 0 0;
+  border-radius: var(--radius-s);
+  background: var(--t-bg);
+  box-shadow: inset 0 0 0 1px var(--t-border);
+  color: var(--t-text);
+  font-size: var(--size-xs);
+  line-height: 1;
+  font-weight: var(--weight-ui-medium);
+}
+
+:where(:root[data-look="medusa"]) .badge::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 6px;
+  border-radius: 2px; /* rounded-sm */
+  background: var(--t-icon);
+}
+
+/* The colors, as classes any status or filter chip can wear. */
+:where(:root[data-look="medusa"]) :is(.t-green, .s-completed, .p-paid, .sub-active, .po-received, .g-A) {
+  --t-bg: var(--md-tag-green-bg); --t-border: var(--md-tag-green-border); --t-text: var(--md-tag-green-text); --t-icon: var(--md-tag-green-icon); --tone: var(--md-tag-green-icon);
+}
+:where(:root[data-look="medusa"]) :is(.t-blue, .s-packed, .s-ready, .po-sent, .g-B) {
+  --t-bg: var(--md-tag-blue-bg); --t-border: var(--md-tag-blue-border); --t-text: var(--md-tag-blue-text); --t-icon: var(--md-tag-blue-icon); --tone: var(--md-tag-blue-icon);
+}
+:where(:root[data-look="medusa"]) :is(.t-purple, .s-shipped, .p-refunded) {
+  --t-bg: var(--md-tag-purple-bg); --t-border: var(--md-tag-purple-border); --t-text: var(--md-tag-purple-text); --t-icon: var(--md-tag-purple-icon); --tone: var(--md-tag-purple-icon);
+}
+:where(:root[data-look="medusa"]) :is(.t-orange, .s-new, .badge-warn, .g-D) {
+  --t-bg: var(--md-tag-orange-bg); --t-border: var(--md-tag-orange-border); --t-text: var(--md-tag-orange-text); --t-icon: var(--md-tag-orange-icon); --tone: var(--md-tag-orange-icon);
+}
+:where(:root[data-look="medusa"]) :is(.t-red, .p-unpaid, .s-pending_payment, .g-F) {
+  --t-bg: var(--md-tag-red-bg); --t-border: var(--md-tag-red-border); --t-text: var(--md-tag-red-text); --t-icon: var(--md-tag-red-icon); --tone: var(--md-tag-red-icon);
+}
+:where(:root[data-look="medusa"]) :is(.t-yellow, .p-partially_refunded, .sub-paused, .po-partial, .g-C) {
+  --t-bg: var(--md-tag-yellow-bg); --t-border: var(--md-tag-yellow-border); --t-text: var(--md-tag-yellow-text); --t-icon: var(--md-tag-yellow-icon); --tone: var(--md-tag-yellow-icon);
+}
+:where(:root[data-look="medusa"]) :is(.s-cancelled, .sub-cancelled, .sub-ended, .po-draft, .po-cancelled, .s-hidden) {
+  --tone: var(--md-tag-neutral-icon);
+}
+
+/* Filters and page sections: no track; the picked one is a white chip with the card ring. */
+:where(:root[data-look="medusa"]) .chip {
+  height: var(--md-control-height-sm);
+  padding: 0 10px;
+  border-radius: var(--radius-s);
+  color: var(--md-fg-subtle);
+  font-size: var(--size-s);
+}
+
+:where(:root[data-look="medusa"]) .chip:hover {
+  background: var(--md-bg-hover);
+}
+
+:where(:root[data-look="medusa"]) .chip.is-active,
+:where(:root[data-look="medusa"]) .segments .chip.is-active {
+  background: var(--md-bg-base);
+  color: var(--md-fg-base);
+  box-shadow: var(--md-elevation-card-rest);
+}
+
+:where(:root[data-look="medusa"]) .chips.segments {
+  gap: var(--space-xs);
+  padding: 2px;
+  background: var(--color-none);
+}
+
+:where(:root[data-look="medusa"]) .segments .chip {
+  height: var(--md-control-height-sm);
+}
+
+/* Drawer: inset 8px, 8px corners, elevation-modal, hairlines under the head and over the foot. */
+:where(:root[data-look="medusa"]) .scrim {
+  background: var(--md-bg-overlay);
+}
+
+@media (min-width: 861px) {
+  :where(:root[data-look="medusa"]) .drawer:not(.is-order-page) {
+    width: min(560px, calc(100% - 2 * var(--space-xs))); /* sm:max-w-[560px] */
+  }
+}
+
+:where(:root[data-look="medusa"]) .drawer:not(.is-order-page) {
+  border-radius: var(--radius-m);
+  box-shadow: var(--md-elevation-modal);
+}
+
+:where(:root[data-look="medusa"]) .drawer:not(.is-order-page) .drawer-head {
+  padding: var(--space-m) var(--space-l);
+  box-shadow: inset 0 -1px 0 var(--md-border-base);
+}
+
+:where(:root[data-look="medusa"]) .drawer-head h2 {
+  font-size: var(--size-l);
+  line-height: var(--line-l);
+  font-weight: var(--weight-brand-medium);
+}
+
+:where(:root[data-look="medusa"]) .drawer:not(.is-order-page) .drawer-body {
+  padding: var(--space-m) var(--space-l);
+}
+
+/* Toast, menus and the bulk bar: the flyout elevation. */
+:where(:root[data-look="medusa"]) .bulk,
+:where(:root[data-look="medusa"]) .toast {
+  border-radius: var(--radius-m);
+  box-shadow: var(--md-elevation-flyout);
+}
+
+/* Sidebar (desktop): light, 220px, a hairline on its right; 28px items in 13px medium; the open
+   page a white chip with the card ring. Phones keep their own top bar and bottom tab bar. */
+@media (min-width: 861px) {
+  :where(:root[data-look="medusa"]) .shell {
+    grid-template-columns: var(--md-sidebar-width) minmax(0, 1fr);
+    background: var(--md-bg-subtle);
+  }
+
+  :where(:root[data-look="medusa"]) .bulk {
+    left: calc(50% + var(--md-sidebar-width) / 2);
+  }
+
+  :where(:root[data-look="medusa"]) .side {
+    gap: var(--space-xs);
+    padding: var(--space-s);
+    background: var(--md-bg-subtle);
+    color: var(--md-fg-base);
+    box-shadow: inset -1px 0 0 var(--md-border-base);
+  }
+
+  :where(:root[data-look="medusa"]) .brand {
+    padding: var(--space-xxs) var(--space-xs);
+  }
+
+  :where(:root[data-look="medusa"]) .brand strong {
+    font-weight: var(--weight-brand-medium);
+  }
+
+  :where(:root[data-look="medusa"]) .side-search {
+    min-height: var(--md-control-height);
+    padding: 6px 8px;
+    background: var(--md-bg-field);
+    color: var(--md-fg-muted);
+    box-shadow: var(--md-borders-base);
+  }
+
+  :where(:root[data-look="medusa"]) .side-search:hover {
+    background: var(--md-bg-hover);
+    color: var(--md-fg-subtle);
+  }
+
+  :where(:root[data-look="medusa"]) .side-search .i {
+    width: 15px;
+    height: 15px;
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav {
+    gap: 2px;
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav a,
+  :where(:root[data-look="medusa"]) .side-foot a,
+  :where(:root[data-look="medusa"]) .side-foot button {
+    min-height: var(--md-nav-item-height);
+    gap: var(--space-xs);
+    padding: 2px 8px 2px 6px;
+    border-radius: var(--radius-s);
+    color: var(--md-fg-subtle);
+    font-size: var(--size-s);
+    line-height: var(--line-s);
+    font-weight: var(--weight-ui-medium);
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav .i,
+  :where(:root[data-look="medusa"]) .side-foot .i {
+    width: 15px;
+    height: 15px;
+    color: var(--md-fg-subtle);
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav a:hover,
+  :where(:root[data-look="medusa"]) .side-foot a:hover,
+  :where(:root[data-look="medusa"]) .side-foot button:hover {
+    background: var(--md-bg-hover);
+    color: var(--md-fg-base);
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav a.is-active,
+  :where(:root[data-look="medusa"]) .side-nav a.is-active:hover {
+    background: var(--md-bg-base);
+    color: var(--md-fg-base);
+    box-shadow: var(--md-elevation-card-rest);
+  }
+
+  :where(:root[data-look="medusa"]) .side-group {
+    margin: var(--space-s) var(--space-xs) var(--space-xxs);
+    color: var(--md-fg-muted);
+    font-size: var(--size-xs);
+    line-height: var(--line-xs);
+    font-weight: var(--weight-ui-medium);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav .count,
+  :where(:root[data-look="medusa"]) .side-nav a.is-active .count {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-s);
+    background: var(--md-bg-subtle);
+    box-shadow: inset 0 0 0 1px var(--md-border-base);
+    color: var(--md-fg-subtle);
+    font-size: var(--size-xs);
+    line-height: 20px;
+  }
+
+  :where(:root[data-look="medusa"]) .side-nav .count.is-new,
+  :where(:root[data-look="medusa"]) .side-nav a.is-active .count.is-new {
+    background: var(--md-fg-interactive);
+    box-shadow: none;
+    color: var(--cte-accent-text);
+  }
+
+  :where(:root[data-look="medusa"]) .main {
+    padding: var(--space-l) var(--space-xl) var(--space-xxl);
+  }
+}
+
+/* Phones: Medusa's 32px controls are below a comfortable tap size and its 13px fields make
+   iPhones zoom in, so the phone keeps 40px controls and 16px fields. */
+@media (max-width: 899px) {
+  :where(:root[data-look="medusa"]) .btn,
+  :where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]):where(:not(.sk-bar *, .quick-field *, .assist-compose *, .stock-left *)),
+  :where(:root[data-look="medusa"]) select,
+  :where(:root[data-look="medusa"]) .search input {
+    min-height: 40px;
+  }
+
+  :where(:root[data-look="medusa"]) .search input {
+    height: 40px;
+  }
+
+  :where(:root[data-look="medusa"]) input:not([type="checkbox"], [type="radio"], [type="color"]),
+  :where(:root[data-look="medusa"]) select,
+  :where(:root[data-look="medusa"]) textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  :where(:root[data-look="medusa"]) .card,
+  :where(:root[data-look="medusa"]) .table-card {
+    padding-inline: var(--space-m);
+  }
+
+  :where(:root[data-look="medusa"]) .side {
+    box-shadow: inset 0 -1px 0 var(--md-border-base);
+  }
+
+  :where(:root[data-look="medusa"]) .tabbar {
+    background: var(--md-bg-base);
+    box-shadow: inset 0 1px 0 var(--md-border-base);
+  }
+}
+
+/* Each sidebar item has its icon, as in Medusa's. */
+:where(:root[data-look="medusa"]) .side-nav .side-i {
+  display: block;
+}
+
+/* Trend lines (Insights) in the first chart color, not ink. */
+:where(:root[data-look="medusa"]) .spark {
+  color: var(--chart-1);
+}
+
+/* ── Mimi Food color ──────────────────────────────────────────────────────────────────────────
+   One brand color, ink blue, for what you act on: primary buttons, the open page, picked
+   filters, links, checks, switches and focus. A cool white for the sidebar and side panels.
+   One color per meaning everywhere (rings, dots, tags, badges, bars):
+     green done · paid · ready   yellow coming due · low   red due · failed · short
+     blue planned · in progress   purple snoozed · reached out   gray open · draft
+   (the theme's tag colors). */
+:root[data-look="medusa"] {
+  --brand: #1e3a8a;
+  --brand-hover: #1e40af;
+  --brand-pressed: #172554;
+  --brand-tint: #eef2ff;
+  --brand-soft: #dbe4ff;
+  --brand-ring: rgba(30, 58, 138, 0.35);
+  --side-bg: #f7f8fb;
+  --band-bg: #f7f8fb;
+
+  /* Status: the theme's own tag colors (green, yellow, red, blue, purple, gray). */
+  --st-green: var(--md-tag-green-icon);
+  --st-yellow: var(--md-tag-yellow-icon);
+  --st-red: var(--md-tag-red-icon);
+  --st-blue: var(--md-tag-blue-icon);
+  --st-purple: var(--md-tag-purple-icon);
+  --st-gray: var(--md-tag-neutral-icon);
+
+  --cte-accent: var(--brand);
+  --color-1: var(--brand);
+  --color-1-transparent: rgba(30, 58, 138, 0.2);
+  --cte-focus: var(--brand);
+  --md-fg-interactive: var(--brand);
+  --md-button-inverted: var(--brand);
+  --md-button-inverted-hover: var(--brand-hover);
+  --md-button-inverted-pressed: var(--brand-pressed);
+  --md-buttons-inverted: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(23, 37, 84, 0.4), 0px 0px 0px 1px var(--brand-pressed);
+  --md-buttons-inverted-focus: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(23, 37, 84, 0.4), 0px 0px 0px 1px var(--brand-pressed), 0px 0px 0px 2px #fff, 0px 0px 0px 4px var(--brand-ring);
+  --md-buttons-neutral-focus: 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 0px 0px 2px #fff, 0px 0px 0px 4px var(--brand-ring);
+  --md-borders-focus: 0px 0px 0px 1px #fff, 0px 0px 0px 3px var(--brand-ring);
+  --md-borders-interactive-with-active: 0px 0px 0px 4px rgba(30, 58, 138, 0.15), 0px 0px 0px 1px var(--brand);
+}
+
+:root[data-look="medusa"] .link {
+  color: var(--brand);
+}
+
+/* Sidebar: cool white; the open page a tint of the brand, its icon and name in the brand. */
+@media (min-width: 861px) {
+  :root[data-look="medusa"] .side {
+    background: var(--side-bg);
+  }
+
+  :root[data-look="medusa"] .side-nav a.is-active,
+  :root[data-look="medusa"] .side-nav a.is-active:hover {
+    background: var(--brand-tint);
+    color: var(--brand);
+    box-shadow: none;
+  }
+
+  :root[data-look="medusa"] .side-nav a.is-active .i {
+    color: var(--brand);
+  }
+}
+
+/* Counts: a plain count in the brand's tint; red when something waits on someone. */
+:root[data-look="medusa"] .side-nav .count,
+:root[data-look="medusa"] .side-nav a.is-active .count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-xs);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+:root[data-look="medusa"] .side-nav .count.is-alert,
+:root[data-look="medusa"] .side-nav a.is-active .count.is-alert,
+:root[data-look="medusa"] .tabbar .count.is-alert {
+  background: var(--st-red);
+  color: #fff;
+}
+
+/* Filters: a hairline chip with a hollow ring in its color (gray when it has none); the picked
+   one takes the brand's border and tint. Page sections (segments) keep no ring. */
+:root[data-look="medusa"] .chips:not(.segments) .chip {
+  gap: 7px;
+  height: 30px;
+  padding: 0 10px;
+  background: var(--md-bg-base);
+  box-shadow: inset 0 0 0 1px var(--md-border-base);
+  color: var(--md-fg-subtle);
+}
+
+:root[data-look="medusa"] .chips:not(.segments) .chip:hover {
+  background: var(--md-bg-subtle);
+  box-shadow: inset 0 0 0 1px var(--md-border-strong);
+}
+
+:root[data-look="medusa"] .chips:not(.segments) .chip.is-active {
+  background: var(--brand-tint);
+  box-shadow: inset 0 0 0 1px var(--brand);
+  color: var(--brand);
+}
+
+:root[data-look="medusa"] .chips:not(.segments) .chip i {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--tone, var(--st-gray));
+}
+
+:root[data-look="medusa"] .chips:not(.segments) .chip.is-active b {
+  color: var(--brand);
+  opacity: 0.7;
+}
+
+:root[data-look="medusa"] .segments .chip i {
+  display: none;
+}
+
+:root[data-look="medusa"] .segments .chip.is-active {
+  color: var(--brand);
+}
+
+/* Switches and checks in the brand. */
+:root[data-look="medusa"] .switch-row input:checked + i,
+:root[data-look="medusa"] .mini-switch input:checked + i {
+  background: var(--brand);
+}
+
+/* Hover tips: a small dark label for what a button does. */
+.hover-tip {
+  position: fixed;
+  z-index: 200;
+  max-width: 260px;
+  padding: 5px 8px;
+  border-radius: var(--radius-s);
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  animation: fade 120ms ease-out;
+}
+
+.info-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.25px currentColor;
+  color: var(--md-fg-muted);
+  font-size: 9px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  vertical-align: 1px;
+  cursor: help;
+}
+
+/* Phone tab bar: a plain count in the brand, red only when something waits on someone. */
+:root[data-look="medusa"] .tabbar .count:not(.is-alert) {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* The assistant's send: the primary action, in the brand. */
+:root[data-look="medusa"] .assist-send:not(:disabled) {
+  background: var(--brand);
+  color: #fff;
+}
+
+.hover-tip strong {
+  font-weight: 600;
+}
+
+/* A key that does the same thing, as a small key cap. */
+.hover-tip kbd {
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.16);
+  font: inherit;
+  font-size: 11px;
+}
+
+/* ── The desktop shell (Peasy's): a white work area beside a tinted sidebar. Each page is a slim
+   top strip (its title, then its filters; its main action on the right) over a toolbar strip
+   (Filter, Sort, Search; actions on the right), both on hairlines, and its list runs edge to edge
+   beneath them. Number cards and other content sit in from the edges. Phones keep their own. ── */
+@media (min-width: 861px) {
+  :root[data-look="medusa"] {
+    --shell-pad: 20px;
+    --shell-line: var(--md-border-base, #e4e4e7);
+  }
+
+  :root[data-look="medusa"] .shell,
+  :root[data-look="medusa"] .main {
+    background: var(--md-bg-base, #fff);
+  }
+
+  :root[data-look="medusa"] .main {
+    padding: 0 0 var(--space-xxl);
+  }
+
+  /* Sidebar: roomier rows in 14px; the open page a soft gray, as Peasy's. */
+  :root[data-look="medusa"] .side {
+    padding: var(--space-s) 10px;
+    background: var(--side-bg, var(--md-bg-subtle));
+    box-shadow: inset -1px 0 0 var(--shell-line);
+  }
+
+  :root[data-look="medusa"] .side-nav a,
+  :root[data-look="medusa"] .side-nav .side-group {
+    min-height: 32px;
+    padding: 6px 10px;
+    gap: 10px;
+    border-radius: var(--radius-s);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  :root[data-look="medusa"] .side-nav .i.side-i {
+    width: 16px;
+    height: 16px;
+    color: var(--md-fg-subtle, var(--neutral-8));
+  }
+
+  :root[data-look="medusa"] .side-nav a:hover,
+  :root[data-look="medusa"] .side-nav .side-group:hover {
+    background: rgb(0 0 0 / 0.04);
+  }
+
+  :root[data-look="medusa"] .side-nav a.is-active,
+  :root[data-look="medusa"] .side-nav a.is-active:hover {
+    background: rgb(0 0 0 / 0.07);
+    box-shadow: none;
+    color: var(--md-fg-base, var(--neutral-10));
+    font-weight: var(--weight-ui-medium);
+  }
+
+  :root[data-look="medusa"] .side-nav a.is-active .i.side-i {
+    color: var(--md-fg-base, var(--neutral-10));
+  }
+
+  :root[data-look="medusa"] .side-sub {
+    margin-left: 17px;
+    padding-left: 8px;
+  }
+
+  /* The top strip. */
+  :root[data-look="medusa"] .main > .page-head {
+    align-items: center;
+    min-height: 48px;
+    margin: 0;
+    padding: 6px var(--shell-pad);
+    box-shadow: inset 0 -1px 0 var(--shell-line);
+  }
+
+  :root[data-look="medusa"] .main > .page-head h1 {
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: var(--weight-ui-medium);
+    letter-spacing: 0;
+  }
+
+  :root[data-look="medusa"] .main > .page-head > div > p {
+    margin: 0;
+    font-size: var(--size-xs);
+  }
+
+  :root[data-look="medusa"] .page-title-row {
+    gap: var(--space-s);
+  }
+
+  :root[data-look="medusa"] .page-title-row .chip {
+    height: 28px;
+  }
+
+  :root[data-look="medusa"] .main > .page-head .page-actions .btn {
+    min-height: 30px;
+  }
+
+  /* The toolbar strip. */
+  :root[data-look="medusa"] .main > .toolbar {
+    margin: 0;
+    padding: 8px var(--shell-pad);
+    box-shadow: inset 0 -1px 0 var(--shell-line);
+  }
+
+  /* Everything else sits in from the edges… */
+  :root[data-look="medusa"] .main > :not(.page-head, .toolbar, .table-card, .bulk) {
+    margin-left: var(--shell-pad);
+    margin-right: var(--shell-pad);
+  }
+
+  :root[data-look="medusa"] .main > :is(.page-head, .toolbar) + :not(.toolbar, .table-card) {
+    margin-top: var(--space-m);
+  }
+
+  /* …and a list runs edge to edge: no card around it, a tinted header row, hairlines between. */
+  :root[data-look="medusa"] .main > .table-card {
+    margin: var(--space-m) 0 0;
+    border-radius: 0;
+    background: var(--md-bg-base, #fff);
+    box-shadow: inset 0 1px 0 var(--shell-line), inset 0 -1px 0 var(--shell-line);
+  }
+
+  :root[data-look="medusa"] .main > :is(.page-head, .toolbar) + .table-card {
+    margin-top: 0;
+    box-shadow: inset 0 -1px 0 var(--shell-line);
+  }
+
+  :root[data-look="medusa"] .main > .table-card thead th {
+    background: var(--md-bg-subtle, var(--neutral-2));
+  }
+
+  :root[data-look="medusa"] .main > .table-card :is(th, td):first-child {
+    padding-left: var(--shell-pad);
+  }
+
+  :root[data-look="medusa"] .main > .table-card :is(th, td):last-child {
+    padding-right: var(--shell-pad);
+  }
+
+  /* A record beside the list starts under nothing: full height on the right. */
+  :root[data-look="medusa"] .drawer.is-order-page {
+    left: var(--md-sidebar-width);
+  }
+}
+
+/* The shop's name at the top opens a menu (Peasy's): who's signed in, View Site, Install App and
+   Sign Out. On a computer that's their only home, so the sidebar's foot is just Ask anything. */
+.brand-menu {
+  display: none;
+}
+
+@media (min-width: 861px) {
+  :root[data-look="medusa"] .side > a.brand,
+  :root[data-look="medusa"] .side-foot {
+    display: none;
+  }
+
+  :root[data-look="medusa"] .brand-menu {
+    position: relative;
+    display: block;
+  }
+
+  :root[data-look="medusa"] .brand-menu > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 6px;
+    border-radius: var(--radius-s);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  :root[data-look="medusa"] .brand-menu > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  :root[data-look="medusa"] .brand-menu > summary:hover {
+    background: rgb(0 0 0 / 0.04);
+  }
+
+  :root[data-look="medusa"] .brand-chev {
+    width: 14px;
+    height: 14px;
+    color: var(--md-fg-subtle, var(--neutral-8));
+  }
+
+  :root[data-look="medusa"] .brand-list {
+    left: 0;
+    right: auto;
+    min-width: 220px;
+  }
+
+  :root[data-look="medusa"] .brand-who {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 6px 10px 8px;
+    box-shadow: inset 0 -1px 0 var(--shell-line);
+  }
+
+  :root[data-look="medusa"] .brand-who small {
+    color: var(--md-fg-subtle, var(--neutral-8));
+  }
+
+  :root[data-look="medusa"] .side-ask {
+    padding-bottom: 2px;
+  }
+}
+
+/* ── The assistant's panel (Peasy's): docked full height on the right, white on a hairline. The
+   chat's title opens recent chats; questions sit in a gray bubble, answers are plain text, each
+   followed by Helpful / Leave feedback; buttons open what an answer mentions. ── */
+:root[data-look="medusa"] .sk-panel {
+  width: 400px;
+  background: var(--md-bg-base, #fff);
+  box-shadow: -1px 0 0 var(--shell-line, var(--neutral-4));
+}
+
+:root[data-look="medusa"] .sk-head {
+  min-height: 48px;
+  padding: 6px 8px 6px 10px;
+  box-shadow: inset 0 -1px 0 var(--shell-line, var(--neutral-4));
+}
+
+.sk-chats {
+  position: relative;
+  min-width: 0;
+}
+
+.sk-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 280px;
+  padding: 4px 8px;
+  border-radius: var(--radius-s);
+  font-size: 14px;
+  font-weight: var(--weight-ui-medium);
+  list-style: none;
+  cursor: pointer;
+}
+
+.sk-title::-webkit-details-marker {
+  display: none;
+}
+
+.sk-title:hover,
+.sk-chats[open] > .sk-title {
+  background: rgb(0 0 0 / 0.05);
+}
+
+.sk-title > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-chev {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--md-fg-subtle, var(--neutral-8));
+}
+
+.sk-chats[open] .sk-chev {
+  transform: rotate(180deg);
+}
+
+.sk-chat-list.order-menu-list {
+  left: 0;
+  right: auto;
+  width: 340px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.sk-chat-find {
+  display: flex;
+  gap: var(--space-xs);
+  padding: 0 6px 6px;
+}
+
+.sk-chat-find .search {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-chat-find .search input {
+  width: 100%;
+}
+
+.order-menu-list .sk-chat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sk-chat > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-chat small {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--md-fg-subtle, var(--neutral-7));
+  font-size: 11px;
+}
+
+.sk-chat small .i {
+  width: 11px;
+  height: 11px;
+}
+
+.order-menu-list .sk-chat.is-on {
+  background: var(--brand-tint, var(--neutral-3));
+  color: var(--brand, var(--neutral-10));
+}
+
+.sk-chat-none {
+  margin: 0;
+  padding: 6px 10px 8px;
+  font-size: var(--size-s);
+}
+
+/* The conversation: their question a gray bubble on the right, the answer plain. */
+:root[data-look="medusa"] .sk-thread {
+  padding: var(--space-m) var(--space-m) var(--space-s);
+}
+
+:root[data-look="medusa"] .sk-thread .assist-msg.is-you {
+  justify-self: end;
+  max-width: 85%;
+  margin-left: auto;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--md-bg-component, var(--neutral-3));
+  box-shadow: none;
+}
+
+:root[data-look="medusa"] .sk-thread .assist-msg.is-ai .assist-body {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.assist-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-xs);
+}
+
+.assist-rate {
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: var(--radius-s);
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--weight-ui-medium);
+  text-transform: none;
+  cursor: pointer;
+}
+
+.assist-rate.is-good {
+  background: var(--md-tag-green-bg, #ecfdf5);
+  box-shadow: 0 0 0 1px var(--md-tag-green-border, #a7f3d0);
+  color: var(--md-tag-green-text, #047857);
+}
+
+.assist-rate.is-bad {
+  background: var(--md-tag-orange-bg, #fff7ed);
+  box-shadow: 0 0 0 1px var(--md-tag-orange-border, #fed7aa);
+  color: var(--md-tag-orange-text, #c2410c);
+}
+
+.assist-rate:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.assist-rate:disabled:not(.is-on) {
+  display: none;
+}
+
+.assist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-s);
+}
+
+.assist-actions .btn .i {
+  width: 14px;
+  height: 14px;
+}
+
+/* Starting points: quiet bordered rows, as Peasy's suggestions. */
+:root[data-look="medusa"] .sk-hello .assist-starters {
+  display: grid;
+  gap: 6px;
+}
+
+:root[data-look="medusa"] .sk-hello .assist-starter {
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border-radius: var(--radius-m);
+  background: var(--md-bg-base, #fff);
+  box-shadow: 0 0 0 1px var(--shell-line, var(--neutral-4));
+  text-align: left;
+}
+
+:root[data-look="medusa"] .sk-hello .assist-starter:hover {
+  background: rgb(0 0 0 / 0.03);
+}
+
+/* The box: a bordered card, the send faded until there's something to send. */
+:root[data-look="medusa"] .sk-dock {
+  padding: var(--space-xs) var(--space-s) var(--space-s);
+}
+
+.assist-compose:has(textarea:placeholder-shown):not(:has(.assist-file)) .assist-send {
+  opacity: 0.4;
+}
+
+/* With the panel open the page has less room: its two-column parts stack until there's space. */
+@media (max-width: 1700px) {
+  body.sk-open .ov-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1500px) {
+  body.sk-open .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1101px) {
+  body.sk-open .main {
+    margin-right: 400px;
+  }
+
+  body.sk-open .drawer.is-order-page {
+    right: 400px;
+  }
+}
+
+/* Chat titles and times are as written, not title-cased like buttons. */
+.sk-chat,
+.sk-title,
+.assist-rate {
+  text-transform: none;
+}
+
+/* A place an answer names ("Buy › Bills") is a link there: the brand color and an arrow. */
+.assist-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--brand, var(--neutral-10));
+  font-weight: var(--weight-ui-medium);
+  text-decoration: none;
+}
+
+.assist-go .i {
+  width: 13px;
+  height: 13px;
+}
+
+.assist-go:hover {
+  color: var(--brand-hover, var(--brand));
+}
+
+/* The chat across the work area (Peasy's): the conversation and the box in a centered column, a
+   back arrow to the page, and a button to dock it beside the page instead. */
+.sk-back {
+  display: none;
+}
+
+@media (min-width: 861px) {
+  :root[data-look="medusa"] body.sk-full .sk-panel {
+    left: var(--md-sidebar-width);
+    right: 0;
+    width: auto;
+    max-width: none;
+    box-shadow: none;
+    animation: none;
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-back {
+    display: grid;
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-head {
+    justify-content: flex-start;
+    gap: var(--space-xs);
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-head > span {
+    margin-left: auto;
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-thread,
+  :root[data-look="medusa"] body.sk-full .sk-dock {
+    padding-left: max(var(--space-l), calc((100% - 760px) / 2));
+    padding-right: max(var(--space-l), calc((100% - 760px) / 2));
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-thread {
+    padding-top: var(--space-l);
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-dock {
+    padding-bottom: var(--space-l);
+  }
+
+  :root[data-look="medusa"] body.sk-full .sk-title {
+    max-width: 520px;
+  }
+
+  :root[data-look="medusa"] body.sk-full :is(.sk-bar, .sk-fab, .bulk) {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  [data-sk-dock] {
+    display: none;
+  }
+}
+
+/* ══ Dark (Beta, as Peasy's): the same tokens in a dark zinc set. Chosen in the account menu
+   (Light, Dark, System); admin.html sets data-theme before the page draws. ══ */
+:root[data-look="medusa"][data-theme="dark"] {
+  color-scheme: dark;
+  --md-bg-base: #1c1c1f;
+  --md-bg-subtle: #161618;
+  --md-bg-field: #232327;
+  --md-bg-hover: #26262a;
+  --md-bg-pressed: #303035;
+  --md-border-base: #2e2e33;
+  --md-border-strong: #3f3f46;
+  --md-fg-base: #ededef;
+  --md-fg-subtle: #a1a1aa;
+  --md-fg-muted: #8b8b94;
+  --md-fg-disabled: #5b5b63;
+  --neutral-1: #1c1c1f;
+  --neutral-2: #161618;
+  --neutral-3: #26262a;
+  --neutral-4: #2e2e33;
+  --neutral-5: #3f3f46;
+  --neutral-6: #5b5b63;
+  --neutral-7: #8b8b94;
+  --neutral-8: #a1a1aa;
+  --neutral-9: #d4d4d8;
+  --neutral-10: #ededef;
+  --cte-canvas: #161618;
+  --cte-surface: #1c1c1f;
+  --cte-surface-muted: #232327;
+  --cte-text: #ededef;
+  --cte-text-muted: #8b8b94;
+  --brand: #4c6ef5;
+  --brand-hover: #5c7cfa;
+  --brand-pressed: #3b5bdb;
+  --brand-tint: #1f2647;
+  --brand-soft: #27305a;
+  --brand-ring: rgba(92, 124, 250, 0.45);
+  --side-bg: #161618;
+  --band-bg: #161618;
+  --navigation-active-background: #26262a;
+  --navigation-active-foreground: #ededef;
+  --md-buttons-neutral: 0 0 0 1px #34343a;
+  --md-borders-base: 0 0 0 1px #34343a;
+  --md-elevation-card-rest: 0 0 0 1px #2e2e33;
+  --md-elevation-card-hover: 0 0 0 1px #3f3f46, 0 2px 8px rgba(0, 0, 0, 0.4);
+  --md-elevation-flyout: 0 0 0 1px #34343a, 0 8px 24px rgba(0, 0, 0, 0.5);
+  --md-elevation-modal: 0 0 0 1px #34343a, 0 16px 40px rgba(0, 0, 0, 0.55);
+  --md-buttons-neutral-focus: 0 0 0 1px #34343a, 0 0 0 2px #1c1c1f, 0 0 0 4px var(--brand-ring);
+  --md-borders-focus: 0 0 0 1px #1c1c1f, 0 0 0 3px var(--brand-ring);
+  --shadow-s: 0 0 0 1px #2e2e33;
+  --shadow-m: 0 0 0 1px #34343a, 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-l: 0 0 0 1px #34343a, 0 16px 40px rgba(0, 0, 0, 0.55);
+  --md-tag-green-bg: #0b2e22;
+  --md-tag-green-border: #14532d;
+  --md-tag-green-text: #6ee7b7;
+  --md-tag-blue-bg: #0f1f3d;
+  --md-tag-blue-border: #1e3a8a;
+  --md-tag-blue-text: #93c5fd;
+  --md-tag-purple-bg: #221a3d;
+  --md-tag-purple-border: #4c1d95;
+  --md-tag-purple-text: #c4b5fd;
+  --md-tag-orange-bg: #33190a;
+  --md-tag-orange-border: #7c2d12;
+  --md-tag-orange-text: #fdba74;
+  --md-tag-red-bg: #3a0d17;
+  --md-tag-red-border: #881337;
+  --md-tag-red-text: #fda4af;
+  --md-tag-yellow-bg: #2e2309;
+  --md-tag-yellow-border: #78350f;
+  --md-tag-yellow-text: #fcd34d;
+  --md-tag-neutral-bg: #26262a;
+  --md-tag-neutral-border: #34343a;
+  --md-tag-neutral-text: #c4c4cc;
+  --success: #6ee7b7;
+}
+
+:root[data-look="medusa"][data-theme="dark"] body {
+  background: var(--md-bg-base);
+  color: var(--md-fg-base);
+}
+
+:root[data-look="medusa"][data-theme="dark"] .order-note p {
+  background: #3d3209;
+  color: #fde68a;
+}
+
+:root[data-look="medusa"][data-theme="dark"] {
+  --emphasis-rewards-background: #232327;
+  --emphasis-icon-background: #232327;
+  --emphasis-type-background: #232327;
+}
+
+/* Main buttons are flat, as Peasy's: one solid color, no ring, highlight or shadow; focus is a
+   ring outside. */
+:root[data-look="medusa"],
+:root[data-look="medusa"][data-theme="dark"] {
+  --md-buttons-inverted: none;
+  --md-buttons-inverted-focus: 0 0 0 2px var(--md-bg-base, #fff), 0 0 0 4px var(--brand-ring);
+}
+
+/* On a phone the back office is an app held at arm's length: list text at 15px and secondary
+   text at 13px (a computer keeps Peasy's 13 and 12). Every field stays at 16px, the Ask box
+   included, so iPhones don't zoom in when one is tapped. */
+@media (max-width: 860px) {
+  :root[data-look="medusa"] {
+    --size-xxs: 12px;
+    --size-xs: 13px;
+    --size-s: 15px;
+    --size-m: 16px;
+    --line-xs: 18px;
+    --line-s: 22px;
+    --line-m: 22px;
+  }
+
+  :root[data-look="medusa"] :is(.assist-compose textarea, .sk-bar input, .quick-field input) {
+    font-size: 16px;
+  }
+
+  /* Toolbar buttons keep a computer's size, so a page's tools still fit in two rows. */
+  :root[data-look="medusa"] .toolbar :is(.btn, .tb-menu, .btn-split, summary) {
+    font-size: 14px;
+  }
+
+  :root[data-look="medusa"] :is(.toolbar, .toolbar-side) {
+    column-gap: 6px;
+  }
+}

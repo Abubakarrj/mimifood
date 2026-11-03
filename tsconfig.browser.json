@@ -1,0 +1,15 @@
+{
+  // Type checking only (npm run typecheck): the server sends js/*.ts to browsers as JavaScript,
+  // with the types stripped. The files are plain browser scripts sharing globals (PRODUCTS, SITE…).
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "types": [],
+    "noEmit": true,
+    "erasableSyntaxOnly": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "moduleDetection": "legacy"
+  },
+  "include": ["js/*.ts"]
+}

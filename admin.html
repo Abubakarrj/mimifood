@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Back Office — Mimi Food</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#111111">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <!-- Installable as an app (home screen): manifest, icons, full-screen on iPhone. -->
+  <link rel="manifest" href="/admin.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/admin-icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Back Office">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin.css">
+  <!-- The back office's look, after Medusa's admin (admin-medusa.css). /admin?look=classic shows
+       the earlier look in this browser; /admin?look=medusa goes back. -->
+  <script>
+    // Light, Dark or System (the account menu): set before the page draws.
+    (function () {
+      var t = "light";
+      try {
+        t = localStorage.getItem("bo-theme") || "light";
+      } catch (e) {}
+      var dark = t === "dark" || (t === "system" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    })();
+  </script>
+  <script>
+    (function () {
+      var look = null;
+      try {
+        var asked = new URLSearchParams(location.search).get("look");
+        if (asked === "classic") localStorage.setItem("bo-look", "classic");
+        else if (asked === "medusa" || asked === "default") localStorage.removeItem("bo-look");
+        look = localStorage.getItem("bo-look");
+      } catch (e) {
+        look = new URLSearchParams(location.search).get("look");
+      }
+      if (look === "classic") return;
+      document.documentElement.dataset.look = "medusa";
+      ["https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap", "/admin-medusa.css"].forEach(function (href) {
+        var l = document.createElement("link");
+        l.rel = "stylesheet";
+        l.href = href;
+        document.head.appendChild(l);
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="bo" data-app>
+    <p class="boot">Loading…</p>
+  </div>
+  <div class="slips" data-slips aria-hidden="true"></div>
+  <script src="/vendor/lucide.min.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FAQ: Shipping, Subscriptions & Brewing — Mimi Food</title>
+  <meta name="description" content="Answers about Mimi Food orders, shipping, local courier delivery, subscriptions, grind options and gifts.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mimi Food">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Mimi Food">
+  <meta property="og:title" content="FAQ: Shipping, Subscriptions & Brewing — Mimi Food">
+  <meta property="og:description" content="Answers about Mimi Food orders, shipping, local courier delivery, subscriptions, grind options and gifts.">
+  <meta property="og:image" content="%SITE_URL%/assets/og-home.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="faq">
+  <main id="main">
+
+    <div class="page">
+      <header class="page-head" data-reveal>
+        <h1>FAQ</h1>
+        <p>Can't find what you're after? <a href="contact" style="text-decoration:underline;text-underline-offset:3px">Get in touch</a>.</p>
+      </header>
+      <div class="faq-list">
+        <div data-faq></div>
+        <div data-ask-thread aria-live="polite"></div>
+        <form class="ask-row" data-ask-form data-reveal>
+          <label class="visually-hidden" for="ask-input">Ask your own question</label>
+          <input id="ask-input" name="q" maxlength="600" autocomplete="off" required placeholder="Ask your own question…">
+          <button type="submit">Ask</button>
+        </form>
+        <p class="ask-note muted"><span>AI answers can be wrong.</span> <button type="button" class="ask-person" data-handoff-open>Talk to a Person</button></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

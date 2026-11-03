@@ -1,0 +1,204 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# A small Node server (the site, checkout, back office, FAQ answers with Claude)
+# and the Postgres database that keeps the shop's data.
+services:
+  # A web service (not a static site): it runs server.ts (via server.js) for checkout, payments,
+  # accounts and the back office. Named Mimi Food-coffee because "black-paper" was
+  # first created as a static site, and Render can't change a service's type.
+  - type: web
+    runtime: node
+    name: Mimi Food-coffee
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Set the value in the Render dashboard; never commit the key.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Wholesale login by text code (Twilio). Account SID and auth token, plus a Verify
+      # service (VA…), or a sending number (TWILIO_FROM) / messaging service (MG…).
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      # Or an API key instead of the auth token (Account → API keys): SK… and its secret.
+      - key: TWILIO_API_KEY
+        sync: false
+      - key: TWILIO_API_SECRET
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      # Instagram check on ambassador applications (back office → Ambassadors): our Instagram
+      # professional account looks up theirs through Meta's Business Discovery API. In a Meta app
+      # (developers.facebook.com) with Instagram access, make a long-lived token for that account
+      # and copy its Instagram user id. Until both are set, applications are left unchecked.
+      - key: INSTAGRAM_USER_ID
+        sync: false
+      - key: INSTAGRAM_ACCESS_TOKEN
+        sync: false
+      # AnyAPI (getanyapi.com), optional: Google Maps search and listings, websites that need a
+      # browser, and Instagram accounts Meta can't see, for Wholesale → Prospects, enquiries and
+      # ambassador checks; Insights (where we show up, mentions, creators, ideas, prices), the
+      # coffee price, customer Look Up, return drop-offs and the assistant's web lookups.
+      # Charged per call, within the monthly limit set on the Prospects page.
+      - key: ANYAPI_API_KEY
+        sync: false
+      # Orders, accounts, subscriptions, signups and wholesale enquiries live in the
+      # Postgres database below. (Without DATABASE_URL the server falls back to JSON
+      # files in ./data, which Render wipes on every deploy: fine locally, not live.)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: Mimi Food-db
+          property: connectionString
+      # Private key for the admin downloads:
+      #   https://<your-site>/admin/subscriptions.csv?key=<ADMIN_KEY>
+      #   https://<your-site>/admin/subscribers.csv?key=<ADMIN_KEY>
+      #   https://<your-site>/admin/orders.csv?key=<ADMIN_KEY>
+      - key: ADMIN_KEY
+        generateValue: true
+      # Signs the anti-spam tokens on the public forms (server/spam.js).
+      - key: FORM_SECRET
+        generateValue: true
+      # Password-reset emails, sent with Resend (resend.com). Verify your domain there,
+      # then set the API key and a from address on that domain, e.g.
+      #   Mimi Food <hello@mimifood.com>
+      # Without them, "Forgot your password?" asks customers to email you instead.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # Optional: the sender for newsletters, on its own subdomain verified in Resend (e.g.
+      # "Mimi Food <news@mail.mimifood.com>"), so newsletters don't affect order emails.
+      # Without it, newsletters go from EMAIL_FROM.
+      - key: NEWSLETTER_FROM
+        sync: false
+      # Optional: a sender for each kind of email (each falls back to EMAIL_FROM), e.g.
+      # "Mimi Food <orders@mimifood.com>". ORDERS_FROM: confirmations, shipping and pickup updates,
+      # refunds, returns, gift cards, back in stock, class tickets. WHOLESALE_FROM: invoices,
+      # wholesale invites, supplier POs. ACCOUNT_FROM: password resets and email confirmations.
+      # AUTOMATIONS_FROM: welcome, abandoned cart, after an order, running low, win-back.
+      - key: ORDERS_FROM
+        sync: false
+      - key: WHOLESALE_FROM
+        sync: false
+      - key: ACCOUNT_FROM
+        sync: false
+      - key: AUTOMATIONS_FROM
+        sync: false
+      # Optional: the Inbox (back office → Inbox). Replies to customers go from INBOX_FROM (or
+      # EMAIL_FROM) with Reply-To INBOX_ADDRESS, an address Resend receives mail for (Resend →
+      # Domains → enable receiving, e.g. hello@reply.mimifood.com, or your .resend.app address).
+      # Add a webhook in Resend for "email.received" pointing at
+      #   https://<your-site>/api/resend/inbound
+      # and put its signing secret (whsec_…) in RESEND_INBOUND_SECRET. Without these, the contact
+      # form and "Talk to a person" still land in the Inbox, but customers' email answers don't.
+      - key: INBOX_ADDRESS
+        sync: false
+      - key: INBOX_FROM
+        sync: false
+      - key: RESEND_INBOUND_SECRET
+        sync: false
+      # Wholesale texts (iMessage) through Photon Spectrum (Photon dashboard → Settings). Texts land
+      # in the Inbox and replies go back by iMessage; we never text first. PHOTON_TEXT_NUMBER
+      # overrides the Text Us number (+1 415 605 6081, in js/data.js). Optional.
+      - key: PHOTON_PROJECT_ID
+        sync: false
+      - key: PHOTON_PROJECT_SECRET
+        sync: false
+      - key: PHOTON_TEXT_NUMBER
+        sync: false
+      # Google Analytics 4 (Admin → Data streams → Web → Measurement ID, "G-…"). Loads only for
+      # visitors who accept analytics cookies. Optional.
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      # Payments, POS orders, subscriptions, wholesale invoices and the item library, with Square
+      # (Square Developer Console → your app → Credentials and Locations). Webhook endpoint:
+      #   https://<your-site>/api/square/webhook  (see README "Orders and payments")
+      # SQUARE_ENVIRONMENT=sandbox while testing, production when live (use the production access
+      # token, application ID and location ID with it). Without them, orders are saved and payment
+      # is arranged by email.
+      - key: SQUARE_ACCESS_TOKEN
+        sync: false
+      - key: SQUARE_APPLICATION_ID
+        sync: false
+      - key: SQUARE_LOCATION_ID
+        sync: false
+      - key: SQUARE_WEBHOOK_SIGNATURE_KEY
+        sync: false
+      - key: SQUARE_ENVIRONMENT
+        value: production
+      # Bank payments (ACH) in the wholesale portal, in its own form, through Stripe
+      # (dashboard.stripe.com → Developers → API keys). Webhook endpoint:
+      #   https://<your-site>/api/stripe/webhook  with the events payment_intent.processing,
+      #   payment_intent.succeeded and payment_intent.payment_failed; its signing secret in
+      #   STRIPE_WEBHOOK_SECRET. Without them, bank payments go through Square as before.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      # Couriers for local deliveries (within 10 miles of the roastery) and café delivery, with
+      # Uber Direct (direct.uber.com → Developer). Webhook: https://<your-site>/api/uber/webhook,
+      # its signing key in UBER_DIRECT_WEBHOOK_SECRET.
+      - key: UBER_DIRECT_CUSTOMER_ID
+        sync: false
+      - key: UBER_DIRECT_CLIENT_ID
+        sync: false
+      - key: UBER_DIRECT_CLIENT_SECRET
+        sync: false
+      - key: UBER_DIRECT_WEBHOOK_SECRET
+        sync: false
+      # Shipping rates at checkout and labels with Shippo (Shippo → Settings → API): the cheapest
+      # service from the account's carriers is shown and its label bought when the order is paid.
+      # Optional SHIPPO_CARRIERS ("USPS") limits it to those carriers.
+      - key: SHIPPO_API_TOKEN
+        sync: false
+      # Parcel tracking: in Shippo → Settings → Webhooks, add https://<your-site>/api/shippo/webhook?token=<this>
+      # for "track_updated". Customers are emailed when it ships, is out for delivery and is delivered.
+      - key: SHIPPO_WEBHOOK_SECRET
+        generateValue: true
+      # Optional: an OpenSalesTax server (github.com/ejosterberg/open-sales-tax) for the rates of
+      # states other than California once you collect there (Back office → Sales tax).
+      - key: OPENSALESTAX_URL
+        sync: false
+      # Or labels with ShipStation (used only without Shippo).
+      # SHIPSTATION_TEST_LABELS=true buys free test labels while you set up; false when live.
+      - key: SHIPSTATION_API_KEY
+        sync: false
+      - key: SHIPSTATION_API_SECRET
+        sync: false
+      - key: SHIPSTATION_TEST_LABELS
+        value: "false"
+      # Optional: keep OpenStreetMap address lookups in your country, e.g. "us".
+      - key: GEOCODE_COUNTRIES
+        sync: false
+      # The site's one public address: links in emails, search engines and the sitemap use it,
+      # and the site's other names on this service (mimifood.com, www., onrender.com)
+      # redirect here.
+      - key: SITE_URL
+        value: https://mimifood.com
+      # Optional: also send each signup to Mailchimp, Klaviyo, a Google Sheet, etc.
+      # via a webhook URL (e.g. from Zapier or Make). Leave blank to skip.
+      - key: NEWSLETTER_WEBHOOK_URL
+        sync: false
+      # Google Merchant API: products sent to Merchant Center as they change (see the
+      # README, "Google Shopping"). The account number, and a service account's JSON key.
+      - key: GOOGLE_MERCHANT_ID
+        sync: false
+      - key: GOOGLE_MERCHANT_KEY
+        sync: false
+
+databases:
+  - name: Mimi Food-db
+    databaseName: Mimi Food
+    user: Mimi Food
+    # Render's free Postgres expires after 30 days, so use a paid plan for real
+    # orders. basic-256mb is the smallest paid plan and is backed up by Render
+    # (see render.com/pricing for the current price).
+    plan: basic-256mb
+    # Only this site's server can connect.
+    ipAllowList: []

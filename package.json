@@ -1,0 +1,35 @@
+{
+  "name": "black-paper",
+  "private": true,
+  "type": "module",
+  "description": "Mimi Food site with an AI-answered FAQ",
+  "scripts": {
+    "start": "node server.js",
+    "typecheck": "tsc -p . && tsc -p tsconfig.browser.json && tsc -p tsconfig.strict.json",
+    "typecheck:server": "tsc -p .",
+    "typecheck:browser": "tsc -p tsconfig.browser.json",
+    "typecheck:strict": "tsc -p tsconfig.strict.json"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@getanyapi/sdk": "0.127.6",
+    "@simplewebauthn/server": "^13.3.3",
+    "@spectrum-ts/core": "^12.11.0",
+    "@spectrum-ts/imessage": "^12.11.0",
+    "ffmpeg-static": "^5.3.0",
+    "heic-convert": "^2.1.0",
+    "llama-tokenizer-js": "1.2.2",
+    "lucide": "^1.48.0",
+    "onnxruntime-web": "1.22.0",
+    "pg": "^8.13.1",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "5.9"
+  }
+}

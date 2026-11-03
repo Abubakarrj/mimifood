@@ -1,0 +1,10 @@
+{
+  // Strict type checking for the modules tightened so far (npm run typecheck:strict).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  },
+  "include": ["server/orders.ts", "server/orderstore.ts", "server/promos.ts", "server/square.ts"]
+}
