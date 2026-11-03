@@ -48,6 +48,9 @@
     if (exact.has(key)) return exact.get(key);
     for (const p of patterns) {
       const m = p.re.exec(key);
+      // A pattern with almost no words of its own ("{a} of {b}", "{n} items") would take any
+      // sentence containing them: its values must then be numbers or text the dictionary knows.
+      if (m && p.fixed < 10 && !m.slice(1).every((v) => /^[\d.,:$%\s–-]+$/.test(v) || exact.has(norm(v)))) continue;
       if (m) {
         let out = p.value;
         p.names.forEach((name, i) => (out = out.split(`{${name}}`).join(lookupValue(m[i + 1]))));
