@@ -158,7 +158,7 @@
     if (!nodes.length) {
       // Plain text: keep the surrounding spaces.
       const raw = el.textContent;
-      el.textContent = raw.replace(norm(raw), t);
+      el.textContent = raw.replace(/\S(?:[\s\S]*\S)?/, () => t); // by position, so extra spaces in the text don't matter
     } else rebuild(el, t, nodes);
   }
 
@@ -168,7 +168,7 @@
     const t = lookup(key);
     if (t == null) return missing.add(key);
     outputs.add(t);
-    node.nodeValue = node.nodeValue.replace(key, t);
+    node.nodeValue = node.nodeValue.replace(/\S(?:[\s\S]*\S)?/, () => t);
   }
 
   const ATTRS = ["placeholder", "aria-label", "alt", "title", "data-label"];
