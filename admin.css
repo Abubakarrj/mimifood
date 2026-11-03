@@ -16321,13 +16321,15 @@ body:has(.drawer.is-modal:not([hidden])) .scrim {
 .products-table .c-select { width: 36px; padding-right: 0; }
 .products-table .c-select input { width: 16px; height: 16px; cursor: pointer; accent-color: #2f7a34; }
 
-/* The brand mark is a picture now, sized wherever it appears. */
+/* The brand artwork is picture files: the small mark (sidebar), the round avatar (assistant) and the full wordmark (login, print). */
 .mark-img { display: block; width: 100%; height: auto; max-width: 100%; }
-.login-logo .mark-img { width: 44px; }
 .brand-logo .mark-img { width: 28px; }
-.slip-logo .mark-img { width: 44px; }
-.assist-avatar:has(.mark-img),
-.sk-fab:has(.mark-img) { background: #ffffff; box-shadow: inset 0 0 0 1px var(--neutral-4, #e4e4e4); }
-.assist-avatar .mark-img { width: 18px; }
-.assist-avatar.is-big .mark-img { width: 30px; }
-.sk-fab .mark-img { width: 24px; }
+.wordmark-img { display: block; width: 100%; height: auto; max-width: 100%; }
+.login-logo { display: block; width: 190px; margin: 0 0 6px; }
+.slip-logo .wordmark-img { width: 150px; }
+/* The assistant's face fills its circle: no dark disc, no padding. */
+.assist-avatar:has(.avatar-img),
+.sk-fab:has(.avatar-img) { padding: 0; overflow: hidden; background: none; box-shadow: none; }
+.avatar-img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.sk-fab:has(.avatar-img) { width: 48px; height: 48px; border: 0; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22); }
+.sk-fab .avatar-img { width: 48px; height: 48px; }

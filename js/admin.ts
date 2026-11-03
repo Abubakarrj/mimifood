@@ -12,6 +12,9 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const imgSrc = (u) => esc(u && !/^([a-z]+:|\/)/i.test(u) ? `/${u}` : u);
 
 const LOGO = `<img class="mark-img" src="/assets/logo-mark.png" alt="">`;
+// The round avatar for the assistant, and the full wordmark for the login and print slips.
+const AVATAR = `<img class="avatar-img" src="/assets/logo-avatar.png" alt="">`;
+const LOGO_FULL = `<img class="wordmark-img" src="/assets/logo-full.png" alt="Mimi Food USA">`;
 
 // Icons: Lucide (outlined), loaded from /vendor/lucide.min.js. Markup is built from
 // Lucide's own icon data so the page can render as strings.
@@ -341,7 +344,7 @@ function renderLogin(message = "", mode = "email") {
   app.innerHTML = `
     <div class="login">
       <form class="login-card" data-login data-mode="${mode}">
-        <span class="login-logo">${LOGO}</span>
+        <span class="login-logo">${LOGO_FULL}</span>
         <h1>Back office</h1>
         ${
           mode === "key"
@@ -3211,7 +3214,7 @@ function printRoastSheet(from, to = from) {
   $("[data-slips]").innerHTML = days
     .map(
       (d) => `<article class="slip roast-sheet">
-        <header><span class="slip-logo">${LOGO}</span><div class="slip-shop"><strong>Roast sheet</strong><br>${esc(dayName(d, { weekday: "long", month: "long", day: "numeric" }))}</div></header>
+        <header><span class="slip-logo">${LOGO_FULL}</span><div class="slip-shop"><strong>Roast sheet</strong><br>${esc(dayName(d, { weekday: "long", month: "long", day: "numeric" }))}</div></header>
         <table>
           <thead><tr><th class="tick"></th><th>Coffee</th><th>Green coffee</th><th class="num">Green kg</th><th class="num">Target bags</th><th>Roaster</th><th>Charge °C</th><th>Drop</th><th>Roasted kg</th><th>Bags</th></tr></thead>
           <tbody>${list
@@ -5742,7 +5745,7 @@ function printPo(po, supplier) {
   $("[data-slips]").innerHTML = `
     <article class="slip">
       <header>
-        <span class="slip-logo">${LOGO}</span>
+        <span class="slip-logo">${LOGO_FULL}</span>
         <div class="slip-shop"><strong>${esc(state.shop.name)}</strong><br>${esc(state.shop.email || "")}</div>
       </header>
       <div class="slip-meta">
@@ -9904,7 +9907,7 @@ const assistComposer = (off) => `
     </form>`;
 const assistAnswer = (m, i) => `
     <li class="assist-msg is-ai${m.error ? " is-error" : ""}">
-      <span class="assist-avatar" aria-hidden="true">${LOGO}</span>
+      <span class="assist-avatar" aria-hidden="true">${AVATAR}</span>
       <div class="assist-body">
         ${assistSteps(m)}
         ${m.error ? `<p>${esc(m.content)}</p>` : `<div class="assist-text">${plainMarkdown(m.content)}</div>`}
@@ -9978,7 +9981,7 @@ function assistChatsMenu() {
 const assistThreadHtml = () =>
   `<ol class="assist-thread" data-assist-thread>${assistChat
     .map((m, i) => (m.role === "user" ? `<li class="assist-msg is-you">${m.files?.length ? `<div class="assist-sent-files">${m.files.map((f) => assistFileTile(f)).join("")}</div>` : ""}${m.content ? `<p>${esc(m.content)}</p>` : ""}</li>` : assistAnswer(m, i)))
-    .join("")}${assistBusy ? `<li class="assist-msg is-ai"><span class="assist-avatar" aria-hidden="true">${LOGO}</span><div class="assist-body"><p class="assist-thinking" role="status"><span class="assist-spinner" aria-hidden="true"></span><span data-assist-now>${esc(assistNow())}</span><span class="assist-clock" data-assist-clock>${seconds(Date.now() - assistStarted)}</span></p><div class="assist-text" data-assist-live>${plainMarkdown(assistLive.text)}</div></div></li>` : ""}</ol>`;
+    .join("")}${assistBusy ? `<li class="assist-msg is-ai"><span class="assist-avatar" aria-hidden="true">${AVATAR}</span><div class="assist-body"><p class="assist-thinking" role="status"><span class="assist-spinner" aria-hidden="true"></span><span data-assist-now>${esc(assistNow())}</span><span class="assist-clock" data-assist-clock>${seconds(Date.now() - assistStarted)}</span></p><div class="assist-text" data-assist-live>${plainMarkdown(assistLive.text)}</div></div></li>` : ""}</ol>`;
 // What it's doing right now: "Checking sales" while it looks, "Writing" once the answer starts.
 const assistNow = () =>
   assistLive.text ? "Writing" : assistLive.step ? (STEP_LABEL[assistLive.step] || "Looking it up").replace(/^Checked/, "Checking").replace(/^Looked/, "Looking").replace(/^Searched/, "Searching").replace(/^Drafted/, "Drafting").replace(/^Saved/, "Saving") : "Thinking";
@@ -10019,7 +10022,7 @@ function assistantView() {
             ? `${assistThreadHtml()}
               <div class="assist-dock">${composer}</div>`
             : `<div class="assist-hello">
-                <span class="assist-avatar is-big" aria-hidden="true">${LOGO}</span>
+                <span class="assist-avatar is-big" aria-hidden="true">${AVATAR}</span>
                 <h2>How can I help?</h2>
                 ${composer}
                 <div class="assist-starters">${ASSIST_STARTERS.map((q) => `<button type="button" class="assist-starter" data-assist-ask>${esc(q)}</button>`).join("")}</div>
@@ -10236,9 +10239,9 @@ document.addEventListener("click", (e) => {
 function sidekickHtml() {
   if (state.page === "assistant") return "";
   if (!skOpen)
-    return `<button type="button" class="sk-fab" data-sk-untuck aria-label="Ask the assistant" title="Ask the assistant">${LOGO}</button>
+    return `<button type="button" class="sk-fab" data-sk-untuck aria-label="Ask the assistant" title="Ask the assistant">${AVATAR}</button>
     <form class="sk-bar" data-sk-bar>
-      <span class="assist-avatar" aria-hidden="true">${LOGO}</span>
+      <span class="assist-avatar" aria-hidden="true">${AVATAR}</span>
       <input name="q" placeholder="Ask the assistant" aria-label="Ask the assistant" autocomplete="off">
       <button type="submit" class="assist-send" aria-label="Ask">${icon("up")}</button>
       <button type="button" class="icon-btn" data-sk-open aria-label="Open the assistant" title="Open the assistant">${icon("PanelRight")}</button>
@@ -13785,7 +13788,7 @@ async function printSlips(numbers) {
       return `
       <article class="slip">
         <header>
-          <span class="slip-logo">${LOGO}</span>
+          <span class="slip-logo">${LOGO_FULL}</span>
           <div class="slip-shop"><strong>${esc(state.shop.name || "Mimi Food")}</strong><br>${esc(state.shop.email || "")}</div>
         </header>
         <div class="slip-meta">

@@ -16,7 +16,7 @@ const SITE: any = {
   // engines and AI assistants these are all the same Mimi Food (schema.org sameAs, /llms.txt).
   sameAs: [],
   // Checkout happens on Shopify: the cart goes to this store as a cart link when every item has a Shopify variant id.
-  shopify: { domain: "mimifoodusa.com" },
+  shopify: { domain: "mimifoodusa.com", giftCard: "" }, // giftCard: the handle of the gift card product in Shopify (shows a Buy button on /gift-cards)
   currency: "$",
   currencyCode: "USD", // for card payments (Square)
   freeShippingOver: 60,
