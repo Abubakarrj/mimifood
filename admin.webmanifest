@@ -1,7 +1,7 @@
 {
   "name": "Mimi Food Back Office",
   "short_name": "Back Office",
-  "description": "Orders, products, café menu, customers and wholesale for Mimi Food.",
+  "description": "Orders, products, customers and wholesale for Mimi Food.",
   "id": "/admin",
   "start_url": "/admin/overview",
   "scope": "/admin",
@@ -16,7 +16,6 @@
   ],
   "shortcuts": [
     { "name": "Orders to pack", "short_name": "To pack", "url": "/admin#orders/new", "icons": [{ "src": "/assets/admin-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Café menu", "short_name": "Menu", "url": "/admin#menu", "icons": [{ "src": "/assets/admin-icon-192.png", "sizes": "192x192" }] },
     { "name": "Products", "url": "/admin#products", "icons": [{ "src": "/assets/admin-icon-192.png", "sizes": "192x192" }] }
   ]
 }

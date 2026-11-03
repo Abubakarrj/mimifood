@@ -377,7 +377,7 @@ const ACCESSORY_ART = {
     <path d="M88 590L36 486M552 590L604 486" stroke="${shade(c, -0.1)}" stroke-width="5" fill="none"/>
     <path d="M246 360C272 400 368 400 394 360" stroke="${shade(c, -0.14)}" stroke-width="16" fill="none" stroke-linecap="round"/>
     <path d="M246 360C272 384 368 384 394 360" stroke="${shade(c, -0.22)}" stroke-width="3" fill="none"/>
-    <g transform="translate(372 458) scale(0.62)" fill="none"><ellipse cx="23" cy="33" rx="21.5" ry="31.5" stroke="#111" stroke-width="3"/><path fill-rule="evenodd" d="M19.6 13h6.8L36 41h-6.3l-2.1-6.4h-9.2L16.3 41H10zm.6 16.4h5.6L23 20.4z" fill="#111"/><path d="M20 44h6v8h-6z" fill="#111"/></g>`,
+    <g transform="translate(372 458) scale(0.62)" fill="none"><ellipse cx="23" cy="33" rx="21.5" ry="31.5" stroke="#111" stroke-width="3"/><path fill-rule="evenodd" d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="#111"/></g>`,
   // A ceramic cone dripper on its base plate, with a loop handle and ribs inside the cone.
   dripper: (c) => `
     <defs>
@@ -1295,6 +1295,7 @@ function renderLayout() {
             <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="menu-shop">Shop<span class="menu-plus" aria-hidden="true"></span></button>
             <div class="menu-sub" id="menu-shop" inert><ul>
               <li><a href="shop">Shop All</a></li>
+              ${shopCategories().map((c) => `<li><a href="shop?kind=${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}">${esc(c)}</a></li>`).join("")}
               <li><a href="gift-cards">Gift Cards</a></li>
             </ul></div>
           </li>
@@ -2692,7 +2693,7 @@ function drinkSvg(item) {
       <rect x="176" y="196" width="30" height="26" rx="6" fill="#fff" opacity="0.35" transform="rotate(6 191 209)"/>
       <rect x="132" y="102" width="136" height="12" rx="4" fill="#fff" opacity="0.8"/>
       <circle cx="200" cy="280" r="17" fill="#fff" opacity="0.9"/>
-      <path transform="translate(181.6 258.4) scale(0.8)" fill-rule="evenodd" d="M19.6 13h6.8L36 41h-6.3l-2.1-6.4h-9.2L16.3 41H10zm.6 16.4h5.6L23 20.4z" fill="#111"/>
+      <path transform="translate(181.6 258.4) scale(0.8)" fill-rule="evenodd" d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="#111"/>
     </svg>`;
   }
   return `<svg class="drink" viewBox="0 0 400 400" aria-hidden="true">
@@ -2702,7 +2703,7 @@ function drinkSvg(item) {
     <rect x="160" y="104" width="80" height="12" rx="5" fill="#ebebeb"/>
     <path d="M148 196h104l-6 70h-92z" fill="#111"/>
     <circle cx="200" cy="231" r="17" fill="#fff"/>
-    <path transform="translate(181.6 209.4) scale(0.8)" fill-rule="evenodd" d="M19.6 13h6.8L36 41h-6.3l-2.1-6.4h-9.2L16.3 41H10zm.6 16.4h5.6L23 20.4z" fill="#111"/>
+    <path transform="translate(181.6 209.4) scale(0.8)" fill-rule="evenodd" d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="#111"/>
   </svg>`;
 }
 
@@ -2971,6 +2972,12 @@ function coffeeLine(p, size, grind, qty = 1, gift = null) {
 
 // The shop's sections by address (/coffee, /tea …), each the home page opened on that section.
 // "Section/kind": /espresso opens the coffee with Espresso chosen (search uses these).
+// The shop's categories, in this order (any other category follows): the filter chips and menu links.
+const SHOP_CATEGORY_ORDER = ["Sauces", "Mala", "Dressings", "Seasonings", "Batter Flour", "Soups & Broths", "Soy Milk", "Teas", "Skincare"];
+function shopCategories() {
+  const have = [...new Set(ACCESSORIES.map((a) => a.category).filter(Boolean))];
+  return [...SHOP_CATEGORY_ORDER.filter((c) => have.includes(c)), ...have.filter((c) => !SHOP_CATEGORY_ORDER.includes(c))];
+}
 const SHOP_SECTIONS = { shop: "Shop", coffee: "Coffee", espresso: "Coffee/Espresso", filter: "Coffee/Filter", decaf: "Coffee/Decaf", accessories: "Accessories", tea: "Tea", limited: "Limited Drop" };
 // The section an address is for ("/es/tea" → "tea"), or null.
 const sectionSlug = (url) => {
@@ -3814,8 +3821,13 @@ const pages = {
       if (!slug || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
       closeOverlays(false);
-      if (sectionSlug(location.href) !== slug) history.pushState(null, "", `${prefix}/${slug}`);
+      if (sectionSlug(location.href) !== slug || location.search !== link.search) history.pushState(null, "", `${prefix}/${slug}${link.search}`);
       showSection(SHOP_SECTIONS[slug]);
+      const wanted = kindFromAddress();
+      if (wanted) {
+        view.kind = wanted;
+        render();
+      }
       if (root.classList.contains("home-shop") && !main.classList.contains("is-moving")) {
         main.classList.add("is-moving");
         setTimeout(() => {
@@ -3869,7 +3881,7 @@ const pages = {
     const SHOP_KINDS = { Coffee: (c) => c.dataset.group === "Coffee", Tea: (c) => c.dataset.group === "Tea", Accessories: (c) => c.dataset.group === "Accessories", "Limited Drop": (c) => c.dataset.labels.split("|").includes("Limited Drop") };
     const kindsOf = (section) => {
       // Limited Drop stays even between drops: it says the next is coming, and offers the list.
-      if (section === "Shop") return Object.keys(SHOP_KINDS).filter((k) => k === "Limited Drop" || $$(".product-card", grid).some(SHOP_KINDS[k]));
+      if (section === "Shop") return shopCategories().filter((k) => $$(".product-card", grid).some((c) => c.dataset.category === k));
       const cards = $$(`.product-card[data-group="${section}"]`, grid);
       if (section === "Coffee") return ["Espresso", "Filter", "Decaf"].filter((k) => cards.some((c) => matchesKind(c, k)));
       if (section === "Accessories") return [...new Set(cards.map((c) => c.dataset.category).filter(Boolean))];
@@ -3877,7 +3889,7 @@ const pages = {
       return [];
     };
     const matchesKind = (card, kind) =>
-      kind === "All" || (view.section === "Shop" ? SHOP_KINDS[kind]?.(card) : card.dataset.group === "Coffee" ? card.dataset.type === kind || card.dataset.tag === kind || card.dataset.labels.split("|").includes(kind) : card.dataset.category === kind);
+      kind === "All" || (view.section === "Shop" ? card.dataset.category === kind : card.dataset.group === "Coffee" ? card.dataset.type === kind || card.dataset.tag === kind || card.dataset.labels.split("|").includes(kind) : card.dataset.category === kind);
     function render() {
       const coffee = view.section === "Coffee";
       const everything = view.section === "Shop";

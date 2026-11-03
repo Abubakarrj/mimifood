@@ -1,5 +1,5 @@
 /* Mimi Food back office, in the Untitled theme (see GUI.md and gui/themes/untitled.md),
-   with the theme's colour 1 changed from yellow to the Mimi Food blue (#2457f5) and its warning
+   with the theme's colour 1 changed from yellow to the Mimi Food blue (#2f7a34) and its warning
    from yellow to orange. Colour 4 keeps the theme's yellow (#fff0b8); the shop (styles.css)
    uses the same colour 1 and colour 4. */
 
@@ -47,17 +47,17 @@
   --motion-large-iterations: infinite;
   --motion-popup-scale: 0.96;
   --motion-press-distance: 1px;
-  --option-badge-background: #2457f5;
+  --option-badge-background: #2f7a34;
   --option-badge-foreground: #ffffff;
   --navigation-active-foreground: #ffffff;
-  --emphasis-chart-fill: #2457f533;
+  --emphasis-chart-fill: #2f7a3433;
   --emphasis-balance-background: #cdcdcd;
   --emphasis-rewards-background: #f4f4f4;
   --emphasis-icon-background: #f4f4f4;
   --emphasis-icon-foreground: #000000;
   --emphasis-type-background: #f4f4f4;
   --emphasis-type-foreground: #000000;
-  --navigation-active-background: #2457f5;
+  --navigation-active-background: #2f7a34;
   --surface-raised-image: none;
   --surface-raised-shadow: 0 0 0 0 transparent;
   --surface-recessed-image: none;
@@ -129,14 +129,14 @@
   --weight-data-medium: 500;
   --weight-data-heavy: 600;
   --color-none: transparent;
-  --color-1: #2457f5;
-  --color-1-transparent: #2457f533;
+  --color-1: #2f7a34;
+  --color-1-transparent: #2f7a3433;
   --color-2: #085e55;
   --color-2-transparent: #085e5533;
   --color-3: #91b9fa;
   --color-3-transparent: #91b9fa33;
-  --color-4: #fff0b8;
-  --color-4-transparent: #fff0b833;
+  --color-4: #ffe66d;
+  --color-4-transparent: #ffe66d33;
   --neutral-1: #ffffff;
   --neutral-1-transparent: #ffffff33;
   --neutral-2: #fafafa;
@@ -173,10 +173,10 @@
   --cte-text: #111111;
   --cte-text-muted: #666666;
   --cte-border: #e7e7e733;
-  --cte-accent: #2457f5;
+  --cte-accent: #2f7a34;
   --cte-accent-text: #ffffff;
   --cte-danger: #c4231a;
-  --cte-focus: #2457f5;
+  --cte-focus: #2f7a34;
   --cte-font: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --cte-font-size: 14px;
   --cte-font-weight: 400;
@@ -992,7 +992,7 @@ a.stat:hover {
 /* Sales by channel: one fixed color each, in this order (checked as a set for color-blind
    readers and against the card's white: dataviz validate_palette). Text stays in ink. */
 :root {
-  --chart-1: #3b82f6; /* Online Store: blue */
+  --chart-1: #7bc46d; /* Online Store: blue */
   --chart-2: #f97316; /* Wholesale: orange */
   --chart-3: #10b981; /* Café: green */
   --chart-4: #8b5cf6; /* Subscriptions: purple */
@@ -14924,7 +14924,7 @@ body.sk-open .drawer.is-order-page {
   box-shadow: inset 0 0 0 1px var(--md-tag-neutral-border, #e5e7eb);
 }
 
-.sk-tag.is-blue { background: var(--md-tag-blue-bg, #eff6ff); color: var(--md-tag-blue-text, #1d4ed8); box-shadow: inset 0 0 0 1px var(--md-tag-blue-border, #bfdbfe); }
+.sk-tag.is-blue { background: var(--md-tag-blue-bg, #eff6ff); color: var(--md-tag-blue-text, #256629); box-shadow: inset 0 0 0 1px var(--md-tag-blue-border, #bfdbfe); }
 .sk-tag.is-orange { background: var(--md-tag-orange-bg, #fff7ed); color: var(--md-tag-orange-text, #c2410c); box-shadow: inset 0 0 0 1px var(--md-tag-orange-border, #fed7aa); }
 .sk-tag.is-green { background: var(--md-tag-green-bg, #f0fdf4); color: var(--md-tag-green-text, #15803d); box-shadow: inset 0 0 0 1px var(--md-tag-green-border, #bbf7d0); }
 .sk-tag.is-purple { background: var(--md-tag-purple-bg, #faf5ff); color: var(--md-tag-purple-text, #7e22ce); box-shadow: inset 0 0 0 1px var(--md-tag-purple-border, #e9d5ff); }
@@ -15320,7 +15320,7 @@ body.sk-full .sk-panel.is-home .sk-home {
   position: relative;
 }
 
-.inbox-avatar.tone-blue { background: var(--md-tag-blue-bg, #dbeafe); color: var(--md-tag-blue-text, #1d4ed8); }
+.inbox-avatar.tone-blue { background: var(--md-tag-blue-bg, #dbeafe); color: var(--md-tag-blue-text, #256629); }
 .inbox-avatar.tone-green { background: var(--md-tag-green-bg, #dcfce7); color: var(--md-tag-green-text, #15803d); }
 .inbox-avatar.tone-purple { background: var(--md-tag-purple-bg, #ede9fe); color: var(--md-tag-purple-text, #6d28d9); }
 .inbox-avatar.tone-orange { background: var(--md-tag-orange-bg, #ffedd5); color: var(--md-tag-orange-text, #c2410c); }

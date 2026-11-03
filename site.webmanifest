@@ -1,21 +1,21 @@
 {
   "name": "Mimi Food",
   "short_name": "Mimi Food",
-  "description": "Specialty coffee, roasted fresh. Shop beans, order ahead, manage your subscription.",
+  "description": "Korean sauces, soups and seasonings. Shop online and track your orders.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#e6f3d6",
   "icons": [
     { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Shop coffee", "short_name": "Shop", "url": "/shop", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Shop", "short_name": "Shop", "url": "/shop", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
     { "name": "My account", "short_name": "Account", "url": "/account", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] }
   ]
 }

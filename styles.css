@@ -7,15 +7,15 @@
      color-4 (yellow): money saved, and only that: the offers ticker, sale labels, "Save" and
      "% off" badges, "You save", savings in Ways to Save, the welcome code. Not for
      navigation, progress or instructions. */
-  --color-1: #2457f5;
-  --color-1-transparent: #2457f533;
-  --color-4: #fff0b8;
+  --color-1: #2f7a34;
+  --color-1-transparent: #2f7a3433;
+  --color-4: #ffe66d;
   --cte-accent: var(--color-1);
   --cte-accent-text: #ffffff; /* text on color-1 */
   --ink-muted: #666666;    /* secondary text: 4.5:1+ on white, panels and tiles */
   --line: #e4e4e4;
   --paper: #ffffff;
-  --tile: #e6e6e6;         /* product image background */
+  --tile: #e6f3d6;         /* product image background */
   --open: #3a9d5d;         /* "open now" dot */
   --open-text: #2f7d4c;    /* green text, readable on white */
   --error: #c4231a;        /* wrong or missing input */
@@ -8604,7 +8604,7 @@ html.a11y-contrast {
 }
 
 html.a11y-contrast {
-  --color-1: #1a3fc4; /* a deeper blue for buttons and links */
+  --color-1: #1f5f24; /* a deeper blue for buttons and links */
 }
 
 html.a11y-links a {
@@ -10042,8 +10042,8 @@ a.cart-thumb:hover {
   --soft: #f2f2f2;          /* grey control */
   --soft-hover: #e8e8e8;
   --soft-text: #6b6b6b;     /* grey text on --soft (4.6:1) */
-  --sky: #e0f0fb;           /* pale blue: main action, chosen option */
-  --sky-hover: #cce6f8;
+  --sky: #e3f3d6;           /* pale blue: main action, chosen option */
+  --sky-hover: #d1eabd;
   --soft-radius: 10px;
 }
 
@@ -15708,10 +15708,10 @@ body[data-page="trade"] {
   --ink-muted: #a1a1a1;
   --paper: #161616;
   --line: #2e2e2e;
-  --tile: #242424;
+  --tile: #263320;
   --edge: #161616;
-  --color-1: #7ea2ff;
-  --color-1-transparent: #7ea2ff33;
+  --color-1: #9bd68d;
+  --color-1-transparent: #9bd68d33;
   --cte-accent-text: #0d0d0d;
   --error: #ff6f63;
   --error-tint: #2b1614;
@@ -17160,7 +17160,7 @@ body[data-page="trade"] {
   white-space: nowrap;
 }
 
-.tp-tag.is-blue { background: #eff6ff; color: #1d4ed8; box-shadow: inset 0 0 0 1px #bfdbfe; }
+.tp-tag.is-blue { background: #eff6ff; color: #256629; box-shadow: inset 0 0 0 1px #bfdbfe; }
 .tp-tag.is-orange { background: #fff7ed; color: #c2410c; box-shadow: inset 0 0 0 1px #fed7aa; }
 .tp-tag.is-green { background: #f0fdf4; color: #15803d; box-shadow: inset 0 0 0 1px #bbf7d0; }
 .tp-tag.is-purple { background: #faf5ff; color: #7e22ce; box-shadow: inset 0 0 0 1px #e9d5ff; }
@@ -18558,7 +18558,7 @@ body.is-app-login .auth-card > * {
     --ink-muted: #666666;
     --paper: #ffffff;
     --line: #e4e4e4;
-    --tile: #e6e6e6;
+    --tile: #e6f3d6;
     color-scheme: light;
     background: #ffffff;
     color: #111111;
@@ -19036,7 +19036,7 @@ body.is-app-login .auth-card > * {
   padding: 0 10px;
   border: 0;
   border-radius: 6px;
-  background: #1e3a8a;
+  background: #2f7a34;
   color: #fff;
   font: inherit;
   font-size: 13px;
@@ -20708,8 +20708,8 @@ body[data-page="checkout"].is-placed .header-actions {
 }
 
 :root[data-theme="dark"] .tp-theme-pick button[aria-pressed="true"] {
-  border-color: #7ea2ff;
-  background: #7ea2ff;
+  border-color: #9bd68d;
+  background: #9bd68d;
   color: #0d0d0d;
 }
 

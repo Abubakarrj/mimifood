@@ -11,7 +11,7 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 // absolute, since back office pages live under /admin/….
 const imgSrc = (u) => esc(u && !/^([a-z]+:|\/)/i.test(u) ? `/${u}` : u);
 
-const LOGO = `<svg viewBox="0 0 46 62" aria-hidden="true"><ellipse cx="23" cy="31" rx="21" ry="29" fill="none" stroke="currentColor" stroke-width="3"/><path d="M19.6 13h6.8L36 41h-6.3l-2.1-6.4h-9.2L16.3 41H10zm.6 16.4h5.6L23 20.4z" fill="currentColor"/><path d="M20 44h6v8h-6z" fill="currentColor"/></svg>`;
+const LOGO = `<svg viewBox="0 0 46 62" aria-hidden="true"><ellipse cx="23" cy="31" rx="21" ry="29" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="currentColor"/></svg>`;
 
 // Icons: Lucide (outlined), loaded from /vendor/lucide.min.js. Markup is built from
 // Lucide's own icon data so the page can render as strings.
@@ -138,12 +138,12 @@ const PAGES = [
   { id: "helpdocs", label: "Help Docs", icon: "BookOpen", group: "Configure" },
   { id: "languages", label: "Languages", icon: "languages", group: "Configure" },
   { id: "careers", label: "Careers", icon: "careers", group: "Configure" },
-].filter((p) => !["roasting", "menu", "subscriptions", "calendar", "ambassadors", "notes"].includes(p.id));
+].filter((p) => !["roasting", "menu", "subscriptions", "calendar", "ambassadors", "notes", "careers", "calls", "helpdocs", "imports"].includes(p.id));
 /* ── Configure (Peasy's): the gear swaps the sidebar for the settings pages, grouped, with a back
    arrow to where you were. Their pages sit in a centered column under a breadcrumb. ── */
 const CONFIG_NAV = [
-  ["Business", ["business", "team", "salestax", "calls", "helpdocs"]],
-  ["Website", ["languages", "careers"]],
+  ["Business", ["business", "team", "salestax"]],
+  ["Website", ["languages"]],
 ];
 const isConfig = (id = state.page) => PAGES.find((p) => p.id === id)?.group === "Configure";
 const configPages = () => myPages().filter((p) => isConfig(p.id));
@@ -819,7 +819,7 @@ const GROUP_ICON = { Sell: "Handshake", Wholesale: "wholesale", Make: "Hammer", 
 // [sub, label, icon, the page's count shown here].
 const SUB_NAV = {
   wholesale: [["accounts", "Accounts", "building"], ["pricelists", "Price Lists", "Tags"], ["orders", "Wholesale Orders", "orders"], ["quotes", "Quotes", "quote"], ["enquiries", "Inquiries", "imessage"], ["samples", "Samples", "FlaskConical"], ["documents", "Documents", "doc"], ["prospects", "Prospects", "search"]],
-  purchasing: [["stock", "Ingredients", "purchasing"], ["samples", "Samples", "FlaskConical"], ["orders", "Purchase Orders", "doc"], ["bills", "Bills", "receipt", true], ["suppliers", "Suppliers", "building"]],
+  purchasing: [["stock", "Ingredients", "purchasing"], ["orders", "Purchase Orders", "doc"], ["bills", "Bills", "receipt", true], ["suppliers", "Suppliers", "building"]],
 };
 const subLabel = (page) => (page.id === "overview" ? greeting() : SUB_NAV[page.id]?.find(([sub]) => sub === state.sub)?.[1] || page.label);
 const sideOpen = () => {
@@ -1068,9 +1068,9 @@ function pageActions() {
     const n = (state.green?.cart || []).filter((l) => !l.later).length;
     if (state.counting) return `<button type="button" class="btn" data-count-cancel>Cancel</button>`;
     // On a phone, Cart stays and the rest fold into a ⋯ menu.
-    return `${sortFor("greenSort")}${searchBox("Search green coffee")}<button type="button" class="btn on-wide" data-stock-log="green">${icon("file")}<span>Log</span></button><button type="button" class="btn on-wide" data-count-start="green">${icon("edit")}<span>Count</span></button><button type="button" class="btn on-wide" data-green-new>${icon("plus")}<span>New Green Coffee</span></button>
+    return `${sortFor("greenSort")}${searchBox("Search green coffee")}<button type="button" class="btn on-wide" data-stock-log="green">${icon("file")}<span>Log</span></button><button type="button" class="btn on-wide" data-count-start="green">${icon("edit")}<span>Count</span></button><button type="button" class="btn on-wide" data-green-new>${icon("plus")}<span>New Ingredient</span></button>
       <details class="order-menu on-narrow"><summary class="btn" aria-label="More">${icon("more")}</summary><div class="order-menu-list">
-        <button type="button" data-green-new>${icon("plus")}<span>New Green Coffee</span></button><button type="button" data-count-start="green">${icon("edit")}<span>Count</span></button><button type="button" data-stock-log="green">${icon("file")}<span>Log</span></button>
+        <button type="button" data-green-new>${icon("plus")}<span>New Ingredient</span></button><button type="button" data-count-start="green">${icon("edit")}<span>Count</span></button><button type="button" data-stock-log="green">${icon("file")}<span>Log</span></button>
       </div></details>
       <button type="button" class="btn btn-primary" data-green-cart>${icon("cart")}<span>Cart${n ? ` (${n})` : ""}</span></button>`;
   }
@@ -1233,19 +1233,16 @@ const OV_CARDS = [
   ["topack", "Sell", "To pack", "Paid orders waiting to be packed."],
   ["awaiting", "Sell", "Awaiting payment", "Orders and wholesale invoices not paid yet."],
   ["ready", "Sell", "Ready to collect", "Orders packed for pickup."],
-  ["cafe", "Sell", "Café today", "Café orders for today."],
   ["sales", "Sell", "Sales today", "What was ordered today, and how much is paid."],
   ["chart", "Sell", "Sales, last 14 days", "Daily sales by where they came from."],
-  ["inquiries", "Wholesale", "Wholesale inquiries", "New cafés asking about wholesale."],
-  ["locations", "Wholesale", "New café locations", "Accounts that opened another location."],
-  ["roasts", "Make", "Roasts today", "Roasts planned for today, and any overdue."],
-  ["green", "Buy", "Green coffee to reorder", "Green coffee below its reorder level."],
+  ["inquiries", "Wholesale", "Wholesale inquiries", "New businesses asking about wholesale."],
+  ["locations", "Wholesale", "New locations", "Accounts that opened another location."],
   ["deliveries", "Buy", "Deliveries due", "Purchase orders due to arrive."],
   ["bills", "Buy", "Bills due", "Supplier bills due to pay."],
   ["reviews", "Marketing", "Low reviews", "Low reviews on Google or Tripadvisor."],
   ["visibility", "Marketing", "Where we show up", "How often search and AI answers name you."],
 ];
-const OV_DEFAULT = ["setup", "inbox", "todos", "topack", "awaiting", "roasts", "bills", "green", "sales", "chart"];
+const OV_DEFAULT = ["setup", "inbox", "todos", "topack", "awaiting", "bills", "sales", "chart"];
 const ovKey = () => `bo-ov-cards:${ME?.id || "key"}`;
 const ovPrefs = () => {
   try {
@@ -4175,7 +4172,7 @@ function greenStock() {
               </tr>`
             )
             .join("")}</tbody></table>`
-      : `<div class="empty empty-lg">${icon("purchasing", "i i-xl")}<p><strong>${f === "low" ? "Nothing running low" : "No green coffee yet"}</strong></p>${f === "low" ? "" : `<button type="button" class="btn btn-primary" data-green-new>${icon("plus")}<span>New Green Coffee</span></button>`}</div>`
+      : `<div class="empty empty-lg">${icon("purchasing", "i i-xl")}<p><strong>${f === "low" ? "Nothing running low" : "No green coffee yet"}</strong></p>${f === "low" ? "" : `<button type="button" class="btn btn-primary" data-green-new>${icon("plus")}<span>New Ingredient</span></button>`}</div>`
   }</section>`;
 }
 
@@ -4208,7 +4205,7 @@ function greenItemPanel(id = null) {
   editingNext = x ? `green:${x.id}` : null;
   const tabs = x ? recordTabs("green", [["details", "Details"], ["stock", "Stock"], ["roasts", "Roasts"], ["todos", "To-Dos"]]) : null;
   const drawer = openPanel(
-    x ? x.name : "New Green Coffee",
+    x ? x.name : "New Ingredient",
     `${tabs ? tabs.bar : ""}${tabs ? `<div class="rec-pane-wrap">` : ""}${tabs ? `<div class="rec-pane" role="tabpanel" data-rpane="green|details" ${recTabs.green && recTabs.green !== "details" ? "hidden" : ""}>` : ""}<form class="form-stack" data-green-form>
       <div class="grid-2">
         <label class="field"><span>Name</span><input name="name" required maxlength="120" value="${esc(x?.name || "")}" placeholder="Muhathi Estate AB"></label>
@@ -13949,7 +13946,7 @@ function importsView() {
       </form>
       <section class="card im-types">
         <p class="im-types-head">Choose a record type to continue</p>
-        ${[["order", "Wholesale orders", "Orders from cafés on account", "wholesale"], ["bill", "Bills", "Invoices or bills from suppliers", "receipt"], ["offer", "Offer sheets", "Green coffee on offer from importers", "purchasing"]]
+        ${[["order", "Wholesale orders", "Orders from wholesale accounts", "wholesale"], ["bill", "Bills", "Invoices or bills from suppliers", "receipt"], ["offer", "Offer sheets", "Products on offer from suppliers", "purchasing"]]
           .map(([k, label, what, ic]) => `<button type="submit" form="im-form" name="kind" value="${k}" class="im-type" ${v.reading ? "" : "disabled"}><span class="todo-icon" aria-hidden="true">${icon(ic)}</span><span><strong>${label}</strong><small>${what}</small></span></button>`)
           .join("")}
         ${v.reading ? "" : `<p class="muted im-off">Reading documents isn't connected yet.</p>`}

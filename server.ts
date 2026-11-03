@@ -7145,7 +7145,7 @@ async function serveGiftCardPicture(res, amount) {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#e6e6e6"/>
         <rect x="${x}" y="${y + 14}" width="${cw}" height="${ch}" rx="${r}" fill="#000" opacity="0.18"/>
         <rect x="${x}" y="${y}" width="${cw}" height="${ch}" rx="${r}" fill="#111"/>
-        <g transform="translate(${x + 54} ${y + 50}) scale(1.1)" fill="none"><ellipse cx="23" cy="33" rx="21.5" ry="31.5" stroke="#fff" stroke-width="3"/><path fill-rule="evenodd" d="M19.6 13h6.8L36 41h-6.3l-2.1-6.4h-9.2L16.3 41H10zm.6 16.4h5.6L23 20.4z" fill="#fff"/><path d="M20 44h6v8h-6z" fill="#fff"/></g>
+        <g transform="translate(${x + 54} ${y + 50}) scale(1.1)" fill="none"><ellipse cx="23" cy="33" rx="21.5" ry="31.5" stroke="#fff" stroke-width="3"/><path fill-rule="evenodd" d="M10 41V13h5.6L23 28.2 30.4 13H36v28h-5.3V22.6L23 37.6 15.3 22.6V41z" fill="#fff"/></g>
         <g font-family="Instrument Sans, Helvetica, Arial, sans-serif" fill="#fff">
           <text x="${x + cw - 54}" y="${y + 84}" font-size="32" text-anchor="end" opacity="0.75">Gift Card</text>
           <text x="${x + 54}" y="${y + ch - 54}" font-size="120" font-weight="500">${escapeHtml(money(amount).replace(/\.00$/, ""))}</text>

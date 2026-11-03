@@ -27,7 +27,7 @@
   --md-fg-subtle: #52525b;
   --md-fg-muted: #71717a;
   --md-fg-disabled: #a1a1aa;
-  --md-fg-interactive: #3b82f6;
+  --md-fg-interactive: #7bc46d;
   --md-fg-error: #e11d48;
   --md-button-inverted: #27272a;
   --md-button-inverted-hover: #3f3f46;
@@ -72,7 +72,7 @@
   --option-badge-foreground: #ffffff;
   --navigation-active-background: #ffffff;
   --navigation-active-foreground: #18181b;
-  --emphasis-chart-fill: #3b82f633;
+  --emphasis-chart-fill: #7bc46d33;
 
   --space-xl: 32px; /* Tailwind 8 */
   --space-xxl: 48px; /* Tailwind 12 */
@@ -132,8 +132,8 @@
   --weight-data-heavy: 500;
 
   /* Color: Medusa's zinc neutrals and its tag colors. */
-  --color-1: #3b82f6; /* bg-interactive */
-  --color-1-transparent: #3b82f633;
+  --color-1: #7bc46d; /* bg-interactive */
+  --color-1-transparent: #7bc46d33;
   --color-2: #5b21b6; /* tag-purple-text */
   --color-2-transparent: #5b21b633;
   --color-3: #dbeafe; /* tag-blue-bg */
@@ -180,7 +180,7 @@
   --cte-accent: #27272a; /* primary buttons are "inverted" (near black), not blue */
   --cte-accent-text: #ffffff;
   --cte-danger: #e11d48;
-  --cte-focus: #3b82f6;
+  --cte-focus: #7bc46d;
   --cte-font: Inter, ui-sans-serif, system-ui, sans-serif;
   --cte-font-size: 13px;
   --cte-line-height: 20px;
@@ -510,7 +510,7 @@
   --md-tag-green-text: #065f46;
   --md-tag-blue-bg: #dbeafe;
   --md-tag-blue-border: #bfdbfe;
-  --md-tag-blue-text: #1e40af;
+  --md-tag-blue-text: #256629;
   --md-tag-purple-bg: #ede9fe;
   --md-tag-purple-border: #ddd6fe;
   --md-tag-purple-text: #5b21b6;
@@ -821,8 +821,8 @@
      blue planned · in progress   purple snoozed · reached out   gray open · draft
    (the theme's tag colors). */
 :root[data-look="medusa"] {
-  --brand: #1e3a8a;
-  --brand-hover: #1e40af;
+  --brand: #2f7a34;
+  --brand-hover: #256629;
   --brand-pressed: #172554;
   --brand-tint: #eef2ff;
   --brand-soft: #dbe4ff;
@@ -1599,7 +1599,7 @@
   --md-tag-green-border: #14532d;
   --md-tag-green-text: #6ee7b7;
   --md-tag-blue-bg: #0f1f3d;
-  --md-tag-blue-border: #1e3a8a;
+  --md-tag-blue-border: #2f7a34;
   --md-tag-blue-text: #93c5fd;
   --md-tag-purple-bg: #221a3d;
   --md-tag-purple-border: #4c1d95;
