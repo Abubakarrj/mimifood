@@ -19527,7 +19527,7 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
 }
 
 .tp-map-pin .pin-body {
-  fill: #9a9a9a;
+  fill: #8fa68f;
 }
 
 .tp-map-pin .pin-face {
@@ -19539,15 +19539,15 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
 }
 
 .tp-map-pin.is-on .pin-body {
-  fill: #111;
+  fill: #2f7a34;
 }
 
 :root[data-theme="dark"] .tp-map-pin.is-on .pin-body {
-  fill: #f2f2f2;
+  fill: #6cbf72;
 }
 
 :root[data-theme="dark"] .tp-map-pin.is-on .pin-face {
-  fill: #111;
+  fill: #fff;
 }
 
 :root[data-theme="dark"] .tp-map-me {

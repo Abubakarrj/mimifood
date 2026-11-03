@@ -2615,8 +2615,9 @@ function contactMap() {
       <span class="contact-map-status${status.open ? " is-open" : ""}">${esc(status.text)}</span>
     </div>
     <a class="button is-outline" href="${gmaps.directions(loc)}" target="_blank" rel="noopener">Directions</a>`;
+  if (!Array.isArray(loc.coords)) return; // no coordinates yet: the static pin on grey stays
 
-  const css = document.createElement("link");
+  const css =document.createElement("link");
   css.rel = "stylesheet";
   css.href = "/js/vendor/leaflet-1.9.4.css";
   document.head.append(css);
@@ -5728,7 +5729,7 @@ const pages = {
     // Choose a pickup date (the month, its days, closed ones and the past greyed), then a time.
     // The pins on our maps (as the Contact page's): a black teardrop with the A for one of our
     // places; with a dot for theirs.
-    const PIN_A = `<svg viewBox="0 0 48 60" aria-hidden="true"><path class="pin-body" d="M24 58C24 58 4 36.5 4 22a20 20 0 0 1 40 0c0 14.5-20 36-20 36Z"/><ellipse class="pin-face" cx="24" cy="22" rx="10.2" ry="14.6"/><path class="pin-body" fill-rule="evenodd" d="M22.4 12.6h3.2L30 25.6h-2.9l-1-3h-4.3l-1 3H18zm.3 7.6h2.6l-1.3-4.2z"/><path class="pin-body" d="M22.6 27h2.8v3.7h-2.8z"/></svg>`;
+    const PIN_A = `<svg viewBox="0 0 48 60" aria-hidden="true"><path class="pin-body" d="M24 58C24 58 4 36.5 4 22a20 20 0 0 1 40 0c0 14.5-20 36-20 36Z"/><circle class="pin-face" cx="24" cy="22" r="14"/><image href="/assets/logo-mark.png" x="12" y="10" width="24" height="24"/></svg>`;
     const PIN_DOT = `<svg viewBox="0 0 48 60" aria-hidden="true"><path class="pin-body" d="M24 58C24 58 4 36.5 4 22a20 20 0 0 1 40 0c0 14.5-20 36-20 36Z"/><circle class="pin-face" cx="24" cy="22" r="8"/></svg>`;
     let leaflet = null;
     const loadLeaflet = () =>
@@ -10651,7 +10652,7 @@ const pages = {
       a.href = `https://instagram.com/${SITE.instagram}`;
       a.textContent = `@${SITE.instagram}`;
     });
-    contactMap();
+    locationsReady.then(contactMap);
     // Messages land in the back office Inbox, where the reply is written.
     const form = $("[data-contact-form]");
     const error = $("[data-contact-error]");
