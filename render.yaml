@@ -180,7 +180,7 @@ services:
       # and the site's other names on this service (mimifood.com, www., onrender.com)
       # redirect here.
       - key: SITE_URL
-        value: https://mimifood.com
+        value: https://mimi-food.onrender.com
       # Optional: also send each signup to Mailchimp, Klaviyo, a Google Sheet, etc.
       # via a webhook URL (e.g. from Zapier or Make). Leave blank to skip.
       - key: NEWSLETTER_WEBHOOK_URL
