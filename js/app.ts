@@ -12800,35 +12800,18 @@ function wireChat() {
 // origin, tasting notes, process, variety), accessories, pages and FAQ answers, all from what the
 // page already has. Enter (or →) opens the first result.
 
-const SEARCH_PICKS = () => [
-  ["Espresso", "espresso"],
-  ["Filter", "filter"],
-  ["Decaf", "decaf"],
-  ...(ACCESSORIES.some((a) => !isTea(a)) ? [["Accessories", "accessories"]] : []),
-  ...(ACCESSORIES.some(isTea) ? [["Tea", "tea"]] : []),
-  ["Subscriptions", "subscriptions/build"],
-  ["Gift A Subscription", "subscriptions/gift"],
-  ...(SITE.cafesLive ? [["Locations", "locations"]] : []),
-];
+const catHref = (c) => `shop?kind=${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`;
+const SEARCH_PICKS = () => [...shopCategories().map((c) => [c, catHref(c)]), ["Gift Cards", "gift-cards"]];
 const SEARCH_PAGES = () => [
-  ["Subscriptions", "subscriptions/build", "subscribe save delivery monthly weekly plan"],
-  ["Gift A Subscription", "subscriptions/gift", "gift present give"],
   ["Gift Cards", "gift-cards", "gift card voucher present give balance egift"],
-  ["Find Your Coffee", "find-your-coffee", "finder quiz recommend help choose"],
-  ["Find Your Coffee or Tea", "find", "finder quiz recommend help choose not sure coffee tea"],
-  ["Find Your Tea", "find-your-tea", "tea finder quiz recommend help choose caffeine free herbal black green"],
-  ["What Is a Tea Cultivar?", "numeral/what-is-a-tea-cultivar", "tea cultivar variety glossary guide green matcha oolong black puerh white herbal"],
-  ["True Specialty", "true-specialty", "about story sourcing roasting quality"],
-  ["Wholesale", "wholesale", "cafe business office trade bulk"],
+  ["Wholesale", "wholesale", "restaurant business trade bulk case"],
+  ["Shipping & Returns", "shipping-returns", "delivery shipping returns refund pickup"],
+  ["Track Order", "track", "order status tracking where is my order"],
   ["FAQ", "faq", "questions help shipping"],
-  ["Contact", "contact", "email help support"],
-  ...(SITE.notes ? [["Numeral", "numeral/", "blog journal guides brewing news"]] : []),
-  ...(SITE.calendar?.classes ? [["Classes", "classes", "class course workshop learn barista espresso brewing lesson"]] : []),
-  ...(SITE.calendar?.events ? [["Calendar", "calendar", "events cupping pop-up popup festival meet calendar"]] : []),
-  ["My Account", "account", "login log in subscription manage orders"],
-  ...(SITE.cafesLive ? [["Locations", "locations", "cafe bar shop visit address hours"], ["Order Ahead", "order-ahead", "pickup menu drinks food"]] : []),
+  ["Contact", "contact", "email help support phone address"],
+  ["About Us", "about", "about story company mimi food korean"],
+  ["My Account", "account", "login log in orders manage"],
 ];
-
 const fold = (t) => String(t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 // Every word typed has to start a word in the text (or be a near miss of one, a letter or two
 // out: "dripr" finds the dripper); the name counts more than the rest.
@@ -12844,7 +12827,7 @@ function editDistance(a, b, max) {
   return prev[b.length];
 }
 const nearMiss = (w, text) => {
-  if (w.length < 4) return false;
+  if (w.length < 5) return false; // short words must match exactly, so "mala" doesn't find "manage"
   const max = w.length >= 6 ? 2 : 1;
   // Against each word, and its start (so a misspelled start of a long word still counts).
   return text.split(/[^a-z0-9]+/).some((t) => t.length >= 3 && (editDistance(w, t, max) <= max || (t.length > w.length && editDistance(w, t.slice(0, w.length), 1) <= 1)));
@@ -12871,42 +12854,21 @@ const searchThumb = (art) => `<span class="search-thumb" aria-hidden="true">${ar
 
 function searchResults(query) {
   const rank = (items) => items.filter((x) => x.score > 0).sort((a, b) => b.score - a.score);
-  // The kind of product (coffee, tea, an accessory's category) counts as part of its name, so
-  // "tea" puts the teas first.
-  const coffees = rank(
-    PRODUCTS.map((p) => ({
-      title: p.short || p.name,
-      meta: `${p.type} roast · ${p.soldOut ? "Sold out" : money(p.price)}`,
-      href: `products/${encodeURIComponent(p.id)}`,
-      thumb: () => searchThumb(productArt(p)),
-      score: searchScore(query, `${p.name} ${p.short || ""} coffee`, [p.type, "roast beans", p.tag, p.notes, p.region, p.process, p.variety, p.altitude, p.about, ...(p.labels || []).map((l) => l.name || l)].join(" ")),
-    }))
-  );
-  const extras = rank(
+  // A product's category counts as part of its name, so "sauce" or "soup" puts those first.
+  const products = rank(
     ACCESSORIES.map((a) => ({
       title: a.name,
-      meta: `${a.category || "Accessories"} · ${a.soldOut ? "Sold out" : comingSoon(a) ? "Coming soon" : money(a.price)}`,
+      meta: `${a.category || "Products"} · ${a.soldOut ? "Sold out" : comingSoon(a) ? "Coming soon" : money(a.price)}`,
       href: `products/${encodeURIComponent(a.id)}`,
       thumb: () => searchThumb(accessoryArt(a)),
-      score: searchScore(query, `${a.name} ${a.category || ""}`, [isTea(a) ? "tisane" : "accessories", a.type, a.blend, a.notes, a.short, a.about, ...(a.ingredients || []).flat(), ...(a.colors || []).map((c) => c.name)].join(" ")),
+      score: searchScore(query, `${a.name} ${a.category || ""}`, [a.short, a.pack, a.about, ...(a.labels || []).map((l) => l.name || l)].join(" ")),
     }))
   );
+  const categories = rank(shopCategories().map((c) => ({ title: c, meta: `${ACCESSORIES.filter((a) => a.category === c).length} products`, href: catHref(c), score: searchScore(query, c, "") })));
   const pages = rank(SEARCH_PAGES().map(([title, href, words]) => ({ title, href, score: searchScore(query, title, words) })));
-  const faqs = rank(
-    (typeof FAQ !== "undefined" ? FAQ : [])
-      .filter((f) => (f[2] !== "cafes" || SITE.cafesLive) && (f[2] !== "calendar" || SITE.calendar?.classes || SITE.calendar?.events))
-      .map(([q, a]) => ({ title: q, href: "faq", score: searchScore(query, q, a) }))
-  );
-  // Products first, the better-matched kind on top; then pages and questions.
-  const products = [
-    [ACCESSORIES.every(isTea) ? "Tea" : "Tea & Accessories", extras.slice(0, 4)],
-    ["Coffee", coffees.slice(0, 6)],
-  ]
-    .filter(([, list]) => list.length)
-    .sort((a, b) => b[1][0].score - a[1][0].score);
-  return [...products, ["Pages", pages.slice(0, 4)], ["Questions", faqs.slice(0, 3)]].filter(([, list]) => list.length);
+  const faqs = rank((typeof FAQ !== "undefined" ? FAQ : []).map(([q, a]) => ({ title: q, href: "faq", score: searchScore(query, q, a) })));
+  return [["Categories", categories.slice(0, 3)], ["Products", products.slice(0, 8)], ["Pages", pages.slice(0, 3)], ["Questions", faqs.slice(0, 3)]].filter(([, list]) => list.length);
 }
-
 function wireSearch() {
   const form = $("[data-search]");
   if (!form) return;
