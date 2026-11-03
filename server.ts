@@ -803,7 +803,7 @@ function seoHead(html, req, lang = "en") {
           ${card("shop", "Shop Online", `Free shipping over ${S.currency}${S.freeShippingOver}`)}
           ${card("subscriptions", "Subscriptions", `Save up to ${upTo}%`)}
           ${S.localDelivery ? card("faq", "Local Delivery", `Within ${S.localDelivery.radiusMiles} miles of our office`) : ""}
-          ${card("wholesale", "Wholesale", "Cafés, restaurants and offices")}
+          ${card("wholesale", "Wholesale", "Restaurants, grocers and food service")}
         </ul>
       </section>`;
     html = html.replace("<div data-about></div>", `<div data-about></div>`);
@@ -3912,7 +3912,7 @@ const accountByName = (q) => {
 
 const teamReads = {
   async find_businesses(c, { area, type }) {
-    const t = PROSPECT_TYPES[type] ? type : "cafe";
+    const t = PROSPECT_TYPES[type] ? type : "restaurant";
     try {
       const r = await research.discover({ area: String(area || "").slice(0, 100), type: t, query: PROSPECT_TYPES[t][1] });
       return { source: r.source, cost: r.cost, businesses: r.places.slice(0, 12).map((p) => ({ name: p.name, category: p.category, address: p.address, website: p.website, rating: p.facts.find((f) => f.key === "rating")?.value || null, alreadyOurs: alreadyKnown(p) })) };
@@ -14171,13 +14171,14 @@ const shopCoords = new Map<any, any>(DATA.LOCATIONS.map((l) => [l.id, Array.isAr
 // researched by server/research.ts, scored for fit, and kept with where each fact came from.
 // AnyAPI calls (with ANYAPI_API_KEY) count against a monthly limit set on the Prospects page.
 const PROSPECT_TYPES = {
-  cafe: ["Cafés", "coffee shop"],
-  restaurant: ["Restaurants", "restaurant"],
-  hotel: ["Hotels", "boutique hotel"],
-  bakery: ["Bakeries", "bakery"],
-  tea: ["Tea shops", "tea house"],
-  grocer: ["Specialty grocers", "specialty grocery store"],
-  office: ["Offices and coworking", "coworking space"],
+  restaurant: ["Korean and Asian restaurants", "korean restaurant"],
+  fastfood: ["Fried chicken and fast casual", "korean fried chicken"],
+  noodle: ["Noodle and ramen shops", "ramen restaurant"],
+  bbq: ["BBQ and hot pot", "korean bbq restaurant"],
+  grocer: ["Asian grocers and markets", "asian grocery store"],
+  bakery: ["Bakeries and cafés", "korean bakery cafe"],
+  caterer: ["Caterers and ghost kitchens", "catering company"],
+  foodtruck: ["Food trucks", "korean food truck"],
 };
 const prospectStore = await storage.open("prospects", { prospects: (p) => p.id, settings: (s) => s.id, people: (p) => p.id });
 // Research that was running when the server stopped won't finish.
@@ -14291,24 +14292,23 @@ function problem(error, what) {
 // A second look, by the low-cost model, for a business that does what we do: roasts, sells its
 // own coffee or tea (bags, subscriptions, wholesale) or sources it. It must quote their own words,
 // and the quote must be in what we read, or it doesn't count. Returns a fact or null.
-const RIVAL_WHAT = { roasts: "Roasts its own coffee", beans: "Sells its own beans", wholesale: "Sells coffee or tea wholesale", subscriptions: "Sells coffee or tea subscriptions", sources: "Sources its own coffee or tea", brand: "A coffee or tea brand" };
+const RIVAL_WHAT = { makes: "Makes its own sauces", sells: "Sells its own bottled sauces", wholesale: "Sells sauces or seasonings wholesale", distributes: "Distributes or imports Korean food", brand: "A Korean food brand" };
 const RIVAL_SCHEMA = {
   type: "object",
   properties: { sameAsUs: { type: "boolean" }, what: { type: "string", enum: Object.keys(RIVAL_WHAT) }, quote: { type: "string" }, source: { type: "integer" } },
   required: ["sameAsUs", "what", "quote", "source"],
   additionalProperties: false,
 };
-const RIVAL_SYSTEM = `${DATA.SITE.name} is a Korean food company that sells its coffee and teas wholesale to cafés, restaurants, hotels and shops. You check whether a business would compete with us instead of buying from us.
+const RIVAL_SYSTEM = `${DATA.SITE.name} is a Korean food company in Los Angeles that sells sauces, soup bases and seasonings wholesale to restaurants, grocers and food service. You check whether a business would compete with us instead of buying from us.
 
 sameAsUs is true only if the business itself does one of these, shown in its own words:
-- roasts: roasts coffee (has a roastery, roasts in house, is a roaster).
-- beans: sells bags of coffee under its own name.
-- wholesale: sells its coffee or tea wholesale to other businesses.
-- subscriptions: sells coffee or tea subscriptions.
-- sources: buys green coffee or tea directly from farms, imports it, or runs origin trips.
-- brand: is the café of a coffee or tea brand.
+- makes: manufactures its own sauces, seasonings or Korean food products (a factory, an OEM or private-label maker).
+- sells: sells bottled sauces or seasonings under its own name.
+- wholesale: sells sauces, seasonings or Korean food wholesale to other businesses.
+- distributes: distributes or imports Korean or Asian food products for other businesses.
+- brand: is the restaurant or store of a Korean food brand.
 
-Serving or reselling another company's coffee or tea is not this, even when it names that roaster. Roasted food is not this. A bakery or kitchen selling its food wholesale is not this.
+A restaurant, grocer or caterer that cooks with or resells sauces is not this, even when it names a brand. A kitchen selling its own prepared meals is not this.
 quote: the exact words from the text that show it, copied character for character (at most 20 words). source: the number of the text it came from. If sameAsUs is false, quote is "" and source is 0.`;
 const squash = (x) => String(x || "").replace(/[“”"’']/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 async function rivalCheck(name, said) {
@@ -14341,12 +14341,12 @@ const SCREEN_SCHEMA = {
   required: ["places"],
   additionalProperties: false,
 };
-const screenSystem = (type, wanted) => `${DATA.SITE.name} is a Korean food company in Los Angeles that sells its coffee and teas wholesale. The team searched for ${PROSPECT_TYPES[type][0].toLowerCase()} that could buy from us. Look over the listings and decide which to keep.
+const screenSystem = (type, wanted) => `${DATA.SITE.name} is a Korean food company in Los Angeles that sells sauces, soup bases and seasonings wholesale. The team searched for ${PROSPECT_TYPES[type][0].toLowerCase()} that could buy from us. Look over the listings and decide which to keep.
 
 Leave out:
-- Roasters, and cafés of a coffee or tea brand (they sell their own).
+- Sauce makers, food manufacturers, distributors and importers, and restaurants or stores of a Korean food brand (they sell their own or compete with us).
 - Chains and franchises (national or regional brands with many locations).
-- Businesses that aren't ${PROSPECT_TYPES[type][0].toLowerCase()}, or that couldn't serve or sell coffee or tea: gas stations, convenience stores, vending, delivery-only kitchens, supermarkets.
+- Businesses that aren't ${PROSPECT_TYPES[type][0].toLowerCase()}, or that couldn't cook with or sell sauces: gas stations, vending, juice bars, coffee-only shops, delivery-only kitchens.
 ${wanted ? `- Anything that plainly isn't what the team asked for this time: "${wanted}". When a listing doesn't say either way, keep it: we research it next.
 ` : ""}
 Keep everything else. Return every listing by its number. why: under 12 words, plain, for the team (empty when kept).`;
@@ -14527,13 +14527,13 @@ async function draftOutreach(p) {
   if (!client) throw new ResearchError("Drafting isn't connected yet.", 503);
   const facts = (p.research?.facts || []).filter((f) => !["followers", "phone", "address", "closed", "email", "contactPage", "price"].includes(f.key)).slice(0, 25);
   const w = DATA.SITE.wholesale;
-  const system = `You write the first email from Mimi Food, a Korean food company in Los Angeles (light roasts, plus rare teas), to a business that might buy wholesale. Mimi Food supplies coffee in 5 lb bags for brewing, 250g retail bags and teas to resell, with barista training and support; no minimum order within ${w.localMiles} miles of the roastery.
+  const system = `You write the first email from Mimi Food, a Korean food company in Los Angeles, to a business that might buy wholesale. Mimi Food supplies Korean sauces, soup bases, seasonings, batter flour and drinks in bulk packs (2 kg pouches and cases) for kitchens, and retail sizes to resell, with samples and menu ideas; no minimum order within ${w.localMiles} miles of our Los Angeles office.
 
 Rules:
 - Use only the facts given. Mention at most two specific things about them, each one a fact from the list.
 - Never say or imply who supplies them now, that they need anything, or that we have met or spoken.
 - A brand named on their site is only that: don't call it their supplier.
-- Under 120 words. Plain, warm, specific. American spelling. Offer a tasting at their place or ours.
+- Under 120 words. Plain, warm, specific. American spelling. Offer free samples to try in their kitchen.
 - If a person is named, greet them by first name; otherwise no name.
 - Sign off as "The Mimi Food team". No placeholders in brackets.
 - Subject: short, no clickbait.
@@ -14570,17 +14570,17 @@ const intelReady = (kind) => INTEL_OPEN.has(kind) || (INTEL_FREE.has(kind) ? Boo
 const INTEL_DEFAULTS = {
   id: "settings",
   auto: true,
-  queries: ["light roast coffee Los Angeles", "best coffee roaster in Los Angeles", "specialty coffee beans online", `${DATA.SITE.name} coffee`],
+  queries: ["Korean sauce Los Angeles", "best Korean fried chicken sauce", "buy gochujang online", "Korean BBQ sauce wholesale", `${DATA.SITE.name} sauces`],
   area: "Los Angeles,California,United States",
-  hashtags: [DATA.SITE.name.toLowerCase(), `${DATA.SITE.name.toLowerCase()}coffee`],
+  hashtags: [DATA.SITE.name.toLowerCase().replace(/\s+/g, ""), "koreansauce", "kfood"],
   places: [`${DATA.SITE.name} Los Angeles`],
   tiktok: [DATA.SITE.name.toLowerCase()],
-  creatorTopics: ["LA coffee", "specialty coffee Los Angeles"],
-  trends: ["matcha", "pour over", "cold brew", "light roast coffee", "oolong tea"],
-  keywordSeeds: ["light roast coffee", "specialty tea", "pour over coffee"],
-  questions: ["light roast coffee", "matcha", "pour over"],
-  news: ["specialty coffee", "coffee prices", "tea harvest"],
-  priceQueries: ["best selling light roast coffee beans", "single origin ethiopian coffee beans", "colombian whole bean coffee", "espresso blend whole bean", "ceremonial matcha"],
+  creatorTopics: ["Korean food LA", "K-food recipes"],
+  trends: ["korean fried chicken", "gochujang", "tteokbokki", "mala", "kimchi"],
+  keywordSeeds: ["korean sauce", "gochujang", "korean fried chicken sauce"],
+  questions: ["gochujang", "korean fried chicken", "tteokbokki sauce"],
+  news: ["Korean food", "Korean sauces", "restaurant supply"],
+  priceQueries: ["korean fried chicken sauce", "gochujang paste", "tteokbokki sauce", "bulgogi marinade", "mala hot pot base"],
 };
 const intelSettings = () => ({ ...INTEL_DEFAULTS, ...(intelStore.data.runs.find((r) => r.id === "settings") || {}) });
 const intelRun = (kind) => intelStore.data.runs.find((r) => r.id === kind) || null;
@@ -15507,7 +15507,7 @@ async function handleAdminProspects(req, res, pathname) {
     if (pathname === "/api/admin/prospects/find" && method === "POST") {
       const near = body.area === "@accounts";
       const area = near ? "Near our accounts" : String(body.area || "").trim().slice(0, 100);
-      const type = PROSPECT_TYPES[body.type] ? body.type : "cafe";
+      const type = PROSPECT_TYPES[body.type] ? body.type : "restaurant";
       const wanted = String(body.wanted || "").replace(/\s+/g, " ").trim().slice(0, 200);
       if (area.length < 2) throw new ResearchError("Add an area, like Silver Lake, Los Angeles.", 400);
       if (rateLimited("admin", "prospect-find", 20)) throw new ResearchError("That's a lot of searches. Try again in a few minutes.", 429);

@@ -26,7 +26,7 @@ export class ResearchError extends Error {
   }
 }
 
-const UA = "Mimi Food wholesale research (+https://mimifood.com)";
+const UA = "Mimi Food wholesale research (+https://mimifoodusa.com)";
 const MAX_BYTES = 1_500_000;
 const MILE_KM = 1.609344;
 const OVERPASS = (process.env.OVERPASS_URL || "https://overpass-api.de/api/interpreter").replace(/\/$/, "");
@@ -143,32 +143,30 @@ const decode = (s) =>
 
 const metaTag = (html, key) => decode(html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${key}["'][^>]*content=["']([^"']*)`, "i"))?.[1] || html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*(?:name|property)=["']${key}["']`, "i"))?.[1]);
 
-// Roasters and tea brands a café might name on its menu. Kept only as "names X on its site".
-const BRANDS = ["Blue Bottle", "Intelligentsia", "Stumptown", "Counter Culture", "Verve", "Onyx", "Heart Coffee", "Sightglass", "Coava", "Ritual", "Four Barrel", "La Colombe", "Lavazza", "illy", "Peet's", "Starbucks", "Equator", "Klatch", "Go Get Em Tiger", "Canyon Coffee", "Cognoscenti", "Proud Mary", "Dayglow", "Heirloom", "Tartine", "Partners Coffee", "Parlor Coffee", "Joe Coffee", "Rishi", "Harney", "Mariage Frères", "Kusmi", "Ippodo", "Song Tea", "Steven Smith", "Art of Tea", "Leaves and Flowers"];
-const PROGRAM = { coffee: /\b(espresso|cortado|cappuccino|latte|pour[- ]?over|drip coffee|cold brew|flat white|americano|macchiato|single[- ]origin)\b/gi, tea: /\b(matcha|oolong|sencha|hojicha|chai|loose[- ]leaf|green tea|black tea|pu[- ]?erh|herbal tea|tea service|afternoon tea)\b/gi };
-const SPECIALTY = /\b(specialty coffee|specialty tea|single[- ]origin|third[- ]wave|direct trade|small[- ]batch|house[- ]made|locally roasted|seasonal menu|farm[- ]to[- ]table|natural wine|chef[- ]driven|artisan)\b/gi;
-const CATERING = /\b(catering|private events|corporate orders|office (?:coffee|catering))\b/gi;
-const RETAIL = /\b(shop online|retail|our shop|gift shop|pantry|market|grocery|beans to go|whole bean)\b/gi;
+// Korean and Asian food brands a restaurant or grocer might name on its site. Kept only as "names X on its site".
+const BRANDS = ["Sempio", "Chungjungone", "O'Food", "Daesang", "Ottogi", "CJ", "Bibigo", "Nongshim", "Pulmuone", "Haechandle", "Maeil", "Samyang", "Paldo", "Lotte", "Haitai", "Sajo", "Dongwon", "Kikkoman", "Kewpie", "Lee Kum Kee", "Mother-in-Law's", "Jongga", "Wang", "Assi", "Mama Sita"];
+const PROGRAM = { menu: /\b(korean|k-?bbq|bulgogi|bibimbap|kimchi|tteokbokki|japchae|galbi|dakgalbi|jjigae|banchan|soondubu|ramyeon|ramen|dumplings?|mandu|hot ?pot|mala|noodles?|izakaya|udon|sushi|pho)\b/gi, sauce: /\b(fried chicken|wings|bbq|barbecue|stir[- ]fry|marinade|dipping sauce|hot sauce|glazed|katsu|teriyaki|tonkatsu|rice cakes?|gochujang|sriracha|spicy mayo)\b/gi };
+const SPECIALTY = /\b(authentic|homestyle|family[- ]owned|traditional|handmade|house[- ]made|from scratch|signature sauce|chef[- ]driven|street food|late[- ]night|fast[- ]casual|ghost kitchen|small[- ]batch)\b/gi;
+const CATERING = /\b(catering|private events|party trays|corporate orders|delivery|takeout|ghost kitchen|meal prep)\b/gi;
+const RETAIL = /\b(shop online|retail|grocery|market|mart|pantry|convenience|food hall|supermarket|asian market)\b/gi;
 const LOCATIONS = /\b(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten) (?:locations|cafes|cafés|shops|stores|restaurants|hotels|properties)\b/i;
 const WORDS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
 const uniq = (list) => [...new Set(list.map((s) => s.toLowerCase()))];
 
-/* A business that roasts its own coffee (and sells its own beans) never buys ours. */
-const ROASTER_NAME = /\b(roasters?|roastery|roasteries|roasting|roastworks|roast ?house|micro[- ]?roaster)\b/i;
-const OWN_ROAST = /\b(we roast|roasted (?:in[- ]house|on[- ]site|here|by us|in our)|(?:in[- ]house|house|self)[- ]roasted|our (?:own )?roastery|our own roaster|our roasting|roast(?:ing)? our own|our own (?:beans|roasts?)|(?:we are|we're|we’re) an? (?:[^\s.,!?]+ ){0,3}roast(?:er|ery))\b/gi;
-const BEAN_SHOP = /\b(whole bean|shop (?:our )?(?:coffees?|beans)|bags? of (?:our )?coffee|12 ?oz bag|340 ?g)\b/gi;
-// Doing what we do: roasting, selling coffee or tea wholesale or by subscription, sourcing it
-// themselves. [what it is, phrase]. "House-roasted turkey" isn't coffee: "house-roasted" counts
-// only before a coffee word, and every other phrase only in a sentence about coffee or tea.
+/* A business that makes its own sauces, sells its own Korean food or distributes it competes with us instead of buying. */
+const ROASTER_NAME = /\b(sauce (?:co|company|factory|maker|makers|manufacturing)|food (?:manufacturing|manufacturer|industries|factory)|foods? co\.? ?,? ?ltd|(?:food|sauce) (?:distributors?|importers?|wholesale)|oem)\b/i;
+const OWN_ROAST = /\b(we (?:make|manufacture|produce|bottle) (?:all of )?(?:our|the) (?:own )?(?:sauces?|seasonings?|kimchi|gochujang|marinades?)|our own (?:sauces?|seasonings?|gochujang)|sauce (?:manufacturer|maker|factory)|private[- ]label|oem|(?:we are|we're|we’re) an? (?:[^\s.,!?]+ ){0,3}(?:manufacturer|producer))\b/gi;
+const BEAN_SHOP = /\b(shop (?:our )?sauces|buy our sauces?|our (?:bottled )?sauces? (?:are )?(?:available|for sale)|bottled sauces?|retail (?:bottles|jars))\b/gi;
+// Doing what we do: making sauces, selling sauces or Korean food wholesale, importing or distributing it. [what it is, phrase].
 const RIVAL: [string, RegExp][] = [
-  ["Roasts its own coffee", OWN_ROAST],
-  ["Sells coffee or tea wholesale", /\b(wholesale (?:[\w-]+ ){0,2}(?:coffee(?! (?:shops?|bars?|houses?))|teas?(?! (?:shops?|houses?|rooms?))|beans)|(?:coffee|teas?|beans) wholesale|wholesale (?:inquir\w*|program|partners?|partnerships?|accounts?|pricing))\b/gi],
-  ["Sells coffee or tea subscriptions", /\b((?:coffee|tea|bean) (?:subscriptions?|club)|subscribe (?:and|&) save|subscribe to (?:our )?(?:coffee|tea|beans))\b/gi],
-  ["Sources its own coffee or tea", /\b(we source (?:[\w-]+ ){0,3}(?:coffee|teas?|beans)|sourced directly|we buy directly|our (?:farmers|producers|farm partners)|origin trips?|sourcing trips?|green coffee|coffee importers?|import(?:er|ers|ing) (?:coffee|tea)|our own (?:farm|estate))\b/gi],
+  ["Makes its own sauces", OWN_ROAST],
+  ["Sells sauces or seasonings wholesale", /\b(wholesale (?:[\w-]+ ){0,2}(?:sauces?|seasonings?|condiments?|kimchi)|(?:sauces?|seasonings?|condiments?) wholesale|wholesale (?:inquir\w*|program|partners?|partnerships?|accounts?|pricing))\b/gi],
+  ["Sells its own bottled sauces", BEAN_SHOP],
+  ["Distributes or imports Korean food", /\b(food (?:distributor|distribution|importer|wholesaler)|we (?:import|distribute) (?:[\w-]+ ){0,3}(?:food|sauces?|groceries|products)|korean (?:food )?(?:importer|distributor|wholesaler)|restaurant supply)\b/gi],
 ];
-// Coffee or tea as what they sell ("coffee shops" are who a bakery sells to, not what it sells).
-const CONTEXT = /coffee(?! (?:shops?|bars?|houses?))|beans?\b|espresso|roast|single[- ]origin|\btea\b(?! (?:shops?|houses?|rooms?))|teas\b|matcha|oolong/i;
+// Sauces or Korean food as what they sell (restaurants are who we sell to, not competitors).
+const CONTEXT = /sauces?|seasonings?|condiments?|gochujang|kimchi|korean food|asian food|marinades?/i;
 function sameAsUs(text) {
   const t = String(text || "");
   for (const [label, re] of RIVAL) {
@@ -234,7 +232,7 @@ function siteFacts(pages) {
   const home = pages[0];
   add("description", "What they say", home.description || home.title, home.url);
   const own = [home.siteName, home.title.split(/\s[|–—-]\s/)[0]].find((n) => ROASTER_NAME.test(n || ""));
-  if (own) add("rival", "Roasts its own coffee", `Their site: ${own}`, home.url);
+  if (own) add("rival", "Makes its own sauces", `Their site: ${own}`, home.url);
   for (const p of pages) {
     for (const b of p.ld) {
       const a = b.address && typeof b.address === "object" ? [].concat(b.address)[0] : null;
@@ -254,10 +252,10 @@ function siteFacts(pages) {
   const contact = all.find((l) => /contact/i.test(l.href + l.text) && domainOf(l.href) === domainOf(home.url));
   if (contact) add("contactPage", "Contact page", contact.href, contact.page);
   for (const p of pages) {
-    const coffee = uniq(p.text.match(PROGRAM.coffee) || []);
-    if (coffee.length) add("coffee", "Coffee on the menu", coffee.slice(0, 6).join(", "), p.url);
-    const tea = uniq(p.text.match(PROGRAM.tea) || []);
-    if (tea.length) add("tea", "Tea on the menu", tea.slice(0, 6).join(", "), p.url);
+    const menu = uniq(p.text.match(PROGRAM.menu) || []);
+    if (menu.length) add("menu", "Korean or Asian dishes on the menu", menu.slice(0, 6).join(", "), p.url);
+    const sauce = uniq(p.text.match(PROGRAM.sauce) || []);
+    if (sauce.length) add("sauce", "Cooks with sauces", sauce.slice(0, 6).join(", "), p.url);
     const special = uniq(p.text.match(SPECIALTY) || []);
     if (special.length) add("specialty", "How they describe themselves", special.slice(0, 5).join(", "), p.url);
     const brands = BRANDS.filter((b) => new RegExp(`\\b${b.replace(/[.*+?^${}()|[\]\\']/g, "\\$&")}\\b`, "i").test(p.text));
@@ -271,14 +269,14 @@ function siteFacts(pages) {
     const rival = sameAsUs(`${p.description} ${p.text}`);
     if (rival) add("rival", rival.label, `“${rival.said}”`, p.url);
   }
-  // Bags of coffee for sale, with no other roaster named: their own beans.
+  // Bottled sauces for sale, with no other brand named: their own sauces.
   const shop = uniq(pages.flatMap((p) => p.text.match(BEAN_SHOP) || []));
   const named = BRANDS.some((b) => pages.some((p) => new RegExp(`\\b${b.replace(/[.*+?^${}()|[\]\\']/g, "\\$&")}\\b`, "i").test(p.text)));
-  if (shop.length >= 2 && !named) add("beans", "Sells its own beans", shop.slice(0, 3).join(", "), pages.find((p) => p.text.match(BEAN_SHOP))?.url || home.url);
+  if (shop.length >= 2 && !named) add("beans", "Sells its own sauces", shop.slice(0, 3).join(", "), pages.find((p) => p.text.match(BEAN_SHOP))?.url || home.url);
   // One of each (the first page that said it), except the program and brand lines, kept per page.
   const seen = new Set();
   return facts.filter((f) => {
-    const k = ["coffee", "tea", "brands"].includes(f.key) ? `${f.key}:${f.value}` : f.key;
+    const k = ["menu", "sauce", "brands"].includes(f.key) ? `${f.key}:${f.value}` : f.key;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
@@ -287,22 +285,21 @@ function siteFacts(pages) {
 
 /* ── Fit ───────────────────────────────────────────────────── */
 
-// A business that does what we do (a roaster, or a coffee or tea brand that sells wholesale, by
-// subscription or sources its own) won't buy from us: { tag, label, why, source } or null.
-const RIVAL_CATEGORY = /roast|coffee (?:store|wholesaler|supplier|manufacturer|distributor|importer)|tea (?:wholesaler|manufacturer|supplier|importer|distributor)|green coffee/i;
-// A brand's own café, by name ("Heirloom" or "Ritual" alone is too common a name to count).
-const PLAIN_WORD_BRANDS = ["Heirloom", "Ritual", "Onyx", "Equator", "Verve", "Tartine", "Klatch"];
-const brandIn = (name) => BRANDS.find((b) => (!PLAIN_WORD_BRANDS.includes(b) || /coffee|\btea\b/i.test(name || "")) && new RegExp(`\\b${b.replace(/[.*+?^${}()|[\]\\']/g, "\\$&")}\\b`, "i").test(name || ""));
+// A business that does what we do (makes its own sauces, or sells or distributes sauces and Korean food wholesale) won't buy from us: { tag, label, why, source } or null.
+const RIVAL_CATEGORY = /sauce (?:manufacturer|maker|supplier)|food (?:manufacturer|products supplier|wholesaler|distributor|importer)|condiment (?:manufacturer|supplier)|seasoning (?:manufacturer|supplier)|asian grocery wholesaler|restaurant supply/i;
+// A brand's own restaurant or store, by name ("Wang" or "CJ" alone is too common a name to count).
+const PLAIN_WORD_BRANDS = ["Wang", "CJ", "Assi", "Jongga", "Lotte"];
+const brandIn = (name) => BRANDS.find((b) => (!PLAIN_WORD_BRANDS.includes(b) || /food|sauce|korea|mart|market/i.test(name || "")) && new RegExp(`\\b${b.replace(/[.*+?^${}()|[\]\\']/g, "\\$&")}\\b`, "i").test(name || ""));
 export function roasterCheck(p, facts = []) {
-  const out = (label, why, source) => ({ tag: /roast/i.test(label) ? "Roaster" : "Competitor", label, why, source: source || "" });
-  if (ROASTER_NAME.test(p.name || "")) return out("Roasts its own coffee", `Their name: ${p.name}`, p.mapsUrl);
+  const out = (label, why, source) => ({ tag: /makes|manufactur/i.test(label) ? "Maker" : "Competitor", label, why, source: source || "" });
+  if (ROASTER_NAME.test(p.name || "")) return out("Makes its own sauces", `Their name: ${p.name}`, p.mapsUrl);
   const brand = brandIn(p.name);
-  if (brand) return out("A coffee or tea brand", `${brand}, by their name`, p.mapsUrl);
+  if (brand) return out("A Korean food brand", `${brand}, by their name`, p.mapsUrl);
   const cat = facts.find((f) => f.key === "category" && RIVAL_CATEGORY.test(f.value));
-  if (cat) return out(/roast/i.test(cat.value) ? "Roasts its own coffee" : "Sells coffee or tea", `${cat.label}: ${cat.value}`, cat.source);
+  if (cat) return out(/manufactur|maker/i.test(cat.value) ? "Makes its own sauces" : "Sells sauces or food wholesale", `${cat.label}: ${cat.value}`, cat.source);
   const own = facts.find((f) => ["rival", "roasts", "beans"].includes(f.key));
   if (own) return out(own.label, own.value, own.source);
-  // What they say about themselves (naming another roaster doesn't count).
+  // What they say about themselves (naming another brand doesn't count).
   for (const f of facts.filter((x) => x.key === "description" || x.key === "bio")) {
     const said = sameAsUs(f.value);
     if (said) return out(said.label, `${f.label}: “${said.said}”`, f.source);
@@ -310,25 +307,25 @@ export function roasterCheck(p, facts = []) {
   return null;
 }
 
-const FIT_CATEGORY = /caf[eé]|coffee|tea|bakery|bakeries|patisserie|restaurant|bistro|brunch|breakfast|hotel|inn|lodging|deli|grocer|market|dessert|ice cream|juice|wine bar|office|cowork|retail|shop/i;
+const FIT_CATEGORY = /korean|asian|restaurant|bbq|barbecue|fried chicken|noodle|ramen|sushi|bistro|grill|diner|food truck|catering|ghost kitchen|bakery|bakeries|caf[eé]|grocer|grocery|market|supermarket|convenience|deli|food hall|meal prep|snack/i;
 
 // How well a business fits, out of 100: each signal needs a fact behind it (shown with its source).
 // weights: SITE.prospectWeights in js/data.ts. Returns { score, signals: [{ key, label, points, max, why, source }] }.
-// A roaster scores 0, with why in out.
+// A competitor (a sauce maker, distributor or importer) scores 0, with why in out.
 export function fitScore(p, facts, { weights, home, localMiles }) {
   const f = (key) => facts.filter((x) => x.key === key);
   const signals = [];
   const sig = (key, label, ok, why, source) => signals.push({ key, label, max: weights[key], points: ok ? weights[key] : 0, why: ok ? why : "", source: ok ? source : "" });
 
   const cat = f("category").find((x) => FIT_CATEGORY.test(x.value));
-  sig("category", "Café, restaurant, hotel or shop", Boolean(cat), cat && cat.value, cat?.source);
+  sig("category", "Restaurant, grocer or food business", Boolean(cat), cat && cat.value, cat?.source);
 
-  const program = f("coffee")[0] || f("tea")[0];
-  sig("program", "Coffee or tea program", Boolean(program), program && `${program.label}: ${program.value}`, program?.source);
+  const program = f("menu")[0] || f("sauce")[0];
+  sig("program", "Korean or Asian menu", Boolean(program), program && `${program.label}: ${program.value}`, program?.source);
 
   const rating = f("rating")[0];
   const special = f("specialty")[0] || (rating && rating.stars >= 4.5 && rating.reviews >= 100 ? rating : null) || f("price").find((x) => /\${3,}/.test(x.value));
-  sig("specialty", "Specialty or premium", Boolean(special), special && (special.key === "rating" ? `Rated ${special.value}` : special.value), special?.source);
+  sig("specialty", "Premium or well reviewed", Boolean(special), special && (special.key === "rating" ? `Rated ${special.value}` : special.value), special?.source);
 
   const more = f("locations")[0] || f("catering")[0] || f("retail")[0];
   sig("potential", "Several locations, catering or retail", Boolean(more), more && `${more.label}: ${more.value}`, more?.source);
@@ -338,7 +335,7 @@ export function fitScore(p, facts, { weights, home, localMiles }) {
 
   const near = home && p.point ? distanceKm(home, p.point) / MILE_KM : null;
   const local = near != null && near <= localMiles;
-  sig("territory", `Within ${localMiles} miles`, local, local && `${Math.round(near)} miles from the roastery`, f("address")[0]?.source || p.mapsUrl || "");
+  sig("territory", `Within ${localMiles} miles`, local, local && `${Math.round(near)} miles from our office`, f("address")[0]?.source || p.mapsUrl || "");
 
   const out = roasterCheck(p, facts);
   return { score: out ? 0 : signals.reduce((n, s) => n + s.points, 0), signals, ...(out && { out }) };
@@ -468,13 +465,14 @@ export function createResearch({ apiKey = "", baseUrl = "", instagram, authentic
 
   // Finding businesses: Google Maps through AnyAPI, else OpenStreetMap (free).
   const OSM_TYPES = {
-    cafe: '[amenity=cafe]',
-    restaurant: '[amenity=restaurant]',
-    hotel: '[tourism~"^(hotel|guest_house)$"]',
+    restaurant: '[amenity=restaurant][cuisine~"korean|asian|chinese|japanese|thai|vietnamese|barbecue|noodle|ramen|hot_pot|chicken"]',
+    fastfood: '[amenity=fast_food][cuisine~"korean|asian|chinese|japanese|chicken|noodle|ramen|burger"]',
+    noodle: '[amenity~"^(restaurant|fast_food)$"][cuisine~"noodle|ramen|udon|pho"]',
+    bbq: '[amenity=restaurant][cuisine~"korean|barbecue|hot_pot|bbq"]',
+    grocer: '[shop~"^(supermarket|convenience|greengrocer|deli|grocery|wholesale)$"]',
     bakery: '[shop~"^(bakery|pastry|confectionery)$"]',
-    tea: '[shop=tea]',
-    grocer: '[shop~"^(deli|greengrocer|health_food|organic)$"]',
-    office: '[amenity=coworking_space]',
+    caterer: '[craft=caterer]',
+    foodtruck: '[amenity=fast_food][cuisine~"korean|asian"]',
   };
   // Google Maps places → prospects.
   const fromMaps = (items) =>
@@ -513,7 +511,7 @@ export function createResearch({ apiKey = "", baseUrl = "", instagram, authentic
     const center = point || (await geocoder.geocode(area));
     if (!center) throw new ResearchError("Couldn't find that area. Try a city and state, like Los Angeles, CA.", 400);
     const around = `(around:6000,${center[0]},${center[1]})`;
-    const q = `[out:json][timeout:25];nwr${around}${OSM_TYPES[type] || OSM_TYPES.cafe}[name];out center tags 120;`;
+    const q = `[out:json][timeout:25];nwr${around}${OSM_TYPES[type] || OSM_TYPES.restaurant}[name];out center tags 120;`;
     let data;
     try {
       const res = await fetch(OVERPASS, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": UA }, body: new URLSearchParams({ data: q }), signal: AbortSignal.timeout(30000) });
@@ -535,7 +533,7 @@ export function createResearch({ apiKey = "", baseUrl = "", instagram, authentic
           name: t.name,
           category: kind,
           chain: Boolean(t.brand || t["brand:wikidata"]),
-          roaster: t.craft === "coffee_roaster" || t.shop === "coffee" || /yes|roast/i.test(t.roastery || t.coffee_roaster || "") || ROASTER_NAME.test(t.name || "") || Boolean(brandIn(t.name)),
+          roaster: /manufactur|factory/i.test(t.craft || "") || ROASTER_NAME.test(t.name || "") || Boolean(brandIn(t.name)),
           address,
           city: t["addr:city"] || "",
           point,

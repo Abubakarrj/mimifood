@@ -821,7 +821,7 @@ const GROUP_ICON = { Sell: "Handshake", Wholesale: "wholesale", Make: "Hammer", 
 // Pages that hold different kinds of records are a sidebar page each (Peasy's), not tabs:
 // [sub, label, icon, the page's count shown here].
 const SUB_NAV = {
-  wholesale: [["accounts", "Accounts", "building"], ["pricelists", "Price Lists", "Tags"], ["orders", "Wholesale Orders", "orders"], ["quotes", "Quotes", "quote"], ["enquiries", "Inquiries", "imessage"], ["samples", "Samples", "FlaskConical"], ["documents", "Documents", "doc"]],
+  wholesale: [["accounts", "Accounts", "building"], ["pricelists", "Price Lists", "Tags"], ["orders", "Wholesale Orders", "orders"], ["quotes", "Quotes", "quote"], ["enquiries", "Inquiries", "imessage"], ["samples", "Samples", "FlaskConical"], ["documents", "Documents", "doc"], ["prospects", "Prospects", "search"]],
   purchasing: [["orders", "Purchase Orders", "doc"], ["bills", "Bills", "receipt", true], ["suppliers", "Suppliers", "building"]],
 };
 const subLabel = (page) => (page.id === "overview" ? greeting() : SUB_NAV[page.id]?.find(([sub]) => sub === state.sub)?.[1] || page.label);
@@ -2398,7 +2398,7 @@ const fitLevel = (score) => (score >= 70 ? ["low", "Strong"] : score >= 40 ? ["m
 const fitBadge = (r, researching) => {
   if (researching) return `<span class="badge"><i></i>Researching…</span>`;
   if (!r?.fit) return `<span class="muted">—</span>`;
-  if (r.fit.out) return `<span class="fit-badge is-high"><strong>0</strong><small>${esc(r.fit.out.tag || "Roaster")}</small></span>`;
+  if (r.fit.out) return `<span class="fit-badge is-high"><strong>0</strong><small>${esc(r.fit.out.tag || "Competitor")}</small></span>`;
   const [tone, label] = fitLevel(r.fit.score);
   return `<span class="fit-badge is-${tone}"><strong>${r.fit.score}</strong><small>${label}</small></span>`;
 };
