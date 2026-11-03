@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --ink: #111111;          /* text, menu background */
   /* Palette, same names and values as the back office theme (admin.css).
      color-1 (blue): the main action on a screen (buttons), links, keyboard focus and the
@@ -170,7 +170,7 @@ main {
   transform: none;
 }
 
-/* ── Header ───────────────────────────────────────────────── */
+/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .header {
   position: sticky;
@@ -300,7 +300,7 @@ main {
   100% { transform: scale(1); }
 }
 
-/* ── Overlays ─────────────────────────────────────────────── */
+/* â”€â”€ Overlays â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .overlay {
   position: fixed;
@@ -637,7 +637,7 @@ html:has(.drawer.is-open) {
   font-size: 14px;
 }
 
-/* Searching, Cancel (back to the menu) is the one way out: the menu's × steps aside. */
+/* Searching, Cancel (back to the menu) is the one way out: the menu's Ã— steps aside. */
 #menu:has(.menu-search:not([hidden])) > .close {
   visibility: hidden;
 }
@@ -1023,7 +1023,7 @@ html:has(.drawer.is-open) {
   margin-bottom: 9px;
 }
 
-/* ── Controls ─────────────────────────────────────────────── */
+/* â”€â”€ Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .button {
   position: relative;
@@ -1111,7 +1111,7 @@ html:has(.drawer.is-open) {
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
-/* − and + are part of the one box (as on the product page), not separate circles. */
+/* âˆ’ and + are part of the one box (as on the product page), not separate circles. */
 .stepper button {
   width: 32px;
   height: 100%;
@@ -1329,7 +1329,7 @@ html:has(.drawer.is-open) {
 }
 
 :root:lang(ko) {
-  --optional-label: "선택 사항";
+  --optional-label: "ì„ íƒ ì‚¬í•­";
 }
 
 /* Fields: soft filled boxes, the same grey, radius and height as the buttons and the card field,
@@ -1410,7 +1410,7 @@ html:has(.drawer.is-open) {
   }
 }
 
-/* ── Page scaffolding ─────────────────────────────────────── */
+/* â”€â”€ Page scaffolding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .page {
   padding: 26px var(--gutter) 63px;
@@ -1434,9 +1434,9 @@ html:has(.drawer.is-open) {
   overflow-wrap: anywhere; /* a long email address wraps on a narrow phone */
 }
 
-/* ── Home: three screens. The photo fills the screen under a see-through header; then the
+/* â”€â”€ Home: three screens. The photo fills the screen under a see-through header; then the
    statement on white; then the shop with the offers banner on top. Scrolling settles on each
-   (proximity snapping), and a tap moves on (js: home). ── */
+   (proximity snapping), and a tap moves on (js: home). â”€â”€ */
 
 html:has(body[data-page="home"]) {
   scroll-padding-top: 0; /* each screen starts at the very top (the header hides going down) */
@@ -1813,7 +1813,7 @@ body[data-page="home"]:has(.hero.is-light) .header.on-hero .header-actions {
   white-space: nowrap;
 }
 
-/* "True Specialty®" never breaks, so the ® stays with its name. */
+/* "True SpecialtyÂ®" never breaks, so the Â® stays with its name. */
 .brand-statement a {
   white-space: nowrap;
 }
@@ -1874,7 +1874,7 @@ body[data-page="home"]:has(.hero.is-light) .header.on-hero .header-actions {
 }
 
 .ticker-track span::after {
-  content: "●";
+  content: "â—";
   margin-left: 31.5px;
   font-size: 7px;
   vertical-align: 3px;
@@ -1889,7 +1889,7 @@ body[data-page="home"]:has(.hero.is-light) .header.on-hero .header-actions {
   to { transform: translateX(-50%); }
 }
 
-/* ── Products ─────────────────────────────────────────────── */
+/* â”€â”€ Products â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .products {
   padding: 23.5px var(--gutter) 39.5px;
@@ -2117,7 +2117,7 @@ html.home-intro .shop-title {
   }
 }
 
-/* ── Product page ─────────────────────────────────────────── */
+/* â”€â”€ Product page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 
 
@@ -2167,7 +2167,7 @@ html.home-intro .shop-title {
   color: var(--ink-muted);
 }
 
-/* Labels from the back office (New Arrival, Sale −10%, Only 2 Left), on the product photo. */
+/* Labels from the back office (New Arrival, Sale âˆ’10%, Only 2 Left), on the product photo. */
 .label-pill {
   display: inline-block;
   padding: 2px 7px;
@@ -2911,7 +2911,7 @@ html.home-intro .shop-title {
   color: var(--ink-muted);
 }
 
-/* ── Subscriptions ────────────────────────────────────────── */
+/* â”€â”€ Subscriptions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .eyebrow {
   margin-bottom: 9px;
@@ -3359,7 +3359,7 @@ html.home-intro .shop-title {
   font-weight: 500;
 }
 
-/* ── 404 ── */
+/* â”€â”€ 404 â”€â”€ */
 
 .notfound {
   min-height: 50vh;
@@ -3393,7 +3393,7 @@ html.home-intro .shop-title {
 }
 
 
-/* ── Wholesale ────────────────────────────────────────────── */
+/* â”€â”€ Wholesale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .wholesale-page .sub-hero-cta {
   margin-top: 18.5px;
@@ -3505,7 +3505,7 @@ html.home-intro .shop-title {
   font-weight: 500;
 }
 
-/* ── Order ahead ──────────────────────────────────────────── */
+/* â”€â”€ Order ahead â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .order-layout {
   display: grid;
@@ -3527,7 +3527,7 @@ html.home-intro .shop-title {
 /* Selected location, shown beside the location choices */
 
 .order-location .location-image {
-  aspect-ratio: 4 / 5; /* the café photos are portrait: show (nearly) all of the room */
+  aspect-ratio: 4 / 5; /* the cafÃ© photos are portrait: show (nearly) all of the room */
 }
 
 .order-location figcaption {
@@ -3557,8 +3557,8 @@ html.home-intro .shop-title {
   gap: 10.5px;
 }
 
-/* A small action (Log Out, Remove, Show All, Back…): a quiet rounded button, not underlined text,
-   so it reads as something to tap. .is-inline keeps one inside a sentence ("Did you mean …?") as
+/* A small action (Log Out, Remove, Show All, Backâ€¦): a quiet rounded button, not underlined text,
+   so it reads as something to tap. .is-inline keeps one inside a sentence ("Did you mean â€¦?") as
    an underlined link. */
 .link-button {
   display: inline-flex;
@@ -4153,7 +4153,7 @@ body.header-hidden .menu-tabs {
   white-space: nowrap;
 }
 
-/* ── Log in & account ─────────────────────────────────────── */
+/* â”€â”€ Log in & account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .auth-card {
   max-width: 460px;
@@ -4350,7 +4350,7 @@ body.header-hidden .menu-tabs {
   font-size: 13px;
 }
 
-/* ── Locations ────────────────────────────────────────────── */
+/* â”€â”€ Locations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* One row per location, divided by hairlines: name, address, today's status and links;
    the week's hours open underneath. */
@@ -4380,7 +4380,7 @@ body.header-hidden .menu-tabs {
 }
 
 /* A photo of each location as a thumbnail beside its details (assets/<location id>.jpg,
-   or a café photo until it has one). */
+   or a cafÃ© photo until it has one). */
 .location {
   grid-template-columns: 84px minmax(0, 1fr);
   column-gap: 14px;
@@ -4445,7 +4445,7 @@ body.header-hidden .menu-tabs {
 }
 
 .location-hours[open] summary::after {
-  content: "−";
+  content: "âˆ’";
 }
 
 .location-hours .hours {
@@ -4529,7 +4529,7 @@ body.header-hidden .menu-tabs {
   padding-bottom: 1.5px;
 }
 
-/* ── FAQ ──────────────────────────────────────────────────── */
+/* â”€â”€ FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .faq-list {
   max-width: 820px;
@@ -4692,7 +4692,7 @@ body.header-hidden .menu-tabs {
 }
 
 
-/* ── Contact ──────────────────────────────────────────────── */
+/* â”€â”€ Contact â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .contact-layout {
   display: grid;
@@ -4711,7 +4711,7 @@ body.header-hidden .menu-tabs {
   text-underline-offset: 3px;
 }
 
-/* ── Checkout ─────────────────────────────────────────────── */
+/* â”€â”€ Checkout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .checkout-layout {
   display: grid;
@@ -4858,7 +4858,7 @@ body.header-hidden .menu-tabs {
   display: none !important;
 }
 
-/* ── Footer ───────────────────────────────────────────────── */
+/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .footer {
   /* The bottom clears the accessibility button, pinned bottom-left over the last row. */
@@ -5071,7 +5071,7 @@ body.header-hidden .menu-tabs {
   }
 }
 
-/* ── Phones ───────────────────────────────────────────────── */
+/* â”€â”€ Phones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* Comfortable tap targets everywhere (44px), without changing the look. */
 .header-actions button {
@@ -5333,7 +5333,7 @@ body.header-hidden .menu-tabs {
   }
 }
 
-/* ── Reduced motion ───────────────────────────────────────── */
+/* â”€â”€ Reduced motion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -5357,7 +5357,7 @@ body.header-hidden .menu-tabs {
   }
 }
 
-/* ── Checkout: café details and the payment step ─────────── */
+/* â”€â”€ Checkout: cafÃ© details and the payment step â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .checkout-layout > [hidden] {
   display: none !important;
@@ -5468,7 +5468,7 @@ body.header-hidden .menu-tabs {
 }
 
 
-/* ── Wholesale portal (trade.html) ───────────────────────── */
+/* â”€â”€ Wholesale portal (trade.html) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .trade-login-link {
   margin-top: 12px;
@@ -5808,7 +5808,7 @@ body.header-hidden .menu-tabs {
   }
 }
 
-/* ── Wrong or missing input: the field keeps its shape, in red; one short shake ── */
+/* â”€â”€ Wrong or missing input: the field keeps its shape, in red; one short shake â”€â”€ */
 
 /* A boxed field: a red ring on a red tint, in its own corners (as .form fields). !important: every
    field style (filled, focused) gives way. Underlined fields are below: only the line turns red. */
@@ -5851,7 +5851,7 @@ input:is([type="radio"], [type="checkbox"])[aria-invalid="true"] {
   }
 }
 
-/* ── Cookie consent ──────────────────────────────────────────── */
+/* â”€â”€ Cookie consent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .cookie-banner {
   position: fixed;
@@ -6196,8 +6196,8 @@ body.is-locked .welcome-card {
   max-width: 820px;
 }
 
-/* ── About: a lead line, then cards: coffee and tea, True Specialty, the shelf, Roastery House,
-   ways to buy. ── */
+/* â”€â”€ About: a lead line, then cards: coffee and tea, True Specialty, the shelf, Roastery House,
+   ways to buy. â”€â”€ */
 .about-page {
   display: grid;
   gap: 52.5px;
@@ -6561,7 +6561,7 @@ body.is-locked .welcome-card {
   }
 }
 
-/* ── Delete account / close wholesale account ────────────────── */
+/* â”€â”€ Delete account / close wholesale account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .danger-zone {
   max-width: 560px;
@@ -6629,7 +6629,7 @@ body.is-locked .welcome-card {
   font-weight: 500;
 }
 
-/* ── Café menu items: photos and sold out (edited in the back office) ── */
+/* â”€â”€ CafÃ© menu items: photos and sold out (edited in the back office) â”€â”€ */
 
 .drink-image img {
   display: block;
@@ -6945,7 +6945,7 @@ tc-s {
   }
 }
 
-/* True Specialty® page: a few large lines carry each section (they rise in word by word);
+/* True SpecialtyÂ® page: a few large lines carry each section (they rise in word by word);
    the longer text sits beneath in calmer type, and the five commitments open on demand. */
 .ts-page {
   display: grid;
@@ -7494,7 +7494,7 @@ h2 + .ts-big {
   }
 }
 
-/* The ® in "True Specialty®": small and raised, like a trademark mark, not full size. */
+/* The Â® in "True SpecialtyÂ®": small and raised, like a trademark mark, not full size. */
 .reg {
   font-size: 0.42em; /* sized and placed like a degree sign: small, its top at cap height */
   line-height: 0;
@@ -8207,7 +8207,7 @@ h2 .reg {
   font-size: 13px;
 }
 
-/* Café menu: Made on arrival and Low stock under the price. */
+/* CafÃ© menu: Made on arrival and Low stock under the price. */
 .drink-flags {
   display: flex;
   flex-wrap: wrap;
@@ -8221,7 +8221,7 @@ h2 .reg {
   color: var(--error);
 }
 
-/* Bags in the café menu: the packaging photo on its tile. */
+/* Bags in the cafÃ© menu: the packaging photo on its tile. */
 .bag-card .drink-image .photo-art {
   position: absolute;
   inset: 0;
@@ -8274,7 +8274,7 @@ h2 .reg {
   margin-top: 16px;
 }
 
-/* ── Order Ahead: café, method and time above the menu ───────── */
+/* â”€â”€ Order Ahead: cafÃ©, method and time above the menu â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .order-controls {
   display: grid;
@@ -8358,7 +8358,7 @@ h2 .reg {
   font-weight: 500;
 }
 
-/* ── Café order placed ───────────────────────────────────── */
+/* â”€â”€ CafÃ© order placed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .cafe-confirm-head {
   margin-bottom: 18px;
@@ -8429,7 +8429,7 @@ h2 .reg {
   outline: none;
 }
 
-/* ── Photos: no "Save image" callout on a long press, no dragging them out ── */
+/* â”€â”€ Photos: no "Save image" callout on a long press, no dragging them out â”€â”€ */
 img,
 .bag-svg {
   -webkit-touch-callout: none;
@@ -8437,7 +8437,7 @@ img,
   user-select: none;
 }
 
-/* ── Accessibility panel: a small blue button, bottom left ── */
+/* â”€â”€ Accessibility panel: a small blue button, bottom left â”€â”€ */
 .a11y {
   position: fixed;
   left: var(--gutter);
@@ -8794,7 +8794,7 @@ html.a11y-motion *::after {
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
-/* ── Languages ── */
+/* â”€â”€ Languages â”€â”€ */
 /* Hidden for a moment on /es/ and /ko/ while js/i18n.js translates, so English doesn't flash. */
 html.i18n-pending body {
   opacity: 0;
@@ -8845,8 +8845,8 @@ html[lang="ko"] body {
   font-size: 12px;
 }
 
-/* ── Notes: articles (/notes/<slug>) and their list (/notes/). Text at reading width; photos
-   on the product tile grey while they load; a coffee mentioned in a note links to it. ── */
+/* â”€â”€ Notes: articles (/notes/<slug>) and their list (/notes/). Text at reading width; photos
+   on the product tile grey while they load; a coffee mentioned in a note links to it. â”€â”€ */
 
 .note-head,
 .note-body,
@@ -9037,7 +9037,7 @@ html[lang="ko"] body {
   }
 }
 
-/* ── Interactive pieces in posts (server/noteblocks.js) ── */
+/* â”€â”€ Interactive pieces in posts (server/noteblocks.js) â”€â”€ */
 
 .note-cards {
   display: grid;
@@ -9775,9 +9775,9 @@ html[lang="ko"] body {
   }
 }
 
-/* ── Rounded photos and product boxes, like the buttons and cards (12px; 8px for the small cart
+/* â”€â”€ Rounded photos and product boxes, like the buttons and cards (12px; 8px for the small cart
    thumbnails). overflow clips the picture inside, including photos scaled for the scroll effect.
-   Photos that run the full width of the screen (the home page hero) stay square. ── */
+   Photos that run the full width of the screen (the home page hero) stay square. â”€â”€ */
 
 .product-image,
 .pdp-image,
@@ -9821,7 +9821,7 @@ a.cart-thumb:hover {
   text-underline-offset: 3px;
 }
 
-/* ── Chat window ──────────────────────────────────────────── */
+/* â”€â”€ Chat window â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* With the keyboard, the chat moves once, smoothly, alongside it. */
 .chat-panel {
@@ -10035,7 +10035,7 @@ a.cart-thumb:hover {
   animation: line-in 0.35s var(--ease);
 }
 
-/* ── Soft controls ─────────────────────────────────────────────
+/* â”€â”€ Soft controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Soft rounded rectangles instead of outlined pills: light grey for everyday controls,
    pale blue with ink text for the one main action and for what's chosen. */
 :root {
@@ -10088,7 +10088,7 @@ a.cart-thumb:hover {
   border-radius: var(--soft-radius);
 }
 
-/* Small actions in a row (Apply, Check, Send, Skip, Track order …): the same grey control,
+/* Small actions in a row (Apply, Check, Send, Skip, Track order â€¦): the same grey control,
    smaller; one marked pill-solid is that row's main action, in pale blue. The outlined pill is
    gone, so there are three looks: pale blue, grey, and the underlined text link (link-button). */
 .pill {
@@ -10209,7 +10209,7 @@ a.cart-thumb:hover {
   background: var(--sky-hover);
 }
 
-/* ── Calendar and classes ─────────────────────────────────────
+/* â”€â”€ Calendar and classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    The calendar page: a small month beside the list of what's coming up (stacked on phones).
    A day with something on it has dots; tapping it narrows the list to that day. */
 .cal-heading {
@@ -11025,7 +11025,7 @@ body.checkout-free [data-express] {
   font-weight: 400;
 }
 
-/* Local Delivery · the courier's mark. */
+/* Local Delivery Â· the courier's mark. */
 .courier-dot {
   margin: 0 4px;
   color: var(--ink-muted);
@@ -11042,7 +11042,7 @@ body.checkout-free [data-express] {
 
 .courier-uber {
   display: inline-block;
-  width: 4.85em; /* logo is 350 × 60 */
+  width: 4.85em; /* logo is 350 Ã— 60 */
   height: 0.83em;
   vertical-align: -0.06em;
   background: currentColor;
@@ -11051,7 +11051,7 @@ body.checkout-free [data-express] {
 }
 
 
-/* ── Order tracking (track.html, and the account page's sheet) ── */
+/* â”€â”€ Order tracking (track.html, and the account page's sheet) â”€â”€ */
 .track-page {
   max-width: 560px;
   margin: 0 auto;
@@ -11322,7 +11322,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   pointer-events: none;
 }
 
-/* ── Reviews ─────────────────────────────────────────────── */
+/* â”€â”€ Reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .star-row {
   color: var(--ink);
   letter-spacing: 1px;
@@ -11433,7 +11433,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   outline-offset: 2px;
 }
 
-/* ── Returns (tracking page) ─────────────────────────────── */
+/* â”€â”€ Returns (tracking page) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tracker-returns {
   display: grid;
   gap: 12px;
@@ -11945,7 +11945,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   font-size: 14px;
 }
 
-/* ── Wholesale portal, second pass ── */
+/* â”€â”€ Wholesale portal, second pass â”€â”€ */
 
 /* A lighter header: the business name, not a page title. */
 .trade-head h1 {
@@ -11984,7 +11984,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   font-weight: 500;
 }
 
-/* Each size: its label and price, then − quantity +. */
+/* Each size: its label and price, then âˆ’ quantity +. */
 .trade-qty > span {
   display: flex;
   justify-content: space-between;
@@ -12211,7 +12211,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   color: var(--ink-muted);
 }
 
-/* ── Gift cards ─────────────────────────────────────────────
+/* â”€â”€ Gift cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    The card: black, the logo, the amount. Sized by its own width (cqw), so the same card works
    large on its page and small in the cart. */
 .gc-stage {
@@ -12256,8 +12256,8 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
 .gc-mark {
   top: 7cqw;
   left: 7cqw;
-  width: 6.5cqw;
-  height: 9.3cqw;
+  width: 10cqw;
+  height: 10cqw;
 }
 
 .gc-kind {
@@ -12491,7 +12491,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   .gc-card.is-revealed .gc-number { animation: none; }
 }
 
-/* ── Shipping & Returns: summary cells, then simple tables ── */
+/* â”€â”€ Shipping & Returns: summary cells, then simple tables â”€â”€ */
 .sr-page {
   max-width: 880px;
 }
@@ -12771,7 +12771,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   font-size: 14px;
 }
 
-/* ── Chat Us, with the assistant: header, avatars, cards, quick replies, composer ──
+/* â”€â”€ Chat Us, with the assistant: header, avatars, cards, quick replies, composer â”€â”€
    Built from the shop's own pieces: ink and paper, --line edges, --soft and --sky controls,
    the bubble radius, and the search thumbnails for product pictures. */
 .chat-head {
@@ -13364,7 +13364,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   margin-top: 8px;
 }
 
-/* ── Tap targets: at least 44px for a finger, with the look unchanged ──
+/* â”€â”€ Tap targets: at least 44px for a finger, with the look unchanged â”€â”€
    Small text links and pills take an invisible hit area; menu rows take padding (their rows clip
    overflow for the rise-in). */
 @media (pointer: coarse), (max-width: 599px) {
@@ -13442,7 +13442,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   }
 }
 
-/* ── Accessibility: in the menu (and the portal's own menu), never floating over the page ──
+/* â”€â”€ Accessibility: in the menu (and the portal's own menu), never floating over the page â”€â”€
    Floating, it sat on labels, prices, headings and the last lines of pages. The panel still
    opens from the bottom corner when it's chosen ([data-a11y-open]). */
 .a11y-button {
@@ -13591,7 +13591,7 @@ body:has(.cookie-banner.is-in:not(.is-done)) .a11y {
   color: var(--ink-muted);
 }
 
-/* ── Chat: the cart's total under the message box, and checkout inside the sheet ── */
+/* â”€â”€ Chat: the cart's total under the message box, and checkout inside the sheet â”€â”€ */
 
 .chat-cart-bar {
   justify-content: space-between;
@@ -14239,7 +14239,7 @@ main :is(p, dd, small, figcaption, td) a:not(.button, .link-button, .pill, .bran
   text-decoration-thickness: 1px;
 }
 
-/* ── Chat: Messages, who's answering, days, and the rating card ── */
+/* â”€â”€ Chat: Messages, who's answering, days, and the rating card â”€â”€ */
 
 /* Back to Messages (their other conversations on this device). */
 .chat-back {
@@ -14464,7 +14464,7 @@ main :is(p, dd, small, figcaption, td) a:not(.button, .link-button, .pill, .bran
   text-wrap: pretty;
 }
 
-/* ⋯ in the chat: search the conversation, download it. */
+/* â‹¯ in the chat: search the conversation, download it. */
 .chat-head-actions {
   position: relative;
 }
@@ -15123,7 +15123,7 @@ main :is(p, dd, small, figcaption, td) a:not(.button, .link-button, .pill, .bran
   padding-inline: 20px;
 }
 
-/* Wholesale portal → Account → Team: each login with its role, and one to add. */
+/* Wholesale portal â†’ Account â†’ Team: each login with its role, and one to add. */
 .trade-team {
   display: grid;
   gap: 8px;
@@ -15165,9 +15165,9 @@ main :is(p, dd, small, figcaption, td) a:not(.button, .link-button, .pill, .bran
   padding-inline: 20px;
 }
 
-/* ── The wholesale portal as an app (Peasy's, as the back office): a sidebar with the café and its
+/* â”€â”€ The wholesale portal as an app (Peasy's, as the back office): a sidebar with the cafÃ© and its
    pages, a slim title strip, then the page. On a phone the pages are a bar along the bottom and
-   the strip carries the café's name and Log Out. The site's header and footer step aside. ── */
+   the strip carries the cafÃ©'s name and Log Out. The site's header and footer step aside. â”€â”€ */
 body:has(.tp-shell) .header,
 body:has(.tp-shell) .footer {
   display: none;
@@ -15226,7 +15226,7 @@ body:has(.tp-shell) .trade-page {
   font-size: 13px;
 }
 
-/* A café's own logo in place of the letter: on white in both themes, so a dark logo still shows. */
+/* A cafÃ©'s own logo in place of the letter: on white in both themes, so a dark logo still shows. */
 .tp-mark.has-logo {
   overflow: hidden;
   padding: 2px;
@@ -15550,9 +15550,9 @@ body:has(.tp-shell) .a11y-panel {
   }
 }
 
-/* ── The portal's pages at desktop widths (Peasy's): lists run the width of the page, each order a
+/* â”€â”€ The portal's pages at desktop widths (Peasy's): lists run the width of the page, each order a
    row with its status and total in columns; Account is its sections as cards in one column, each
-   under its heading; Balance and an invoice get room beside the sidebar. ── */
+   under its heading; Balance and an invoice get room beside the sidebar. â”€â”€ */
 @media (min-width: 1000px) {
   .tp-shell .trade-orders {
     max-width: none;
@@ -15747,7 +15747,7 @@ body[data-page="trade"] {
   background: rgb(0 0 0 / 0.6);
 }
 
-/* ── Portal Products, as the back office's lists: a toolbar (search, quiet filters, the usual),
+/* â”€â”€ Portal Products, as the back office's lists: a toolbar (search, quiet filters, the usual),
    the terms in one muted line, a price table with its sizes as columns, and the order in a cart
    panel beside it. */
 .tp-bar {
@@ -16147,7 +16147,7 @@ body[data-page="trade"] {
   }
 }
 
-/* ── Portal Orders: a table (order, placed, items, status, payment, total); an order opens beside
+/* â”€â”€ Portal Orders: a table (order, placed, items, status, payment, total); an order opens beside
    it on a wide screen, as the back office's records do. */
 .tp-bar .trade-order-views {
   display: flex;
@@ -16317,7 +16317,7 @@ body[data-page="trade"] {
   font-size: 13px;
 }
 
-/* ── Portal Overview: cards, as the back office's (a muted title, the number, one line, then
+/* â”€â”€ Portal Overview: cards, as the back office's (a muted title, the number, one line, then
    what to do). */
 .tp-cards {
   display: grid;
@@ -16390,7 +16390,7 @@ body[data-page="trade"] {
   line-height: 1;
 }
 
-/* ── Portal search: a field-like button in the sidebar (and an icon on a phone) opens a list of
+/* â”€â”€ Portal search: a field-like button in the sidebar (and an icon on a phone) opens a list of
    pages, actions, products, orders and invoices. */
 .tp-search {
   display: flex;
@@ -16539,7 +16539,7 @@ body[data-page="trade"] {
 
 }
 
-/* ── The café's menu (its name at the top of the sidebar; its initial on a phone), as the back
+/* â”€â”€ The cafÃ©'s menu (its name at the top of the sidebar; its initial on a phone), as the back
    office's: who's signed in, Account, Light / Dark / System, Email Us, Log Out. */
 button.tp-brand {
   width: 100%;
@@ -16890,7 +16890,7 @@ body[data-page="trade"] {
   text-align: left;
 }
 
-/* ── Portal sidebar foot, as the back office's: Ask anything, Chats, Account settings. ── */
+/* â”€â”€ Portal sidebar foot, as the back office's: Ask anything, Chats, Account settings. â”€â”€ */
 .tp-ask {
   display: flex;
   align-items: center;
@@ -16956,7 +16956,7 @@ body[data-page="trade"] {
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-/* ── The help panel (Peasy's), on the right. ── */
+/* â”€â”€ The help panel (Peasy's), on the right. â”€â”€ */
 .tp-help {
   position: fixed;
   top: 0;
@@ -17457,7 +17457,7 @@ button.tp-tag[aria-pressed="true"] {
   color: inherit;
 }
 
-/* Messages going out (the café's): blue bubbles on the right, the time under the last of a run. */
+/* Messages going out (the cafÃ©'s): blue bubbles on the right, the time under the last of a run. */
 .tp-help-msg.is-me {
   display: flex;
   flex-direction: column;
@@ -17608,7 +17608,7 @@ button.tp-tag[aria-pressed="true"] {
   text-overflow: ellipsis;
 }
 
-/* ── Book a Call (Peasy's): the month, the day's times, then a note and Book. ── */
+/* â”€â”€ Book a Call (Peasy's): the month, the day's times, then a note and Book. â”€â”€ */
 .tp-call {
   flex: 1;
   min-height: 0;
@@ -17808,8 +17808,8 @@ button.tp-tag[aria-pressed="true"] {
   height: 40px;
 }
 
-/* ── Portal Account, as the back office's Configure pages (Peasy's settings): a label over each
-   card, rows of a name (and a short line) on the left and its value or field on the right. ── */
+/* â”€â”€ Portal Account, as the back office's Configure pages (Peasy's settings): a label over each
+   card, rows of a name (and a short line) on the left and its value or field on the right. â”€â”€ */
 .tp-settings {
   display: grid;
   gap: 24px;
@@ -18106,7 +18106,7 @@ button.tp-tag[aria-pressed="true"] {
   margin-top: 10px;
 }
 
-/* ── Portal Balance, as Products: the invoices in a table, paying in a panel beside it. ── */
+/* â”€â”€ Portal Balance, as Products: the invoices in a table, paying in a panel beside it. â”€â”€ */
 .tp-pay {
   display: grid;
   gap: 24px;
@@ -18393,7 +18393,7 @@ body.is-app-login .auth-card > * {
   margin: 0;
 }
 
-/* The conversation: the title opens recent chats (Peasy's ▾); the assistant's quick replies are
+/* The conversation: the title opens recent chats (Peasy's â–¾); the assistant's quick replies are
    dark buttons under its answer; a product it suggests is a small card with Open. */
 .tp-help-title {
   display: flex;
@@ -18598,8 +18598,8 @@ body.is-app-login .auth-card > * {
   }
 }
 
-/* ── The invoice as a document (Download PDF): the letterhead, then the invoice. Hidden on screen;
-   printing shows it alone, in black on white, on Letter or A4. ── */
+/* â”€â”€ The invoice as a document (Download PDF): the letterhead, then the invoice. Hidden on screen;
+   printing shows it alone, in black on white, on Letter or A4. â”€â”€ */
 .inv-print {
   display: none;
 }
@@ -18899,7 +18899,7 @@ body.is-app-login .auth-card > * {
   }
 }
 
-/* ── Ask anything, as the back office's ── */
+/* â”€â”€ Ask anything, as the back office's â”€â”€ */
 .tp-palette,
 .tp-palette * {
   text-transform: none;
@@ -19762,7 +19762,7 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
   font-weight: 500;
 }
 
-/* ── Big screens ──
+/* â”€â”€ Big screens â”€â”€
    The shop: header, pages and footer keep to a centered 1680px column (full-bleed photos still
    run edge to edge). The portal: its pages grow to 1440px, centered beside the sidebar, and the
    order column widens with them. */
@@ -19794,8 +19794,8 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
   }
 }
 
-/* ── The portal's sidebar (Peasy's): its width set by dragging the edge, or closed to a 60px rail
-   of icons by clicking it; the foot's three buttons always inside the gray. ── */
+/* â”€â”€ The portal's sidebar (Peasy's): its width set by dragging the edge, or closed to a 60px rail
+   of icons by clicking it; the foot's three buttons always inside the gray. â”€â”€ */
 @media (min-width: 761px) {
   .tp-shell {
     grid-template-columns: var(--tp-side, 240px) minmax(0, 1fr);
@@ -20013,7 +20013,7 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
   gap: 0 4px;
 }
 
-/* ── Portal audit pass: where an order goes as one row, the sheets (where, reorder, pay), Orders'
+/* â”€â”€ Portal audit pass: where an order goes as one row, the sheets (where, reorder, pay), Orders'
    rows and Quotes, Back and Ask anything in the phone's title strip, and toasts above the tab bar. */
 
 /* Where it goes: "Deliver to Downtown", who brings it and when, the fee; Change beside it. */
@@ -20055,9 +20055,9 @@ body:is(.tp-help-on, .tp-help-full) .cookie-banner {
   font-size: 14px;
 }
 
-/* "· Free" after who brings it; on its own (who isn't known yet) just "Free". */
+/* "Â· Free" after who brings it; on its own (who isn't known yet) just "Free". */
 .tp-where-fee:not(:first-child)::before {
-  content: "· ";
+  content: "Â· ";
 }
 
 .tp-where-change {
@@ -20555,7 +20555,7 @@ body[data-page="trade"] .toast button {
   box-shadow: 0 -1px 0 var(--line);
 }
 
-/* ── No underlines in the shop (CLAUDE.md) ──
+/* â”€â”€ No underlines in the shop (CLAUDE.md) â”€â”€
    Links in a sentence read as links by their color; names, cards and rows by their place. Only
    the "Underline links" reading aid (html.a11y-links) brings underlines back. */
 html:not(.a11y-links) :is(main :is(p, dd, small, figcaption, td) a, .cart-empty a, .ws-enquire .muted a, .location-meta a, .sub-error a, .toast button, .sub-account-note a, .ask-note a, .cafe-box a, .cookie-banner > p a, .policy-list a, .account-order a, .ts-tea-links a, .finder-link, .note-body a, .cal-facts a, .tracker-sub a, .cal-place a, .sr-page a, .finder-amount a, .chat-card-link, .chat-card-title, .amb-agree a, .dropoff li a, .dropoff-pickup a, .role-body a, .promo-note a, .a11y-panel p a, .cart-name, .menu .search-picks :is(a, button), .menu .search-group a .search-text > span, .note-card strong, .cal-row strong, .menu-langs a, .footer-langs a, .cal-back a, .account-setup-back a, .cal-add-google, .ask-person, .contact-chat button) {
@@ -20662,7 +20662,7 @@ body[data-page="checkout"].is-placed .header-actions {
   stroke-linejoin: round;
 }
 
-/* Account → Interface → Theme: the label and its line, then Light / Dark / System as buttons
+/* Account â†’ Interface â†’ Theme: the label and its line, then Light / Dark / System as buttons
    with their icons (as the back office's Business page); the picked one filled in blue. */
 .tp-set-row.tp-theme-row {
   display: grid;
@@ -20762,7 +20762,7 @@ body[data-page="checkout"].is-placed .header-actions {
   }
 }
 
-/* ── In both chat windows (Chat Us and the portal's): reactions, a poll, Edited, files ── */
+/* â”€â”€ In both chat windows (Chat Us and the portal's): reactions, a poll, Edited, files â”€â”€ */
 .chat-reacts {
   display: inline-flex;
   gap: 2px;
@@ -20866,7 +20866,7 @@ body[data-page="checkout"].is-placed .header-actions {
   text-decoration: none;
 }
 
-/* A café's shared chat: a teammate's name over their message, on the café's side. */
+/* A cafÃ©'s shared chat: a teammate's name over their message, on the cafÃ©'s side. */
 .tp-help-msg.is-me .tp-help-by {
   margin: 0 4px -4px 0;
   text-align: right;
@@ -20897,7 +20897,7 @@ body[data-page="checkout"].is-placed .header-actions {
   background: var(--brand, #2f5bd3);
 }
 
-/* Portal › Samples: where their samples are, the request (coffees as cards, up to three), how
+/* Portal â€º Samples: where their samples are, the request (coffees as cards, up to three), how
    they tasted. Segments as the portal's (small corners), not pills. */
 .tp-samples {
   display: grid;
@@ -21148,7 +21148,7 @@ body[data-page="checkout"].is-placed .header-actions {
   display: none;
 }
 
-/* Portal › Agreement: the text to read, then signing (or who signed). */
+/* Portal â€º Agreement: the text to read, then signing (or who signed). */
 .tp-agreement {
   display: grid;
   gap: 16px;
@@ -21334,4 +21334,11 @@ body[data-page="checkout"].is-placed .header-actions {
 .pdp-image,
 .about-item-art {
   background: #ffffff;
+}
+
+.gc-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

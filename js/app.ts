@@ -606,7 +606,7 @@ const TP_ICON = {
 const TEXT_ICON = `<span class="text-cue-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 3.5c-4.1 0-7.4 2.7-7.4 6.1 0 1.9 1 3.6 2.7 4.7-.2 1-.7 1.9-1.4 2.6 1.5 0 2.9-.6 3.9-1.4.7.1 1.4.2 2.2.2 4.1 0 7.4-2.7 7.4-6.1S14.1 3.5 10 3.5z"/></svg></span>`;
 
 // The card itself: black, the logo, the amount. Drawn in HTML so the amount can change live.
-const LOGO_MARK = `<svg viewBox="0 0 46 66" aria-hidden="true"><text x="23" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="34" fill="currentColor">M</text></svg>`;
+const LOGO_MARK = `<img src="/assets/logo-mark.png" alt="" width="56" height="56">`;
 const giftCardArt = (amount, number = "") => `
   <div class="gc-card" aria-hidden="true">
     <span class="gc-mark">${LOGO_MARK}</span>
@@ -621,20 +621,7 @@ function giftCardsPage() {
   const g = SITE.giftCards || { amounts: [25, 50, 75, 100], min: 10, max: 500 };
   let amount = g.amounts[1] ?? g.amounts[0];
   const root = $("[data-gift-cards]");
-  // With the Shopify store connected, gift cards are sold there: a link to its gift card product.
-  if (SITE.shopify?.domain) {
-    const handle = SITE.shopify.giftCard;
-    root.innerHTML = `
-      <div class="pdp">
-        <div class="pdp-gallery" data-reveal><div class="pdp-image gc-stage">${giftCardArt(g.amounts[1] ?? g.amounts[0])}</div></div>
-        <div class="pdp-info" data-reveal style="--i:1">
-          <h1>Gift Card</h1>
-          <p class="pdp-about">A Mimi Food digital gift card, emailed to them right away. It never expires.</p>
-          ${handle ? `<a class="button" href="https://${esc(SITE.shopify.domain)}/products/${esc(handle)}">Buy a Gift Card</a>` : `<p class="muted">Gift cards are coming soon. Questions? <a href="contact">Contact us</a>.</p>`}
-        </div>
-      </div>`;
-    return;
-  }  root.innerHTML = `
+  root.innerHTML = `
     <div class="pdp">
       <div class="pdp-gallery" data-reveal>
         <div class="pdp-image gc-stage">
