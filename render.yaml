@@ -35,6 +35,17 @@ services:
           type: pserv
           name: hermes-assistant
           envVarKey: HERMES_DASHBOARD_SESSION_TOKEN
+      # Deep Work in the back office: a separate, more capable Hermes (below), signed-in staff only.
+      - key: HERMES_STAFF_URL
+        fromService:
+          type: pserv
+          name: hermes-staff
+          property: hostport
+      - key: HERMES_STAFF_TOKEN
+        fromService:
+          type: pserv
+          name: hermes-staff
+          envVarKey: HERMES_DASHBOARD_SESSION_TOKEN
       # Wholesale login by text code (Twilio). Account SID and auth token, plus a Verify
       # service (VA…), or a sending number (TWILIO_FROM) / messaging service (MG…).
       - key: TWILIO_ACCOUNT_SID
@@ -242,6 +253,43 @@ services:
       - key: HERMES_DASHBOARD_SESSION_TOKEN
         generateValue: true
       # Hermes' model access (Claude through OpenRouter); set the value in the Render dashboard.
+      - key: OPENROUTER_API_KEY
+        sync: false
+
+  # The back office's Deep Work: its own Hermes, apart from the public one, reachable only after
+  # back office sign-in. It may start helpers (up to 3 at once, on a cheaper model), remember things,
+  # look things up on the web and keep to-dos. No terminal, files, browser or scheduled jobs.
+  - type: pserv
+    runtime: docker
+    name: hermes-staff
+    plan: starter
+    repo: https://github.com/NousResearch/hermes-agent
+    branch: main
+    autoDeploy: false
+    dockerCommand: |-
+      sh -c '
+      mkdir -p /opt/data
+      echo "model:" > /opt/data/config.yaml
+      echo "  default: anthropic/claude-sonnet-5.5" >> /opt/data/config.yaml
+      echo "  provider: openrouter" >> /opt/data/config.yaml
+      echo "platform_toolsets:" >> /opt/data/config.yaml
+      echo "  cli: [web, delegation, todo, memory, skills]" >> /opt/data/config.yaml
+      echo "delegation:" >> /opt/data/config.yaml
+      echo "  max_concurrent_children: 3" >> /opt/data/config.yaml
+      echo "  max_spawn_depth: 1" >> /opt/data/config.yaml
+      echo "  model: anthropic/claude-haiku-5.5" >> /opt/data/config.yaml
+      echo "  provider: openrouter" >> /opt/data/config.yaml
+      exec hermes serve --host 0.0.0.0 --port 9119
+      '
+    disk:
+      name: hermes-staff-data
+      mountPath: /opt/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: "9119"
+      - key: HERMES_DASHBOARD_SESSION_TOKEN
+        generateValue: true
       - key: OPENROUTER_API_KEY
         sync: false
 

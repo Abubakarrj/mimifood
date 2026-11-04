@@ -75,7 +75,7 @@ import { createMeetings, MEETING_PARTS, MeetingError, PROVIDER_NAMES } from "./s
 import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIELDS } from "./server/contracts.ts";
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
-import { createAssistantSocket, hermesConfigured } from "./server/hermes.ts";
+import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -9483,7 +9483,7 @@ async function handleAdmin(req, res, url) {
     return answer ? sendJson(res, 200, { ok: true }) : sendJson(res, 404, { error: "That answer isn't saved yet." });
   }
   if (pathname === "/api/admin/assistant/settings" && method === "GET") {
-    return sendJson(res, 200, { staffPhones: setting("staffPhones")?.value || [], chatAssistant: chatAssistantOn(), ready: Boolean(client), texts: imessageConfigured(), waiting: assistantStore.data.proposals.filter((p) => p.status === "waiting" && p.where === "admin").map(proposalView), remembered: memoryOf("team").map((n) => ({ id: n.id, text: n.text, at: n.at })) });
+    return sendJson(res, 200, { staffPhones: setting("staffPhones")?.value || [], chatAssistant: chatAssistantOn(), ready: Boolean(client), deepWork: hermesStaffConfigured(), texts: imessageConfigured(), waiting: assistantStore.data.proposals.filter((p) => p.status === "waiting" && p.where === "admin").map(proposalView), remembered: memoryOf("team").map((n) => ({ id: n.id, text: n.text, at: n.at })) });
   }
   if (pathname === "/api/admin/assistant/settings" && method === "PATCH") {
     const body = await readJson(req).catch(() => ({}));
@@ -16325,8 +16325,25 @@ const assistantSocket = createAssistantSocket({
   logAsked: (question) => logAsked(question, "FAQ"),
   log: console.error,
 });
+// Deep Work in the back office: a separate, more capable Hermes (helpers, memory, web, to-dos) for signed-in staff only.
+const staffSocket = createStaffSocket({
+  siteUrl: SITE_URL,
+  brief: () => `You are the Mimi Food team's deep-work assistant, used by staff in the back office. Take on larger jobs: research, comparisons, drafts, plans and analysis. For big jobs, hand parts to helpers and put their results together. You cannot see orders, customers or the shop's data; if a job needs them, say so and ask the person to paste what is needed. Do not run commands or change files. Be direct and brief.
+
+# About Mimi Food
+
+${SYSTEM_PROMPT}`,
+  who: (req) => {
+    const w: any = adminWho(req);
+    return w ? { id: String(w.id || "key"), name: String(w.name || "Owner") } : null;
+  },
+  sameSite: (req) => sameSite(req, SITE_URL),
+  log: console.error,
+});
 server.on("upgrade", (req, socket, head) => {
-  if (new URL(req.url || "/", "http://x").pathname === "/assistant/ws") assistantSocket.upgrade(req, socket, head);
+  const path = new URL(req.url || "/", "http://x").pathname;
+  if (path === "/assistant/ws") assistantSocket.upgrade(req, socket, head);
+  else if (path === "/assistant/staff/ws") staffSocket.upgrade(req, socket, head);
   else socket.destroy();
 });
 

@@ -9582,6 +9582,43 @@ let assistChatId = (() => {
 })();
 let assistChats = null; // the recent chats list, once asked for
 let assistBusy = false;
+let assistDeep = false; // Deep Work: the staff Hermes (helpers, memory, web) over a WebSocket
+let deepSocket: WebSocket | null = null;
+// One ask over the Deep Work socket: words stream into the live answer; what Hermes is doing shows as the step.
+function deepAsk(text: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const id = String(Date.now());
+    const go = (socket: WebSocket) => socket.send(JSON.stringify({ type: "ask", id, text }));
+    const fresh = () => {
+      const socket = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/assistant/staff/ws`);
+      deepSocket = socket;
+      socket.onmessage = (ev) => {
+        let m: any;
+        try {
+          m = JSON.parse(ev.data);
+        } catch {
+          return;
+        }
+        if (m.type === "ready") go(socket);
+        else if (m.type === "delta" && m.id === id) {
+          assistLive.text += m.text;
+          assistPaint();
+        } else if (m.type === "status" && m.id === id) {
+          assistLive.step = "deep:" + (m.label || "");
+          assistPaint();
+        } else if (m.type === "done" && m.id === id) resolve(m.text);
+        else if (m.type === "error") reject(new Error(m.busy ? "Deep Work is still on the last question." : "Deep Work couldn't finish that. Try again."));
+      };
+      socket.onerror = () => reject(new Error("Deep Work isn't available right now."));
+      socket.onclose = () => {
+        if (deepSocket === socket) deepSocket = null;
+        reject(new Error("Deep Work stopped. Try again."));
+      };
+    };
+    if (deepSocket && deepSocket.readyState === WebSocket.OPEN) go(deepSocket);
+    else fresh();
+  });
+}
 let assistLive = { text: "", step: "" }; // the answer being written, streamed in
 const saveAssist = () => {
   try {
@@ -9900,6 +9937,7 @@ const assistComposer = (off) => `
       <div class="assist-compose-row">
         <button type="button" class="assist-attach" data-assist-attach aria-label="Add photos and files" title="Add photos and files" ${off ? "disabled" : ""}>${icon("plus")}</button>
         <input type="file" data-assist-file accept="${ASSIST_ACCEPT}" multiple hidden>
+        ${state.assist?.deepWork ? `<button type="button" class="assist-attach assist-deep" data-assist-deep aria-pressed="${assistDeep}" aria-label="Deep Work" title="Deep Work: bigger jobs, with helpers working in parallel">${icon("sparkles")}</button>` : ""}
         <textarea id="assist-input" name="q" rows="1" aria-label="Ask the assistant" placeholder="${assistChat.length ? "Ask a follow up" : "Ask anything…"}" ${off ? "disabled" : ""}></textarea>
         ${Speech ? `<button type="button" class="assist-mic" data-assist-mic aria-label="Dictate" aria-pressed="false" data-tip="Dictate" ${off ? "disabled" : ""}>${icon("Mic")}</button>` : ""}
         <button type="submit" class="assist-send" aria-label="Send" ${off ? "disabled" : ""}>${icon("up")}</button>
@@ -9984,7 +10022,7 @@ const assistThreadHtml = () =>
     .join("")}${assistBusy ? `<li class="assist-msg is-ai"><span class="assist-avatar" aria-hidden="true">${AVATAR}</span><div class="assist-body"><p class="assist-thinking" role="status"><span class="assist-spinner" aria-hidden="true"></span><span data-assist-now>${esc(assistNow())}</span><span class="assist-clock" data-assist-clock>${seconds(Date.now() - assistStarted)}</span></p><div class="assist-text" data-assist-live>${plainMarkdown(assistLive.text)}</div></div></li>` : ""}</ol>`;
 // What it's doing right now: "Checking sales" while it looks, "Writing" once the answer starts.
 const assistNow = () =>
-  assistLive.text ? "Writing" : assistLive.step ? (STEP_LABEL[assistLive.step] || "Looking it up").replace(/^Checked/, "Checking").replace(/^Looked/, "Looking").replace(/^Searched/, "Searching").replace(/^Drafted/, "Drafting").replace(/^Saved/, "Saving") : "Thinking";
+  assistLive.text ? "Writing" : assistLive.step.startsWith("deep:") ? (assistLive.step.slice(5) ? "Working: " + assistLive.step.slice(5) : "Working on it") : assistLive.step ? (STEP_LABEL[assistLive.step] || "Looking it up").replace(/^Checked/, "Checking").replace(/^Looked/, "Looking").replace(/^Searched/, "Searching").replace(/^Drafted/, "Drafting").replace(/^Saved/, "Saving") : "Thinking";
 // Streamed bits go straight into the open answer, without redrawing the conversation.
 const assistPaint = () => {
   const now = $("[data-assist-now]");
@@ -10441,6 +10479,12 @@ async function assistAsk(q) {
   assistRender();
   assistScroll();
   try {
+    if (assistDeep && state.assist?.deepWork) {
+      if (files.length) throw new Error("Deep Work takes text only.");
+      const reply = await deepAsk(q);
+      assistChat.push({ role: "assistant", content: reply, cards: [], steps: [], ms: Date.now() - assistStarted } as any);
+      return;
+    }
     // Earlier files still in memory go again, so follow-up questions can see them.
     // Cards it showed go back as a line of text, so a follow-up question has their figures.
     const cardText = (c) => [`[${c.title}${c.sub ? `, ${c.sub}` : ""}]`, ...(c.kpis || []).map((k) => `${k.label} ${k.value}${k.change ? ` (${k.change})` : ""}`), ...(c.rows || []).map((r) => [r.main, r.sub, r.value].filter(Boolean).join(" "))].join("; ");
@@ -10499,6 +10543,11 @@ async function assistAsk(q) {
   }
 }
 async function assistantClick(t) {
+  if (t.closest("[data-assist-deep]")) {
+    assistDeep = !assistDeep;
+    assistRender();
+    return true;
+  }
   if (t.closest("[data-assist-settings]")) {
     assistSettings = !assistSettings;
     assistRender();

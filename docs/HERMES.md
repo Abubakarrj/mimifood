@@ -89,3 +89,16 @@ Tested against a stand-in server that speaks the protocol above: refused upgrade
 foreign or missing Origin), the session lifecycle, streaming, tool activity hidden from the visitor,
 Hermes down. **Not tested against a real Hermes**: it isn't installed in the build environment.
 Before going live, run the steps above, ask a question on the site, and read the Hermes log.
+
+## Deep Work (back office only)
+
+A second, separate Hermes (`hermes-staff` in `render.yaml`) behind the back office Assistant page. When
+`HERMES_STAFF_URL` and `HERMES_STAFF_TOKEN` are set (the Blueprint wires them), a Deep Work button appears in
+the message box. It is off for the public site: the socket `/assistant/staff/ws` needs a back office sign-in
+cookie and a same-site Origin, and allows 2 sockets per person and 6 in all.
+
+- Tools: web, delegation (helpers), todo, memory, skills. No terminal, files, browser or scheduled jobs.
+- Helpers: up to 3 at once, one level deep, on a cheaper model (`delegation:` in the service's start command).
+- It cannot see orders, customers or shop data; the brief tells it so. Answers take minutes, not seconds (10-minute limit).
+- Set `OPENROUTER_API_KEY` on `hermes-staff` and deploy it (auto-deploy is off). Optional `HERMES_STAFF_PROFILE`.
+- Not tested against a real Hermes: only a stand-in server. Check the delegation keys against the pinned commit first.

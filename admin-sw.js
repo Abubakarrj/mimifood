@@ -3,7 +3,7 @@
 // straight away; the cached copy is only used without a connection. API calls (orders,
 // customers…) are never cached: they always need the server.
 
-const CACHE = "bo-shell-v262-mimi12";
+const CACHE = "bo-shell-v262-mimi13";
 const SHELL = ["/admin", "/admin.css", "/admin-medusa.css", "/js/admin.js", "/vendor/lucide.min.js", "/admin.webmanifest", "/assets/admin-icon-192.png", "/assets/logo.svg"];
 
 self.addEventListener("install", (event) => {

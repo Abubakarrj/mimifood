@@ -285,3 +285,149 @@ export function createAssistantSocket(deps: AssistantDeps) {
     },
   };
 }
+
+/* ── Staff tier: the back office's own Hermes (sub-agents, memory, web, todo) ─────────── */
+
+const staffTarget = () => {
+  const url = env("HERMES_STAFF_URL").replace(/\/+$/, "");
+  return { url: url && !/^wss?:\/\//.test(url) ? `ws://${url}` : url, token: env("HERMES_STAFF_TOKEN") };
+};
+export const hermesStaffConfigured = () => {
+  const t = staffTarget();
+  return Boolean(t.url && t.token);
+};
+
+const STAFF = { turnMs: 10 * 60_000, idleMs: 30 * 60_000, questionChars: 4000, perPerson: 2, total: 6, frameBytes: 40_000 };
+
+export type StaffDeps = {
+  siteUrl: string;
+  brief: () => string;
+  who: (req: IncomingMessage) => { id: string; name: string } | null; // signed in to the back office
+  sameSite: (req: IncomingMessage) => boolean;
+  log: (...args: any[]) => void;
+};
+
+// Signed-in staff only. Same relay as the public assistant, but with room to work: long turns,
+// longer questions, and the names of what Hermes is doing (including helpers it starts) shown.
+export function createStaffSocket(deps: StaffDeps) {
+  const wss = new WebSocketServer({ noServer: true, maxPayload: STAFF.frameBytes });
+  const perPerson = new Map<string, number>();
+
+  wss.on("connection", (client: WebSocket, _req: IncomingMessage, person: { id: string; name: string }) => {
+    let link: HermesLink | null = null;
+    let sessionId = "";
+    let turn: { id: string; text: string; timer: NodeJS.Timeout } | null = null;
+    let idle = setTimeout(() => client.close(1000, "idle"), STAFF.idleMs);
+    const send = (m: Json) => client.readyState === WebSocket.OPEN && client.send(JSON.stringify(m));
+    const endTurn = () => {
+      if (turn) clearTimeout(turn.timer);
+      turn = null;
+    };
+    const fail = (id: string, error: unknown, started: boolean) => {
+      if (!turn || turn.id !== id) return;
+      deps.log("[staff-assistant]", error instanceof Error ? error.message : error);
+      endTurn();
+      send({ type: "error", id, started });
+    };
+    const open = async () => {
+      link = new HermesLink(staffTarget());
+      link.onEvent = (type, sid, payload) => {
+        if (sid !== sessionId || !turn) return;
+        if (type === "message.delta" && typeof payload.text === "string") {
+          turn.text += payload.text;
+          send({ type: "delta", id: turn.id, text: payload.text });
+        } else if (type === "tool.start" || type === "tool.progress" || type === "tool.generating") {
+          const label = String(payload.name || payload.tool_name || payload.tool || "").replace(/[^\w .:-]/g, "").slice(0, 60);
+          send({ type: "status", id: turn.id, label });
+        } else if (type === "approval.request") {
+          link?.request("approval.respond", { session_id: sessionId, choice: "deny", all: true }).catch(() => {});
+        } else if (type === "message.complete") {
+          const { id, text } = turn;
+          const full = typeof payload.text === "string" && payload.text ? payload.text : text;
+          if (payload.status === "error" || payload.error) return fail(id, payload.error || "turn failed", Boolean(text));
+          endTurn();
+          send({ type: "done", id, text: full });
+        } else if (type === "error") fail(turn.id, payload.message, Boolean(turn.text));
+      };
+      link.onClose = () => {
+        link = null;
+        sessionId = "";
+        if (turn) fail(turn.id, "Hermes connection closed", Boolean(turn.text));
+      };
+      await link.connect();
+      const created = await link.request("session.create", {
+        profile: env("HERMES_STAFF_PROFILE") || null,
+        source: "back-office",
+        title: `Back office: ${person.name}`.slice(0, 80),
+        messages: [{ role: "system", content: deps.brief(), display_kind: "hidden" }],
+        close_on_disconnect: true,
+        hidden: true,
+      });
+      sessionId = String(created?.session_id || "");
+      if (!sessionId) throw new Error("Hermes gave no session");
+    };
+
+    client.on("message", async (data) => {
+      clearTimeout(idle);
+      idle = setTimeout(() => client.close(1000, "idle"), STAFF.idleMs);
+      let m: Json;
+      try {
+        m = JSON.parse(String(data));
+      } catch {
+        return;
+      }
+      if (m.type === "stop") {
+        if (turn && link && sessionId) link.request("session.interrupt", { session_id: sessionId }).catch(() => {});
+        return;
+      }
+      if (m.type !== "ask") return;
+      const id = String(m.id || "").slice(0, 40);
+      const text = String(m.text || "").trim().slice(0, STAFF.questionChars);
+      if (!text) return;
+      if (turn) return send({ type: "error", id, started: false, busy: true });
+      turn = {
+        id,
+        text: "",
+        timer: setTimeout(() => {
+          if (link && sessionId) link.request("session.interrupt", { session_id: sessionId }).catch(() => {});
+          fail(id, "turn timed out", Boolean(turn?.text));
+        }, STAFF.turnMs),
+      };
+      try {
+        if (!link) await open();
+        await link!.request("prompt.submit", { session_id: sessionId, text, surface: "back-office" });
+      } catch (error) {
+        fail(id, error, false);
+        link?.close();
+      }
+    });
+    client.on("close", () => {
+      clearTimeout(idle);
+      endTurn();
+      const closing = link;
+      link = null;
+      if (closing && sessionId) closing.request("session.close", { session_id: sessionId }, 3000).catch(() => {}).finally(() => closing.close());
+      else closing?.close();
+      const left = (perPerson.get(person.id) || 1) - 1;
+      if (left > 0) perPerson.set(person.id, left);
+      else perPerson.delete(person.id);
+    });
+    client.on("error", () => client.terminate());
+    send({ type: "ready" });
+  });
+
+  return {
+    upgrade(req: IncomingMessage, socket: Duplex, head: Buffer) {
+      const refuse = (status: string) => {
+        socket.write(`HTTP/1.1 ${status}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
+        socket.destroy();
+      };
+      if (!hermesStaffConfigured()) return refuse("404 Not Found");
+      const person = deps.who(req);
+      if (!person || !deps.sameSite(req) || !req.headers.origin) return refuse("403 Forbidden");
+      if ((perPerson.get(person.id) || 0) >= STAFF.perPerson || wss.clients.size >= STAFF.total) return refuse("429 Too Many Requests");
+      perPerson.set(person.id, (perPerson.get(person.id) || 0) + 1);
+      wss.handleUpgrade(req, socket, head, (client) => wss.emit("connection", client, req, person));
+    },
+  };
+}
