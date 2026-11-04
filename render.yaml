@@ -18,6 +18,10 @@ services:
       # Set the value in the Render dashboard; never commit the key.
       - key: ANTHROPIC_API_KEY
         sync: false
+      # Or answer the FAQ through OpenRouter (openrouter.ai) with no Anthropic key: it picks the model
+      # (OPENROUTER_MODEL names one instead). Used only when ANTHROPIC_API_KEY isn't set.
+      - key: OPENROUTER_API_KEY
+        sync: false
       # The site assistant is answered by Hermes Agent, the private service below (docs/HERMES.md).
       # Delete these two lines (and the service) to go back to answering with ANTHROPIC_API_KEY only.
       - key: HERMES_URL
@@ -220,7 +224,7 @@ services:
       sh -c '
       mkdir -p /opt/data
       echo "model:" > /opt/data/config.yaml
-      echo "  default: anthropic/claude-sonnet-5.5" >> /opt/data/config.yaml
+      echo "  default: openrouter/auto" >> /opt/data/config.yaml
       echo "  provider: openrouter" >> /opt/data/config.yaml
       echo "platform_toolsets:" >> /opt/data/config.yaml
       echo "  cli: [web]" >> /opt/data/config.yaml

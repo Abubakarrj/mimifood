@@ -1351,8 +1351,60 @@ function askModel(messages) {
 
 const SORRY = `Sorry, I can't help with that one. For anything else, email us at ${DATA.SITE.email}.`;
 
+// With no Anthropic key, questions go through OpenRouter (OPENROUTER_API_KEY), which picks the model
+// itself unless OPENROUTER_MODEL names one. Same brief, same streamed plain text.
+const openRouterKey = () => String(process.env.OPENROUTER_API_KEY || "").trim();
+async function askOpenRouter(res, messages, abort) {
+  let started = false;
+  try {
+    const upstream = await fetch(process.env.OPENROUTER_URL || "https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openRouterKey()}`, "Content-Type": "application/json", "HTTP-Referer": SITE_URL, "X-Title": DATA.SITE.name },
+      body: JSON.stringify({
+        model: process.env.OPENROUTER_MODEL || "openrouter/auto",
+        stream: true,
+        max_tokens: 2000,
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+      }),
+      signal: abort.signal,
+    });
+    if (!upstream.ok || !upstream.body) throw new Error(`OpenRouter responded ${upstream.status}: ${(await upstream.text().catch(() => "")).slice(0, 200)}`);
+    const decoder = new TextDecoder();
+    let buffer = "";
+    for await (const chunk of upstream.body as any) {
+      buffer += decoder.decode(chunk, { stream: true });
+      let at;
+      while ((at = buffer.indexOf(String.fromCharCode(10))) >= 0) {
+        const line = buffer.slice(0, at).trim();
+        buffer = buffer.slice(at + 1);
+        if (!line.startsWith("data:") || line === "data: [DONE]") continue;
+        let text = "";
+        try {
+          text = JSON.parse(line.slice(5))?.choices?.[0]?.delta?.content || "";
+        } catch {
+          continue;
+        }
+        if (!text) continue;
+        if (!started) {
+          res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" });
+          started = true;
+        }
+        res.write(text);
+      }
+    }
+    if (!started) return send(res, 200, SORRY);
+    res.end();
+  } catch (error) {
+    if (abort.signal.aborted) return;
+    console.error("[ask] OpenRouter:", error.message);
+    const msg = "Sorry, I couldn't answer just now. Please try again in a moment.";
+    if (started) res.end(`\n\n${msg}`);
+    else send(res, 502, msg);
+  }
+}
+
 async function handleAsk(req, res) {
-  if (!client) {
+  if (!client && !openRouterKey()) {
     return send(res, 503, `Questions aren't available right now. Email us at ${DATA.SITE.email}.`);
   }
   if (rateLimited(clientIp(req)) || rateLimited("all", "ask-site", 300)) {
@@ -1377,6 +1429,7 @@ async function handleAsk(req, res) {
 
   const abort = new AbortController();
   res.on("close", () => abort.abort()); // visitor left: stop generating
+  if (!client) return askOpenRouter(res, messages, abort);
 
   let started = false;
   let model = askModel(messages);
@@ -16227,7 +16280,8 @@ server.listen(PORT, () => {
   setTimeout(() => warmUp().catch(() => {}), 50);
   repriceSoon(); // subscriptions billed at an older price move to the current one
   console.log(`Mimi Food running on http://localhost:${PORT} (data: ${storage.describe})`);
-  if (!client && !hermesConfigured()) console.warn("ANTHROPIC_API_KEY is not set: the FAQ assistant will be unavailable.");
+  if (!client && !openRouterKey() && !hermesConfigured()) console.warn("Neither ANTHROPIC_API_KEY nor OPENROUTER_API_KEY is set: the FAQ assistant will be unavailable.");
+  else if (!client && openRouterKey()) console.log("FAQ assistant: OpenRouter.");
   if (hermesConfigured()) console.log("Assistant: Hermes Agent at /assistant/ws (falls back to /api/ask).");
   if (adminKey().length < ADMIN_KEY_MIN) console.warn(`ADMIN_KEY is ${adminKey() ? "shorter than 12 characters" : "not set"}: the back office can't be signed in to.`);
   // Prepaid gift subscriptions: check for deliveries due, now and every hour.
