@@ -1302,6 +1302,19 @@ function openRouterClient() {
   const prepare = (params) => {
     const { betas, fallbacks, output_config, cache_control, system, model, ...rest } = params;
     const schema = output_config?.format?.schema;
+    // Prompt caching: OpenRouter passes block-level cache_control (system blocks keep theirs) on to
+    // Anthropic models. The top-level shortcut isn't supported there, so it becomes a breakpoint on
+    // the last block of the conversation, which caches everything before it too.
+    if (cache_control && Array.isArray(rest.messages) && rest.messages.length) {
+      const messages = rest.messages.slice();
+      const last = messages[messages.length - 1];
+      const blocks = typeof last.content === "string" ? [{ type: "text", text: last.content }] : Array.isArray(last.content) ? last.content.slice() : null;
+      if (blocks?.length) {
+        blocks[blocks.length - 1] = { ...blocks[blocks.length - 1], cache_control };
+        messages[messages.length - 1] = { ...last, content: blocks };
+        rest.messages = messages;
+      }
+    }
     return { schema, body: { ...rest, model: OPENROUTER_MODELS[model] || model, ...(system !== undefined || schema ? { system: schema ? withSchema(system, schema) : system } : {}) } };
   };
   return {
