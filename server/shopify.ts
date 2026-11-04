@@ -44,7 +44,7 @@ export async function giftCardVariants(log: (...a: any[]) => void = console.erro
   if (cache && Date.now() - cache.at < 10 * 60_000) return cache.value;
   try {
     // Gift card products by flag, then any product titled like one (a store can make it a plain product).
-    const data = await graphql(`{ products(first: 50) { nodes { title status isGiftCard variants(first: 50) { nodes { id price } } } } }`);
+    const data = await graphql(`{ products(first: 10, query: "gift_card:true OR title:gift*") { nodes { title status isGiftCard variants(first: 20) { nodes { id price } } } } }`);
     const all: any[] = data?.products?.nodes || [];
     const likely = all.filter((p) => p.isGiftCard || /gift\s*card|egift|e-gift/i.test(p.title));
     const product = likely.find((p) => p.status === "ACTIVE");
@@ -95,7 +95,7 @@ export async function refreshShopifyPrices(log: (...a: any[]) => void = console.
     const titles = new Map<string, { id: string; price: number }>();
     let after = "";
     for (let page = 0; page < 10; page++) {
-      const data = await graphql(`{ products(first: 100${after ? `, after: "${after}"` : ""}) { pageInfo { hasNextPage endCursor } nodes { handle title variants(first: 100) { nodes { id price } } } } }`);
+      const data = await graphql(`{ products(first: 40${after ? `, after: "${after}"` : ""}) { pageInfo { hasNextPage endCursor } nodes { handle title variants(first: 10) { nodes { id price } } } } }`);
       for (const p of data?.products?.nodes || []) {
         const first = p.variants?.nodes?.[0];
         if (first) {
