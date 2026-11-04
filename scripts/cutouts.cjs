@@ -91,23 +91,89 @@ async function tidy(file) {
     }
     // With the sides cut away, the dark corners beside the jar's rounded top and bottom now reach the edge too.
     peel();
+    // The jar's walls are the only columns that stay solid top to bottom; streaks sticking out sideways (label color
+    // smeared past the glass) only fill a short stretch of rows. Cut at the outermost columns that are mostly solid.
+    {
+      const cnt = new Uint32Array(w);
+      for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] > 128) cnt[p % w]++;
+      const peak = Math.max(...cnt);
+      let a = 0, b = w - 1;
+      while (a < w - 1 && cnt[a] < peak * 0.85) a++;
+      while (b > 0 && cnt[b] < peak * 0.85) b--;
+      if (process.env.DEBUG_JAR) console.log("walls", path.basename(file), a, b, peak);
+      // Thin ticks stand above the lid's rim: in each column, nothing counts until a solid stretch of 24 rows begins.
+      for (let x = a; x <= b; x++) {
+        let run = 0, start = -1;
+        for (let y = 0; y < h; y++) {
+          if (data[(y * w + x) * 4 + 3] > 128) { if (++run >= 24) { start = y - 23; break; } } else run = 0;
+        }
+        for (let y = 0; y < (start < 0 ? h : start); y++) data[(y * w + x) * 4 + 3] = 0;
+      }
+      // The rim's corners are rounded, but the photo smears bars straight up from them. Draw the rounded corner back:
+      // the flat top (and bottom) read from the middle of the jar, curving down over the outer 90px (33px deep).
+      // Under the bars runs the rim's own dark edge line: in each column, the first dark pixel within 60 rows of the top
+      // (and of the bottom) is where the jar really starts; the bars above it go.
+      const luma = (p) => 0.3 * data[p * 4] + 0.59 * data[p * 4 + 1] + 0.11 * data[p * 4 + 2];
+      const cutT = new Int32Array(w).fill(-1), cutB = new Int32Array(w).fill(-1);
+      for (let x = a; x <= b; x++) {
+        let t = -1, bt = -1;
+        for (let y = 0; y < h; y++) if (data[(y * w + x) * 4 + 3] > 128) { t = y; break; }
+        if (t < 0) continue;
+        // The jar is the first unbroken stretch from the top; loose bits further down (a red smear under the glass) are not.
+        { let gap = 0; bt = t; for (let y = t; y < h; y++) { if (data[(y * w + x) * 4 + 3] > 128) { bt = y; gap = 0; } else if (++gap > 6) break; } }
+        cutT[x] = t;
+        cutB[x] = bt;
+        for (let y = t; y < t + 60; y++) if (luma(y * w + x) < 75) { cutT[x] = y; break; }
+        for (let y = bt; y > bt - 60; y--) if (luma(y * w + x) < 75) { cutB[x] = y; break; }
+        cutB[x] -= 4; // thin slivers of the label's color hang under the glass
+      }
+      // A bar that is itself dark would fool one column; the median of the neighbors (±20 columns) does not.
+      const med = (arr, x) => {
+        const v = [];
+        for (let k = Math.max(a, x - 70); k <= Math.min(b, x + 70); k++) if (arr[k] >= 0) v.push(arr[k]);
+        v.sort((p, q) => p - q);
+        return v.length ? v[Math.floor(v.length / 2)] : -1;
+      };
+      const medT = new Int32Array(w).fill(-1), medB = new Int32Array(w).fill(-1);
+      for (let x = a; x <= b; x++) { medT[x] = med(cutT, x); medB[x] = med(cutB, x); }
+      for (let x = a; x <= b; x++) {
+        if (medT[x] < 0) continue;
+        for (let y = 0; y < medT[x]; y++) data[(y * w + x) * 4 + 3] = 0;
+        for (let y = medB[x] + 1; y < h; y++) data[(y * w + x) * 4 + 3] = 0;
+      }
+      // Whatever still hangs below the glass is only a few pixels wide: the jar ends at the last row that is mostly solid.
+      {
+        let lastRow = 0;
+        for (let y = 0; y < h; y++) {
+          let n = 0;
+          for (let x = a; x <= b; x++) if (data[(y * w + x) * 4 + 3] > 128) n++;
+          if (n >= (b - a) * 0.3) lastRow = y;
+        }
+        for (let p = (lastRow + 1) * w; p < w * h; p++) data[p * 4 + 3] = 0;
+      }
+      for (let p = 0; p < w * h; p++) {
+        const x = p % w;
+        if (x < a || x > b) data[p * 4 + 3] = 0;
+      }
+    }
   }
   // Shots with extra props: keep only the part of the picture that holds the product, as a share of what's visible
   // [left, top, right, bottom]. Matcha: the bag, not the cup. Oat milks: the cartons, not the white box behind (it
   // vanishes on a white page).
-  const KEEP = { hankook: [0, 0, 0.6, 1], "korean-whole-oat": [0.5, 0.1, 1, 1], "whole-oat-almond": [0.5, 0.05, 1, 1] };
+  // (The oat, almond and melon soy milks are cut by hand from their original photos instead: see the product photo notes.)
+  const KEEP = { hankook: [0, 0, 0.6, 1] };
   const keepKey = Object.keys(KEEP).find((k) => path.basename(file).includes(k));
   if (keepKey) {
-    let x0 = w, x1 = 0, y0 = h, y1 = 0;
-    for (let p = 0; p < w * h; p++) {
-      if (data[p * 4 + 3] === 0) continue;
-      const x = p % w, y = (p - x) / w;
-      if (x < x0) x0 = x;
-      if (x > x1) x1 = x;
-      if (y < y0) y0 = y;
-      if (y > y1) y1 = y;
-    }
+    // Visible extent, ignoring stray specks (a column or row needs 12+ solid pixels to count).
+    const cols = new Uint32Array(w), rows = new Uint32Array(h);
+    for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] > 200) { cols[p % w]++; rows[Math.floor(p / w)]++; }
+    let x0 = 0, x1 = w - 1, y0 = 0, y1 = h - 1;
+    while (x0 < w - 1 && cols[x0] < 12) x0++;
+    while (x1 > 0 && cols[x1] < 12) x1--;
+    while (y0 < h - 1 && rows[y0] < 12) y0++;
+    while (y1 > 0 && rows[y1] < 12) y1--;
     const [kl, kt, kr, kb] = KEEP[keepKey];
+    if (process.env.DEBUG_JAR) console.log("keep", keepKey, { w, h, x0, x1, y0, y1 });
     for (let p = 0; p < w * h; p++) {
       const x = p % w, y = (p - x) / w;
       if (x < x0 + (x1 - x0) * kl || x > x0 + (x1 - x0) * kr || y < y0 + (y1 - y0) * kt || y > y0 + (y1 - y0) * kb) data[p * 4 + 3] = 0;
@@ -139,22 +205,6 @@ async function tidy(file) {
       else if (y > y0 + (y1 - y0) * 0.78 && x >= x0 && data[p * 4 + 3] > 0) data[p * 4 + 3] = 255;
     }
   }
-  // The mala mayo's sauce bowl sits at its bottom left: drop everything left of x and below y.
-  if (/mala-mayo/.test(path.basename(file))) {
-    let x0 = w, x1 = 0, y0 = h, y1 = 0;
-    for (let p = 0; p < w * h; p++) {
-      if (data[p * 4 + 3] === 0) continue;
-      const x = p % w, y = (p - x) / w;
-      if (x < x0) x0 = x;
-      if (x > x1) x1 = x;
-      if (y < y0) y0 = y;
-      if (y > y1) y1 = y;
-    }
-    for (let p = 0; p < w * h; p++) {
-      const x = p % w, y = (p - x) / w;
-      if (x < x0 + (x1 - x0) * 0.235 && y > y0 + (y1 - y0) * 0.7) data[p * 4 + 3] = 0;
-    }
-  }
   const clearKey = Object.keys(CLEAR).find((k) => path.basename(file).includes(k));
   if (clearKey) {
     let x0 = w, x1 = 0, y0 = h, y1 = 0;
@@ -166,7 +216,22 @@ async function tidy(file) {
       if (y < y0) y0 = y;
       if (y > y1) y1 = y;
     }
+    // Leaves are the only green on these brown pouches.
+    const leaf = [];
+    for (let p = 0; p < w * h; p++) {
+      const r = data[p * 4], g = data[p * 4 + 1], b = data[p * 4 + 2];
+      if (data[p * 4 + 3] > 0 && ((g > r + 4 && g > b + 14) || (r - g <= 10 && g - b > 25))) leaf.push(p);
+    }
+    // The leaf and the dark fringe around it (10px) go.
+    for (const p of leaf) {
+      const x = p % w, y = (p - x) / w;
+      for (let dy = -10; dy <= 10; dy++) for (let dx = -10; dx <= 10; dx++) {
+        const xx = x + dx, yy = y + dy;
+        if (xx >= 0 && xx < w && yy >= 0 && yy < h) data[(yy * w + xx) * 4 + 3] = 0;
+      }
+    }
     const [cx, cy] = CLEAR[clearKey];
+    if (process.env.DEBUG_JAR) console.log("clear", clearKey, { w, h, x0, x1, y0, y1 });
     for (let p = 0; p < w * h; p++) {
       const x = p % w, y = (p - x) / w;
       if (x > x0 + (x1 - x0) * cx && y > y0 + (y1 - y0) * cy) data[p * 4 + 3] = 0;
@@ -210,6 +275,47 @@ async function tidy(file) {
         if (x < bx0 - (/stir/.test(file) ? 4 : padX) || x > bx1 + padX || y < by0 - padY || y > by1 + padY) data[p * 4 + 3] = 0;
       }
     }
+  }
+  // The kids' red ginseng jar was shot on black: shave the dark fringe off its outline, a pixel at a time.
+  if (/red-ginseng/.test(path.basename(file))) {
+    for (let pass = 0; pass < 5; pass++) {
+      const kill = [];
+      for (let p = 0; p < w * h; p++) {
+        if (data[p * 4 + 3] === 0) continue;
+        const x = p % w, y = (p - x) / w;
+        const edge = x === 0 || y === 0 || x === w - 1 || y === h - 1 || data[(p - 1) * 4 + 3] === 0 || data[(p + 1) * 4 + 3] === 0 || data[(p - w) * 4 + 3] === 0 || data[(p + w) * 4 + 3] === 0;
+        if (!edge) continue;
+        const luma = 0.3 * data[p * 4] + 0.59 * data[p * 4 + 1] + 0.11 * data[p * 4 + 2];
+        if (luma < 95 || data[p * 4 + 3] < 255) kill.push(p);
+      }
+      for (const p of kill) data[p * 4 + 3] = 0;
+    }
+    // The lid's top rows carry thin streaks sticking out sideways: take the top 9 rows of the jar off.
+    let top = h;
+    for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] > 0) { top = Math.floor(p / w); break; }
+    for (let p = 0; p < w * (top + 9); p++) data[p * 4 + 3] = 0;
+  }
+  // Haze: faint pixels far from anything solid are leftover backdrop glow; only the soft edge within 6px of the product stays.
+  if (/katsu|short-rib|jumulleok/.test(path.basename(file))) {
+    const R = 6;
+    const solid = new Uint8Array(w * h);
+    for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] >= 250) solid[p] = 1;
+    const dil = (src, horizontal) => {
+      const out = new Uint8Array(w * h);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let on = 0;
+          for (let d = -R; d <= R && !on; d++) {
+            const xx = horizontal ? x + d : x, yy = horizontal ? y : y + d;
+            if (xx >= 0 && xx < w && yy >= 0 && yy < h && src[yy * w + xx]) on = 1;
+          }
+          out[y * w + x] = on;
+        }
+      }
+      return out;
+    };
+    const near = dil(dil(solid, true), false);
+    for (let p = 0; p < w * h; p++) if (!near[p]) data[p * 4 + 3] = 0;
   }
   // Keep only the biggest connected piece (plus pieces over a tenth of its size): props that were left behind go.
   const seen = new Int32Array(w * h);
