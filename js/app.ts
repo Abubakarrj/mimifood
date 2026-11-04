@@ -12308,7 +12308,7 @@ function drawChatFiles() {
 
 // Quick replies under the latest answer, and the starters before anything's been said.
 // (Talk to a Person has its own place in the chat's header, so it isn't a starter too.)
-const CHAT_STARTERS = ["Help Me Choose a Dish", "Track My Order", "Gift Ideas"];
+const CHAT_STARTERS = ["Help Me Choose a Product", "Track My Order", "Gift Ideas"];
 const isPersonAsk = (q) => /^(talk|speak|chat) (to|with) (a|the) (person|human|team|someone)\b/i.test(String(q || "").trim());
 const chatReplies = (list) => `<li class="chat-replies">${list.map((q) => `<button type="button" class="chat-chip" data-chat-say="${esc(q)}">${esc(q)}</button>`).join("")}</li>`;
 
@@ -12486,7 +12486,7 @@ function renderChat() {
   if (!thread) return;
   const live = chatLive();
   const assisted = chatAgent || (!live && chatAssistant() && !chatWantsPerson);
-  const welcome = { from: "staff", welcome: true, text: assisted ? "Hi! I can help you find something to eat, track an order or anything else. The team is nearby too." : "Hi! How can we help?" };
+  const welcome = { from: "staff", welcome: true, text: assisted ? "Hi! I can help you find a product, track an order or anything else. The team is nearby too." : "Hi! How can we help?" };
   // (A conversation carried on from our emails starts with those, not a greeting.)
   // Searching: just the messages with the words in them.
   const q = chatQuery.trim().toLowerCase();
