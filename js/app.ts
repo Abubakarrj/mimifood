@@ -12044,7 +12044,7 @@ function renderChatShell() {
           <span class="chat-avatar is-head" aria-hidden="true">${AVATAR_MARK}</span>
           <div class="chat-title">
             <h2>${esc(SITE.name)}</h2>
-            <small class="chat-sub" data-chat-status>The team at the roastery</small>
+            <small class="chat-sub" data-chat-status>The Mimi Food team</small>
           </div>
           <span class="chat-head-actions">
             <button type="button" class="chat-person" data-chat-person aria-label="Talk to a Person" title="Talk to a Person" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.75"/><path d="M2.75 14c.6-2.7 2.7-4.25 5.25-4.25s4.65 1.55 5.25 4.25"/></svg><span>Talk to a Person</span></button>
@@ -12308,7 +12308,7 @@ function drawChatFiles() {
 
 // Quick replies under the latest answer, and the starters before anything's been said.
 // (Talk to a Person has its own place in the chat's header, so it isn't a starter too.)
-const CHAT_STARTERS = ["Help Me Choose a Coffee", "Track My Order", "Gift Ideas"];
+const CHAT_STARTERS = ["Help Me Choose a Dish", "Track My Order", "Gift Ideas"];
 const isPersonAsk = (q) => /^(talk|speak|chat) (to|with) (a|the) (person|human|team|someone)\b/i.test(String(q || "").trim());
 const chatReplies = (list) => `<li class="chat-replies">${list.map((q) => `<button type="button" class="chat-chip" data-chat-say="${esc(q)}">${esc(q)}</button>`).join("")}</li>`;
 
@@ -12486,7 +12486,7 @@ function renderChat() {
   if (!thread) return;
   const live = chatLive();
   const assisted = chatAgent || (!live && chatAssistant() && !chatWantsPerson);
-  const welcome = { from: "staff", welcome: true, text: assisted ? "Hi! I can help you find a coffee, track an order or anything else. The team is nearby too." : "Hi! How can we help?" };
+  const welcome = { from: "staff", welcome: true, text: assisted ? "Hi! I can help you find something to eat, track an order or anything else. The team is nearby too." : "Hi! How can we help?" };
   // (A conversation carried on from our emails starts with those, not a greeting.)
   // Searching: just the messages with the words in them.
   const q = chatQuery.trim().toLowerCase();
@@ -12642,7 +12642,7 @@ async function askForPerson() {
 async function startChat(text, files = []) {
   gaEvent("chat_start", { assistant: chatAssistant() });
   const data = await api("/api/chat", { method: "POST", body: { message: text, messages: chatAsked.slice(-12), ...(files.length && { files }), ...(chatWantsPerson && { person: true }) } });
-  if (!data.chat) throw new Error("Couldn't reach the roastery.");
+  if (!data.chat) throw new Error("Couldn't reach the team.");
   chatState = { id: data.chat.id, token: data.chat.token, messages: data.chat.messages.map(chatMsg), seen: 0 };
   chatAway = Boolean(data.chat.away);
   chatWriting = Boolean(data.chat.typing);
