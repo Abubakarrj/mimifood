@@ -16363,7 +16363,7 @@ async function useShopifyPhotos(): Promise<number> {
     const shop = [byHandle.get(a.id), byName.get(normTitle(a.name))].find(hasCut);
     if (!shop) continue;
     // The ?v= changes whenever the cutouts are redone, so browsers don't keep showing the old picture.
-    const cut = `/assets/products/cut/${cutName(shop.handle)}.webp?v=3`;
+    const cut = `/assets/products/cut/${cutName(shop.handle)}.webp?v=4`;
     if (a.image === cut) continue;
     await catalog.setFoodImage(a.id, cut);
     changed++;

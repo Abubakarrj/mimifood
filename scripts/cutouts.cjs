@@ -22,7 +22,10 @@ async function tidy(file) {
   }
   // Photos shot on black leave a dark box behind the product: eat dark pixels that connect to the picture's edge
   // (the product's own outline is lighter than that, so it stops the spread).
-  const jar = /(^|-)tea(-|\.)|grain/.test(path.basename(file)) && !/hankook/.test(file);
+  // The studio jar photos (beet, ginkgo, bitter melon, horse bean, pumpkin, jerusalem artichoke) are on clean white
+  // and need none of the black-box clean-up below.
+  const studio = /(beet|ginkonut|bitter-melon|horse-bean|pumpkin-red-bean|jerusalem-artichoke)-tea/.test(path.basename(file));
+  const jar = /(^|-)tea(-|\.)|grain/.test(path.basename(file)) && !/hankook/.test(file) && !studio;
   const dark = (p) => data[p * 4 + 3] > 0 && Math.max(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]) < (jar ? 85 : 60);
   const gone = new Uint8Array(w * h);
   const q = [];
@@ -143,7 +146,8 @@ async function tidy(file) {
     if (bestId) {
       for (let p = 0; p < w * h; p++) {
         const x = p % w, y = (p - x) / w;
-        if (x < bx0 - 4 || x > bx1 + (/stir/.test(file) ? Math.round((bx1 - bx0) * 0.55) : 4) || y < by0 - 4 || y > by1 + 4) data[p * 4 + 3] = 0;
+        const padX = Math.round((bx1 - bx0) * (/stir/.test(file) ? 0.55 : 0.06)), padY = Math.round((by1 - by0) * 0.06);
+        if (x < bx0 - (/stir/.test(file) ? 4 : padX) || x > bx1 + padX || y < by0 - padY || y > by1 + padY) data[p * 4 + 3] = 0;
       }
     }
   }
