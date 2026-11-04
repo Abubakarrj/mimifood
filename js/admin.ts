@@ -10074,13 +10074,13 @@ function assistantView() {
 // told which page (and which order) you're on. The same conversation as the Assistant page.
 let skOpen = false;
 const skShown = () => skOpen && state.page !== "assistant";
-// On a computer the chat opens across the work area (Peasy's), or docked beside the page; the
-// choice is remembered on this device.
+// On a computer the chat opens docked beside the page; the expand button opens it across the work
+// area instead, and that choice is remembered on this device.
 let skDocked = (() => {
   try {
-    return localStorage.getItem("bo-sk-docked") === "1";
+    return localStorage.getItem("bo-sk-docked") !== "0";
   } catch {
-    return false;
+    return true;
   }
 })();
 const skBodyClasses = () => {

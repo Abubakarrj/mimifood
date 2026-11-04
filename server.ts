@@ -76,7 +76,7 @@ import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIEL
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
 import { livekitConfigured, livekitRoom, livekitToken, livekitUrl, pacificMoment } from "./server/livekit.ts";
-import { ensureGiftCardProduct, normTitle, shopifyProducts, shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
+import { cutName, ensureGiftCardProduct, normTitle, shopifyProducts, shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
 import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
@@ -16350,22 +16350,22 @@ async function importShopifyProducts(): Promise<number> {
   return added;
 }
 
-// Products still showing the plain placeholder tile (the same 4,492-byte image) get their photo from Shopify.
-const PLACEHOLDER_BYTES = 4492;
+// Each product's photo is its cutout (background removed, so it floats on the tile like the reference shop's
+// products), when one has been made for it: assets/products/cut/<handle>.webp. A photo uploaded in the back
+// office is left alone.
 async function useShopifyPhotos(): Promise<number> {
   let changed = 0;
   const byHandle = new Map(shopifyProducts().map((p) => [p.handle, p]));
   const byName = new Map(shopifyProducts().map((p) => [normTitle(p.title), p]));
   for (const a of DATA.ACCESSORIES) {
-    if (typeof a.image !== "string" || !a.image.startsWith("/assets/products/")) continue;
     const shop = byHandle.get(a.id) || byName.get(normTitle(a.name));
-    if (!shop?.image) continue;
-    const size = await stat(path.join(ROOT, path.normalize(a.image))).then((x) => x.size).catch(() => -1);
-    if (size !== PLACEHOLDER_BYTES) continue;
-    await catalog.setFoodImage(a.id, shop.image);
+    if (!shop) continue;
+    const cut = `/assets/products/cut/${cutName(shop.handle)}.webp`;
+    if (a.image === cut || !existsSync(path.join(ROOT, "assets", "products", "cut", `${cutName(shop.handle)}.webp`))) continue;
+    await catalog.setFoodImage(a.id, cut);
     changed++;
   }
-  if (changed) console.log(`Shopify: ${changed} products now use their Shopify photo.`);
+  if (changed) console.log(`Shopify: ${changed} products now use their cutout photo.`);
   return changed;
 }
 

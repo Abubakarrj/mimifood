@@ -175,3 +175,7 @@ export async function ensureGiftCardProduct(amounts: number[], log: (...a: any[]
     creating = false;
   }
 }
+
+// The file name of a product's floating cutout photo: assets/products/cut/<cutName(handle)>.webp
+// (made by scripts/cutouts.cjs from the product's Shopify photo).
+export const cutName = (handle: string) => String(handle).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "product";

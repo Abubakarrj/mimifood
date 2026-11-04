@@ -7933,6 +7933,37 @@ h2 .reg {
   fill: #fff;
 }
 
+/* Wholesale hero: three products floating on the page, no photo frame. */
+.hero-float {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: min(100%, 520px);
+  justify-self: center;
+}
+
+.hero-float img {
+  position: absolute;
+  height: auto;
+  filter: drop-shadow(0 22px 22px rgba(40, 25, 10, 0.22));
+  animation: hero-bob 7s ease-in-out infinite;
+}
+
+.hero-float .hf-a { width: 54%; left: -4%; top: 14%; transform: rotate(-6deg); }
+.hero-float .hf-b { width: 56%; right: -6%; top: 0; animation-delay: -2.5s; }
+.hero-float .hf-c { width: 52%; right: 6%; bottom: -4%; transform: rotate(5deg); animation-delay: -4.5s; }
+
+@keyframes hero-bob {
+  50% { translate: 0 -10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float img { animation: none; }
+}
+
+@media (min-width: 900px) {
+  .hero-float { justify-self: end; }
+}
+
 /* Wholesale: the frame takes the photo's own shape (3:4), so none of the roaster is cut off. */
 .photo-hero {
   aspect-ratio: 3 / 4;

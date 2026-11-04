@@ -2115,7 +2115,10 @@ function renderCart() {
   $("[data-cart-subtotal]").textContent = money(cartSubtotal());
   $("[data-free-ship]").innerHTML = freeShipMessage();
   renderSuggestions();
-  $("[data-checkout-link]").classList.toggle("is-disabled", cart.length === 0);
+  // Straight to Shopify's checkout when the cart can go there (our own checkout page is the fallback).
+  const checkoutLink = $("[data-checkout-link]") as HTMLAnchorElement;
+  checkoutLink.classList.toggle("is-disabled", cart.length === 0);
+  checkoutLink.href = shopifyCartUrl() || "checkout";
   $(".drawer-foot").hidden = cart.length === 0;
 }
 
@@ -12067,7 +12070,7 @@ function applyChatCarts() {
     }
   }
   chatState.carts = [...done].slice(-50);
-  if (added) toast(`Added to your cart. <a href="checkout">Checkout</a>`);
+  if (added) toast(`Added to your cart. <a href="${esc(shopifyCartUrl() || "checkout")}">Checkout</a>`);
 }
 
 // Checkout inside the chat: the checkout page itself, without its header and footer, in the sheet,
