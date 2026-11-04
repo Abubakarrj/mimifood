@@ -620,7 +620,11 @@ const giftCardArt = (amount, number = "") => `
   </div>`;
 
 function giftCardsPage() {
-  const g = SITE.giftCards || { amounts: [25, 50, 75, 100], min: 10, max: 500 };
+  let g = SITE.giftCards || { amounts: [25, 50, 75, 100], min: 10, max: 500 };
+  // Paid for at Shopify: only the amounts that have a gift card variant there.
+  const shopifyCards: Record<string, string> = SITE.shopify?.domain ? SITE.shopify.giftCardVariants || {} : {};
+  const viaShopify = Object.keys(shopifyCards).length > 0;
+  if (viaShopify) g = { ...g, amounts: Object.keys(shopifyCards).map(Number).sort((a, b) => a - b) };
   let amount = g.amounts[1] ?? g.amounts[0];
   const root = $("[data-gift-cards]");
   root.innerHTML = `
@@ -637,7 +641,7 @@ function giftCardsPage() {
           <fieldset class="options">
             <legend>Amount</legend>
             ${g.amounts.map((a) => `<label><input type="radio" name="amount" value="${a}"${a === amount ? " checked" : ""}><span>${money(a).replace(/\.00$/, "")}</span></label>`).join("")}
-            <label><input type="radio" name="amount" value="other"><span>Other</span></label>
+            ${viaShopify ? "" : `<label><input type="radio" name="amount" value="other"><span>Other</span></label>`}
           </fieldset>
           <label class="gc-other" data-gc-other data-required hidden>Amount (${money(g.min).replace(/\.00$/, "")} to ${money(g.max).replace(/\.00$/, "")})<input name="other" type="number" inputmode="numeric" min="${g.min}" max="${g.max}" step="1" placeholder="${g.amounts.at(-1)}"></label>
           <fieldset class="form gc-group">
@@ -724,7 +728,7 @@ function giftCardsPage() {
     if (u?.name && !form.fromName.value) form.fromName.value = u.name;
     preview();
   });
-  getShopConfig().then((c) => {
+  if (!viaShopify) getShopConfig().then((c) => {
     if (c.payments) return;
     $("[data-pdp-add]").disabled = true;
     $("[data-gc-off]").hidden = false;
@@ -751,6 +755,7 @@ function giftCardsPage() {
       price: amount,
       qty: 1,
       giftcard: { toName, toEmail, ...(toPhone && { toPhone }), fromName, message },
+      ...(viaShopify && { shopify: shopifyCards[String(amount)] }),
     });
     const addBtn = $("[data-pdp-add]");
     addBtn.querySelector(".buy-added")?.remove();
@@ -1957,9 +1962,10 @@ function shopifyCartUrl() {
   const parts = [];
   const notes = [];
   for (const l of cart) {
-    const variant = l.kind === "accessory" ? ACCESSORIES.find((a) => a.id === lineProduct(l))?.shopify : "";
+    const variant = l.kind === "accessory" ? ACCESSORIES.find((a) => a.id === lineProduct(l))?.shopify : l.kind === "giftcard" ? l.shopify : "";
     if (!variant) return "";
     parts.push(`${variant}:${l.qty}`);
+    if (l.kind === "giftcard" && l.giftcard) notes.push(`Gift card for ${l.giftcard.toName} <${l.giftcard.toEmail}>${l.giftcard.toPhone ? ` ${l.giftcard.toPhone}` : ""}, from ${l.giftcard.fromName}${l.giftcard.message ? `: ${l.giftcard.message}` : ""}`);
     if (l.gift) notes.push(`Gift for ${l.recipient || "someone"}${l.note ? `: ${l.note}` : ""} (${String(l.title).split(",")[0]})`);
   }
   return `https://${domain}/cart/${parts.join(",")}?return_to=/checkout${notes.length ? `&note=${encodeURIComponent(notes.join(" | ").slice(0, 500))}` : ""}`;
