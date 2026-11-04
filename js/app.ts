@@ -7800,12 +7800,8 @@ const pages = {
     }
     // Back on the page with a chat open: look again now (so what came in is marked read).
     document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && help.open && help.chat && watchHelp());
-    // Going somewhere from an answer across the page: the chat docks beside it (this time only).
-    const helpBeside = () => {
-      if (help.docked || innerWidth <= 760) return;
-      help.docked = true;
-      drawHelp();
-    };
+    // Going somewhere from an answer: the chat closes (it no longer docks itself beside the page).
+    const helpBeside = () => {};
     async function helpFeedback(id, helpful, note = "") {
       const c = help.chat;
       if (!c) return;
@@ -8102,7 +8098,7 @@ const pages = {
     // Going to a page (and an order or invoice on it) from outside the page's own buttons.
     let cameFrom = "";
     const goTo = (t, ref = "") => {
-      if (help.open && !help.docked) closeHelp();
+      if (help.open) closeHelp();
       cameFrom = tab;
       tab = t;
       if (t === "orderview") orderNo = ref;
@@ -8594,7 +8590,7 @@ const pages = {
       const go = e.target.closest("[data-tab-go]");
       if (go) {
         // Chats across the page step aside for the page picked (docked beside it, it stays).
-        if (help.open && !help.docked) closeHelp();
+        if (help.open) closeHelp();
         cameFrom = tab;
         tab = go.dataset.tabGo;
         if (go.dataset.thenView) orderView = go.dataset.thenView;

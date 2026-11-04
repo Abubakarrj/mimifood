@@ -41,6 +41,10 @@ type Json = Record<string, any>;
 
 // One connection to Hermes: JSON-RPC requests with answers, plus the event stream.
 class HermesLink {
+  private target: { url: string; token: string };
+  constructor(target?: { url: string; token: string }) {
+    this.target = target || { url: hermesUrl(), token: env("HERMES_TOKEN") };
+  }
   private socket: WebSocket | null = null;
   private nextId = 0;
   private pending = new Map<string, { resolve: (v: any) => void; reject: (e: Error) => void; timer: NodeJS.Timeout }>();
@@ -48,7 +52,7 @@ class HermesLink {
   onClose: () => void = () => {};
 
   connect(): Promise<void> {
-    const url = `${hermesUrl()}/api/ws?token=${encodeURIComponent(env("HERMES_TOKEN"))}`;
+    const url = `${this.target.url}/api/ws?token=${encodeURIComponent(this.target.token)}`;
     return new Promise((resolve, reject) => {
       const socket = new WebSocket(url, { handshakeTimeout: LIMITS.connectMs, maxPayload: 4_000_000 });
       this.socket = socket;
