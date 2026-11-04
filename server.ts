@@ -76,7 +76,7 @@ import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIEL
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
 import { livekitConfigured, livekitRoom, livekitToken, livekitUrl, pacificMoment } from "./server/livekit.ts";
-import { shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
+import { normTitle, shopifyProducts, shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
 import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
@@ -641,7 +641,7 @@ function seoHead(html, req, lang = "en") {
       const lead = p.notes ? t("{roast}, with notes of {notes}.").replace("{roast}", roast).replace("{notes}", tList(p.notes)) : `${roast}.`;
       const desc = clip(`${lead} ${p.about ? t(p.about) : t("Roasted weekly in Los Angeles.")}`);
       // Its own photo, else its bag with its label, as drawn for the Google feed (1200 × 1200).
-      const image = p.image ? `${SITE_URL}${p.image}` : `${SITE_URL}/feeds/images/${encodeURIComponent(p.id)}.jpg`;
+      const image = p.image ? (/^https?:/.test(p.image) ? p.image : `${SITE_URL}${p.image}`) : `${SITE_URL}/feeds/images/${encodeURIComponent(p.id)}.jpg`;
       html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
       setMeta("name", "description", desc);
       setMeta("property", "og:title", title);
@@ -16330,6 +16330,45 @@ async function warmUp() {
   }
 }
 
+// Products that are in Shopify (active, priced) but not on the site yet come in as new products: name, price,
+// description and photo from Shopify, linked to its variant. Each is added once.
+async function importShopifyProducts(): Promise<number> {
+  let added = 0;
+  for (const p of shopifyProducts()) {
+    if (p.status !== "ACTIVE" || !(p.price > 0)) continue;
+    const name = p.title.replace(/\([^)]*[\u3131-\uD79D][^)]*\)/g, "").replace(/[\u3131-\uD79D]+/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+    if (!name || catalog.hasProduct(p.handle, name, p.variantId) || DATA.ACCESSORIES.some((a) => normTitle(a.name) === normTitle(p.title))) continue;
+    try {
+      const f = await catalog.createFood({ name, short: name, category: "Supplements", price: p.price, weightOz: 8, about: p.description.slice(0, 800), shopify: p.variantId });
+      if (p.image) await catalog.setFoodImage(f.id, p.image);
+      added++;
+      console.log(`Shopify: added ${name} to the shop.`);
+    } catch (error) {
+      console.error("[shopify] import", p.handle, error instanceof Error ? error.message : error);
+    }
+  }
+  return added;
+}
+
+// Products still showing the plain placeholder tile (the same 4,492-byte image) get their photo from Shopify.
+const PLACEHOLDER_BYTES = 4492;
+async function useShopifyPhotos(): Promise<number> {
+  let changed = 0;
+  const byHandle = new Map(shopifyProducts().map((p) => [p.handle, p]));
+  const byName = new Map(shopifyProducts().map((p) => [normTitle(p.title), p]));
+  for (const a of DATA.ACCESSORIES) {
+    if (typeof a.image !== "string" || !a.image.startsWith("/assets/products/")) continue;
+    const shop = byHandle.get(a.id) || byName.get(normTitle(a.name));
+    if (!shop?.image) continue;
+    const size = await stat(path.join(ROOT, path.normalize(a.image))).then((x) => x.size).catch(() => -1);
+    if (size !== PLACEHOLDER_BYTES) continue;
+    await catalog.setFoodImage(a.id, shop.image);
+    changed++;
+  }
+  if (changed) console.log(`Shopify: ${changed} products now use their Shopify photo.`);
+  return changed;
+}
+
 // The assistant over a WebSocket, answered by Hermes Agent when HERMES_URL is set (server/hermes.ts).
 const assistantSocket = createAssistantSocket({
   siteUrl: SITE_URL,
@@ -16377,9 +16416,10 @@ server.listen(PORT, () => {
     giftCardVariants().then((v) => console.log(`Shopify: ${Object.keys(v).length} gift card amounts.`));
     // Shopify's prices win over the site's placeholders; the catalogue is rebuilt when any move.
     const pullPrices = () =>
-      refreshShopifyPrices().then((r) => {
+      refreshShopifyPrices().then(async (r) => {
         if (!r) return;
-        if (r.changed) syncCatalog();
+        const added = (await importShopifyProducts()) + (await useShopifyPhotos());
+        if (r.changed || added) syncCatalog();
         if (r.unpriced) console.warn(`Shopify: ${r.unpriced} of ${r.total} products are priced at $0 there; checkout would charge nothing for them.`);
       });
     pullPrices();

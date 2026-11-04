@@ -979,6 +979,14 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
     seedFoods,
     shopFoods,
     createFood,
+    hasProduct: (id: string, name: string, shopifyId: string) => [...db.foods, ...db.teas].some((x) => x.id === id || x.shopify === shopifyId || String(x.name).toLowerCase() === name.toLowerCase()),
+    setFoodImage: async (id: string, url: string) => {
+      const f = food(id);
+      if (f && !f.photo) {
+        f.image = url;
+        await save();
+      }
+    },
     updateFood,
     deleteFood,
     deleteFoods,

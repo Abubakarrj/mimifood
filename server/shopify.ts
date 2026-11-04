@@ -72,9 +72,12 @@ export const cachedGiftCardVariants = () => {
 // Prices set in Shopify win over the site's own (placeholders until Shopify has the real ones):
 // a variant at 0 means "not priced yet", so the site's price stays. variantId -> price.
 let prices = new Map<string, number>();
+export type ShopifyProduct = { handle: string; title: string; status: string; description: string; image: string; variantId: string; price: number };
+let products: ShopifyProduct[] = [];
+export const shopifyProducts = () => products;
 let byHandle = new Map<string, { id: string; price: number }>();
 let byTitle = new Map<string, { id: string; price: number }>();
-const normTitle = (s: string) => String(s).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim();
+export const normTitle = (s: string) => String(s).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim();
 // The Shopify variant for a site product: same handle as its id, or the same title. Only when Shopify has a
 // price for it (a product at 0 there would check out for nothing, so it stays unlinked).
 export const shopifyLink = (item: { id?: string; name?: string; shopify?: string }): string | undefined => {
@@ -91,17 +94,19 @@ export async function refreshShopifyPrices(log: (...a: any[]) => void = console.
   if (!shopifyConfigured()) return null;
   try {
     const next = new Map<string, number>();
+    const list: ShopifyProduct[] = [];
     const handles = new Map<string, { id: string; price: number }>();
     const titles = new Map<string, { id: string; price: number }>();
     let after = "";
     for (let page = 0; page < 10; page++) {
-      const data = await graphql(`{ products(first: 40${after ? `, after: "${after}"` : ""}) { pageInfo { hasNextPage endCursor } nodes { handle title variants(first: 10) { nodes { id price } } } } }`);
+      const data = await graphql(`{ products(first: 40${after ? `, after: "${after}"` : ""}) { pageInfo { hasNextPage endCursor } nodes { handle title status description featuredImage { url } variants(first: 10) { nodes { id price } } } } }`);
       for (const p of data?.products?.nodes || []) {
         const first = p.variants?.nodes?.[0];
         if (first) {
           const link = { id: String(first.id).replace(/\D/g, ""), price: Number(first.price) || 0 };
           handles.set(String(p.handle), link);
           titles.set(normTitle(p.title), link);
+          list.push({ handle: String(p.handle), title: String(p.title), status: String(p.status), description: String(p.description || ""), image: String(p.featuredImage?.url || ""), variantId: link.id, price: link.price });
         }
         for (const v of p.variants?.nodes || []) next.set(String(v.id).replace(/\D/g, ""), Number(v.price) || 0);
       }
@@ -110,6 +115,7 @@ export async function refreshShopifyPrices(log: (...a: any[]) => void = console.
     }
     const changed = next.size !== prices.size || [...next].some(([id, price]) => prices.get(id) !== price);
     prices = next;
+    products = list;
     byHandle = handles;
     byTitle = titles;
     return { total: next.size, unpriced: [...next.values()].filter((p) => !(p > 0)).length, changed };
