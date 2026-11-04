@@ -21388,3 +21388,30 @@ body[data-page="checkout"].is-placed .header-actions {
 .call-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 20px 0; }
 .call-video { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--tile, #f2efe9); border-radius: 6px; }
 .call-bar { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* On a big desktop screen Chat Us is a card in the corner, not a full-height drawer: the greeting
+   and the message box stay close together instead of a screen apart. */
+@media (min-width: 900px) and (min-height: 640px) {
+  .chat .drawer-panel {
+    top: auto;
+    right: 24px;
+    bottom: 24px;
+    width: 420px;
+    height: min(700px, calc(100vh - 48px));
+    border-radius: 18px;
+    box-shadow: 0 18px 60px rgba(17, 17, 17, 0.28);
+    transform: translateX(calc(100% + 40px));
+  }
+
+  .chat.is-open .drawer-panel {
+    transform: none;
+  }
+
+  .chat .drawer-panel::after {
+    display: none;
+  }
+
+  .chat .drawer-backdrop {
+    background: rgba(17, 17, 17, 0.12);
+  }
+}

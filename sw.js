@@ -1,9 +1,9 @@
-﻿// Shop service worker (scope /): makes the site installable as an app and keeps the pages you've
+// Shop service worker (scope /): makes the site installable as an app and keeps the pages you've
 // visited available offline. Everything comes from the network first, so a deploy shows up
 // straight away; a cached copy is only used without a connection. API calls (cart checkout,
 // account, orders) are never cached, and the back office has its own worker (admin-sw.js).
 
-const CACHE = "shop-v449-mimi34";
+const CACHE = "shop-v450-mimi35";
 const SHELL = ["/", "/shop", "/offline", "/styles.css", "/js/app.js", "/js/data.js", "/site.webmanifest", "/assets/logo.svg", "/assets/icon-192.png"];
 const STATIC = /\.(html|css|js|svg|png|jpe?g|webp|webmanifest)$/;
 

@@ -1,4 +1,4 @@
-// Wholesale accounts (cafés that order on account) and purchase orders to suppliers.
+// Wholesale accounts (customers that order on account) and purchase orders to suppliers.
 // Stored with server/storage.js as storage.open("trade", TRADE_PARTS).
 
 import { randomUUID } from "node:crypto";

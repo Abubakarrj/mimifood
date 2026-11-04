@@ -115,6 +115,46 @@ async function tidy(file) {
   }
   // Leaves and sprigs set beside a pack go: [left, top] of the corner (as a share of the visible product) to clear.
   const CLEAR = { "korean-beef-short-rib": [0.8, 0.6], jumulleok: [0.8, 0.6] };
+  // Matcha: the bag's right edge runs straight, so cut the bowl's rim off there and make the bag's bottom solid
+  // (the bowl's white showed through it as a pink haze).
+  if (/hankook/.test(path.basename(file))) {
+    let x0 = w, y0 = h, y1 = 0;
+    for (let p = 0; p < w * h; p++) {
+      if (data[p * 4 + 3] === 0) continue;
+      const x = p % w, y = (p - x) / w;
+      if (x < x0) x0 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+    const mid = Math.round(y0 + (y1 - y0) * 0.5);
+    let R = 0;
+    for (let x = 0; x < w; x++) if (data[(mid * w + x) * 4 + 3] > 128) R = x;
+    // The bag's bottom edge, read well left of the bowl: nothing below it belongs to the bag.
+    const probe = Math.round(x0 + (R - x0) * 0.4);
+    let floor = 0;
+    for (let y = 0; y < h; y++) if (data[(y * w + probe) * 4 + 3] > 128) floor = y;
+    for (let p = 0; p < w * h; p++) {
+      const x = p % w, y = (p - x) / w;
+      if (x > R || y > floor) data[p * 4 + 3] = 0;
+      else if (y > y0 + (y1 - y0) * 0.78 && x >= x0 && data[p * 4 + 3] > 0) data[p * 4 + 3] = 255;
+    }
+  }
+  // The mala mayo's sauce bowl sits at its bottom left: drop everything left of x and below y.
+  if (/mala-mayo/.test(path.basename(file))) {
+    let x0 = w, x1 = 0, y0 = h, y1 = 0;
+    for (let p = 0; p < w * h; p++) {
+      if (data[p * 4 + 3] === 0) continue;
+      const x = p % w, y = (p - x) / w;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+    for (let p = 0; p < w * h; p++) {
+      const x = p % w, y = (p - x) / w;
+      if (x < x0 + (x1 - x0) * 0.235 && y > y0 + (y1 - y0) * 0.7) data[p * 4 + 3] = 0;
+    }
+  }
   const clearKey = Object.keys(CLEAR).find((k) => path.basename(file).includes(k));
   if (clearKey) {
     let x0 = w, x1 = 0, y0 = h, y1 = 0;
@@ -196,7 +236,7 @@ async function tidy(file) {
     sizes[label] = count;
   }
   const biggest = Math.max(...sizes.filter(Boolean));
-  for (let p = 0; p < w * h; p++) if (seen[p] && sizes[seen[p]] < biggest * 0.1) data[p * 4 + 3] = 0;
+  for (let p = 0; p < w * h; p++) if (seen[p] && sizes[seen[p]] < biggest * (/sweet-spicy|katsu|short-rib|jumulleok/.test(path.basename(file)) ? 0.3 : 0.1)) data[p * 4 + 3] = 0;
   const trimmed = await sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
   const box = await sharp(trimmed).trim({ threshold: 1 }).resize({ width: FIT, height: FIT, fit: "inside" }).png().toBuffer();
   const meta = await sharp(box).metadata();

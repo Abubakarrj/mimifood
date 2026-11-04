@@ -1,6 +1,6 @@
-// Help Docs: the short guides in the help panels: the team's (back office) and the cafés'
+// Help Docs: the short guides in the help panels: the team's (back office) and the customers'
 // (wholesale portal). Written here to start, then edited in the back office (Configure › Help
-// Docs). The cafés' are translated with the rest of the site (server.ts, autoTranslate).
+// Docs). The customers' are translated with the rest of the site (server.ts, autoTranslate).
 //
 // Stored with server/storage.js as storage.open("helpdocs", HELP_PARTS).
 
@@ -27,12 +27,12 @@ const STARTERS = [
   ["staff", "Make", "Planning roasts", ["Make › Roasting lays out the week's roasts. Add a roast, pick the coffee and the amount, and assign a roaster.", "Print the roast sheet from the same page. Roast dates go on the bags as lots."]],
   ["staff", "Make", "Counting stock", ["Each product shows a stock bar against its reorder level; Low lists what's under it.", "Restock or Adjust changes a count with a reason, and every change is kept in the stock log with who made it.", "On a phone, Count mode walks the shelf: count, see the differences, then apply them."]],
   ["staff", "Wholesale", "Adding a wholesale account", ["Wholesale › Accounts › New Account sets the café up with its discount and terms.", "Invite sends their login to the portal, where they order at their prices, see invoices and pay."]],
-  ["staff", "Wholesale", "Calls with cafés", ["Configure › Calls sets when cafés can book a call from their portal: the days, hours, length and notice, and who takes them.", "Each booked call is a to-do on its day. Cancel one there or in Coming Up, and the café is emailed."]],
+  ["staff", "Wholesale", "Calls with customers", ["Configure › Calls sets when customers can book a call from their portal: the days, hours, length and notice, and who takes them.", "Each booked call is a to-do on its day. Cancel one there or in Coming Up, and the café is emailed."]],
   ["staff", "Business", "Adding someone to the team", ["Configure (the gear at the bottom of the sidebar) › Team › Add Member.", "Their role decides which pages they open; you can tick more pages for them. They sign in with a code emailed to them."]],
   ["staff", "Business", "Using to-dos", ["To-Dos keeps what needs doing, with a due date, who it's for, and how often it repeats.", "Link one to an order or account to open it from the to-do. Snooze puts it away until a day you pick."]],
   ["staff", "Business", "Light and dark mode", ["Click Mimi Food at the top of the sidebar and pick Light, Dark or System. It's kept on this device."]],
   ["staff", "Business", "What the assistant can do", ["Skills lists it: looking things up (Report), and drafting changes (Create, Edit, Operate).", "It never changes prices, stock, codes or messages on its own: each change comes back as a proposal with Approve."]],
-  ["staff", "Business", "Editing these guides", ["Configure › Help Docs: add a guide, or change or remove one, for the team or for cafés.", "The cafés' guides show in their portal's help panel, in English, Spanish and Korean."]],
+  ["staff", "Business", "Editing these guides", ["Configure › Help Docs: add a guide, or change or remove one, for the team or for customers.", "The customers' guides show in their portal's help panel, in English, Spanish and Korean."]],
   ["cafe", "Ordering", "Placing an order", ["Products lists your prices. Type a quantity beside each size, or use − and +; your order adds up on the right.", "Choose Deliver or Pick Up, add any notes, then Place Order. We email the invoice."]],
   ["cafe", "Ordering", "Your usual order", ["Once an order is built, Save as Usual keeps it.", "Fill Your Usual puts it back in with one click: check it, then place the order."]],
   ["cafe", "Ordering", "Asking for a quote", ["Add what you'd like on Products, then Ask for a Quote.", "We price it and it shows in Orders. Accept it to place the order."]],

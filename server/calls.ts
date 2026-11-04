@@ -1,4 +1,4 @@
-// Book a Call: cafés pick a time to talk with the team, from the hours set in the back office
+// Book a Call: customers pick a time to talk with the team, from the hours set in the back office
 // (Configure › Calls). Times are the roastery's (Pacific): a day ("2026-11-02") and a start
 // ("09:30"), so a slot reads the same wherever someone books it from.
 //

@@ -28,7 +28,7 @@ const DEFAULT_OPTION_SETS = [
   { id: "extras", name: "Extras", multi: true, choices: [{ id: "shot", name: "Extra shot", price: 1 }, { id: "vanilla", name: "Vanilla syrup", price: 0.75 }] },
 ];
 
-// Café menu: how an item is drawn when it has no photo, and its dietary labels.
+// Menu: how an item is drawn when it has no photo, and its dietary labels.
 export const MENU_KINDS = ["hot", "iced", "food"];
 export const FOOD_SHAPES = ["croissant", "painchoc", "scroll", "loaf", "cookie", "toastie", "toast", "bowl"];
 export const DIET_TAGS = ["V", "VG", "GF", "DF"];
@@ -430,7 +430,7 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
     await save();
   }
 
-  /* ── Café menu ── */
+  /* ── Menu ── */
 
   const sections = () => [...db.menuSections].sort((a, b) => a.position - b.position);
   const itemsIn = (sectionId) => db.menuItems.filter((x) => x.sectionId === sectionId).sort((a, b) => a.position - b.position);

@@ -149,7 +149,7 @@ const PROGRAM = { menu: /\b(korean|k-?bbq|bulgogi|bibimbap|kimchi|tteokbokki|jap
 const SPECIALTY = /\b(authentic|homestyle|family[- ]owned|traditional|handmade|house[- ]made|from scratch|signature sauce|chef[- ]driven|street food|late[- ]night|fast[- ]casual|ghost kitchen|small[- ]batch)\b/gi;
 const CATERING = /\b(catering|private events|party trays|corporate orders|delivery|takeout|ghost kitchen|meal prep)\b/gi;
 const RETAIL = /\b(shop online|retail|grocery|market|mart|pantry|convenience|food hall|supermarket|asian market)\b/gi;
-const LOCATIONS = /\b(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten) (?:locations|cafes|cafés|shops|stores|restaurants|hotels|properties)\b/i;
+const LOCATIONS = /\b(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten) (?:locations|cafes|customers|shops|stores|restaurants|hotels|properties)\b/i;
 const WORDS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
 const uniq = (list) => [...new Set(list.map((s) => s.toLowerCase()))];

@@ -126,7 +126,7 @@ const PAGES = [
   { id: "reviews", label: "Reviews", icon: "star", group: "Sell" },
   { id: "roasting", label: "Roasting", icon: "roasting", group: "Make" },
   { id: "products", label: "Products", icon: "products", group: "Make" },
-  { id: "menu", label: "Café menu", icon: "cafeMenu", group: "Make" },
+  { id: "menu", label: "Menu", icon: "cafeMenu", group: "Make" },
   { id: "purchasing", label: "Purchasing", icon: "purchasing", group: "Buy" },
   { id: "imports", label: "Imports", icon: "upload", group: "Buy" },
   { id: "signups", label: "Newsletter", icon: "signups", group: "Marketing" },
@@ -155,8 +155,8 @@ const CONFIG_LINE = {
   business: "Your business details, how the back office looks, and your emails.",
   team: "Manage who has access to your back office.",
   salestax: "Where you collect sales tax, and how close you are to each state's limit.",
-  calls: "When cafés can book a call with you from their portal, and who takes it.",
-  helpdocs: "The guides in the help panels, for your team and for cafés.",
+  calls: "When customers can book a call with you from their portal, and who takes it.",
+  helpdocs: "The guides in the help panels, for your team and for customers.",
   languages: "Spanish and Korean for every line of the website.",
   careers: "The roles on your careers page, and who has applied.",
 };
@@ -1128,7 +1128,7 @@ function fulfilmentTags(o) {
   const courierDayLabel = (d) => (!d ? "" : d === new Date().toLocaleDateString("en-CA", { timeZone: state.shop?.timezone || "America/Los_Angeles" }) ? " · Today" : ` · ${new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" })}`);
   if (o.local) tags.push(["bike", `Courier${o.courier?.status && o.courier.status !== "waiting" ? ` · ${COURIER_LABEL[o.courier.status] || o.courier.status}` : courierDayLabel(o.courier?.day)}`]);
   if (o.collect) tags.push(["collect", "Pickup"]);
-  if (o.cafe) tags.push([o.cafe.mode === "delivery" ? "bike" : "cafe", `${o.cafe.mode === "delivery" ? "Café delivery" : "Café pickup"} · ${o.cafe.when}`]);
+  if (o.cafe) tags.push([o.cafe.mode === "delivery" ? "bike" : "cafe", `${o.cafe.mode === "delivery" ? "Delivery" : "Pickup"} · ${o.cafe.when}`]);
   if (o.cafe?.mode === "delivery" && o.courier) tags.push(["bike", COURIER_LABEL[o.courier.status] || o.courier.status]);
   if (o.source === "renewal") tags.push(["subscriptions", "Subscription"]);
   if (o.source === "wholesale") tags.push(["building", "Wholesale"]);
@@ -1948,7 +1948,7 @@ function wholesaleView() {
     const lists = t.priceLists || [];
     body = lists.length
       ? `<table class="table ws-pricelists is-labelled">
-          <thead><tr><th>Price list</th><th class="num">Off retail</th><th class="num">Own prices</th><th>Volume prices</th><th class="num">Cafés</th></tr></thead>
+          <thead><tr><th>Price list</th><th class="num">Off retail</th><th class="num">Own prices</th><th>Volume prices</th><th class="num">Customers</th></tr></thead>
           <tbody>${lists
             .map(
               (l) => `<tr data-pricelist="${esc(l.id)}" class="clickable">
@@ -2031,7 +2031,7 @@ function wholesaleView() {
   // The money figures belong with orders and accounts, not with quotes, inquiries or prospects.
   return `
     ${
-      // Orders: what's to send out and what's to be paid. Accounts: the cafés, what they owe and
+      // Orders: what's to send out and what's to be paid. Accounts: the customers, what they owe and
       // who's asking to join.
       state.sub === "orders"
         ? (() => {
@@ -2077,7 +2077,7 @@ function agreementButtons(accountId) {
   ].join("");
 }
 // Wholesale › Documents: every agreement sent (waiting to be signed, signed, withdrawn), and
-// the cafés that haven't been sent one.
+// the customers that haven't been sent one.
 const DOC_STATE = { draft: ["Draft", "t-blue"], sent: ["Waiting", "t-yellow"], signed: ["Signed", "s-completed"], withdrawn: ["Withdrawn", ""] };
 function documentsTab() {
   const C = state.contracts;
@@ -2317,14 +2317,14 @@ document.addEventListener("change", async (e) => {
   try {
     state.contracts = await api("/api/admin/trade/contracts", { method: "PUT", body: { required: el.checked } });
     state.trade.contractsRequired = state.contracts.template.required;
-    toast(el.checked ? "Cafés sign the agreement before they can order." : "Cafés can order without signing.");
+    toast(el.checked ? "Customers sign the agreement before they can order." : "Customers can order without signing.");
   } catch (error) {
     el.checked = !el.checked;
     toast(error.message, "error");
   }
 });
 
-/* ── Wholesale samples: cafés asking to taste before they order ── */
+/* ── Wholesale samples: customers asking to taste before they order ── */
 
 const CSAMPLE_STATE = { requested: "Requested", roasting: "Roasting", sent: "Sent", tasted: "Tasted", cancelled: "Cancelled" };
 const CSAMPLE_TONE = { requested: "t-yellow", roasting: "t-blue", sent: "s-completed", tasted: "s-completed", cancelled: "" };
@@ -2333,7 +2333,7 @@ const CSAMPLE_BREW = { espresso: "Espresso", filter: "Filter", both: "Espresso a
 
 function cafeSamplesTab() {
   const all = state.trade.samples || [];
-  if (!all.length) return `<div class="empty empty-lg">${icon("FlaskConical", "i i-xl")}<p><strong>No sample requests yet</strong></p><p class="empty-line">Cafés ask for samples from their portal.</p></div>`;
+  if (!all.length) return `<div class="empty empty-lg">${icon("FlaskConical", "i i-xl")}<p><strong>No sample requests yet</strong></p><p class="empty-line">Customers ask for samples from their portal.</p></div>`;
   const shown = all.filter((x) => matches(state.query, x.business, x.by, ...x.coffees.map((c) => c.name)));
   if (!shown.length) return `<div class="empty empty-lg">${icon("FlaskConical", "i i-xl")}<p><strong>No requests match that search</strong></p></div>`;
   const open = (x) => ["requested", "roasting"].includes(x.status);
@@ -5038,7 +5038,7 @@ function priceListForm(list = null) {
         <label class="field"><span>Off Retail</span><span class="tax-input"><input name="offRetail" inputmode="decimal" value="${offPct(l.discount)}" data-was="${offPct(l.discount)}"><i>%</i></span></label>
       </div>
       ${pricingSection(l)}
-      ${list ? `<p class="muted">${list.accounts ? `${list.accounts} ${list.accounts === 1 ? "café is" : "cafés are"} on this list. Changes reach them at once.` : "No cafés on this list yet. Choose it on an account."}</p>` : ""}
+      ${list ? `<p class="muted">${list.accounts ? `${list.accounts} ${list.accounts === 1 ? "café is" : "customers are"} on this list. Changes reach them at once.` : "No customers on this list yet. Choose it on an account."}</p>` : ""}
       <div class="drawer-actions">
         <button type="submit" class="btn btn-primary">${list ? "Save" : "Create Price List"}</button>
         ${list ? `<button type="button" class="btn btn-danger-ghost" data-pricelist-delete>${icon("trash")}<span>Delete</span></button>` : ""}
@@ -5066,7 +5066,7 @@ function priceListForm(list = null) {
     const rmRow = e.target.closest("[data-price-remove]");
     if (rmRow) return rmRow.closest("[data-price-row]").remove();
     if (!e.target.closest("[data-pricelist-delete]")) return;
-    if (!confirm(`Delete the price list “${list.name}”?${list.accounts ? ` Its ${list.accounts} ${list.accounts === 1 ? "café keeps" : "cafés keep"} its discount and volume prices as their own.` : ""}`)) return;
+    if (!confirm(`Delete the price list “${list.name}”?${list.accounts ? ` Its ${list.accounts} ${list.accounts === 1 ? "café keeps" : "customers keep"} its discount and volume prices as their own.` : ""}`)) return;
     try {
       await done(await api(`/api/admin/price-lists/${list.id}`, { method: "DELETE" }), "Price list deleted.");
     } catch (error) {
@@ -5082,7 +5082,7 @@ function priceListForm(list = null) {
     button.disabled = true;
     try {
       const body = { name: f.name.value, discount, ...pricingValues(f) };
-      await done(await api(list ? `/api/admin/price-lists/${list.id}` : "/api/admin/price-lists", { method: list ? "PATCH" : "POST", body }), list ? "Saved. Cafés on it see the new prices." : "Price list created.");
+      await done(await api(list ? `/api/admin/price-lists/${list.id}` : "/api/admin/price-lists", { method: list ? "PATCH" : "POST", body }), list ? "Saved. Customers on it see the new prices." : "Price list created.");
     } catch (error) {
       button.disabled = false;
       panelError(error.message);
@@ -6366,9 +6366,9 @@ document.addEventListener("change", async (e) => {
     toast(error.message, "error");
   }
 });
-// Configure › Help Docs: the guides in the help panels, the team's and the cafés'
-// (server/helpdocs.ts). A guide opens in a popup to change; the cafés' are translated on save.
-const HELP_FOR = [["staff", "For Your Team"], ["cafe", "For Cafés"]];
+// Configure › Help Docs: the guides in the help panels, the team's and the customers'
+// (server/helpdocs.ts). A guide opens in a popup to change; the customers' are translated on save.
+const HELP_FOR = [["staff", "For Your Team"], ["cafe", "For Customers"]];
 function helpDocsView() {
   const docs = state.helpEdit.docs;
   return HELP_FOR.map(([who, label]) => {
@@ -6444,7 +6444,7 @@ function callsView() {
   return `
     <section class="cfg-section"><header class="cfg-sect-head"><div><h2>Booking</h2></div></header>
       <div class="cfg-card">
-        <label class="switch-row cfg-row"><span><strong>Cafés can book a call</strong><small>Book a Call shows in their portal's help panel.</small></span><input type="checkbox" data-calls-set="on" ${s.on ? "checked" : ""}><i aria-hidden="true"></i></label>
+        <label class="switch-row cfg-row"><span><strong>Customers can book a call</strong><small>Book a Call shows in their portal's help panel.</small></span><input type="checkbox" data-calls-set="on" ${s.on ? "checked" : ""}><i aria-hidden="true"></i></label>
         ${row("Days", "", `<div class="cfg-days">${WEEKDAYS.map(([d, label]) => `<label class="cfg-day"><input type="checkbox" data-calls-day="${d}" ${s.days.includes(d) ? "checked" : ""}><span>${label}</span></label>`).join("")}</div>`)}
         ${row("Hours", "Pacific time.", `<span class="cfg-hours"><input type="time" step="900" value="${esc(s.from)}" data-calls-set="from" aria-label="From"><span>to</span><input type="time" step="900" value="${esc(s.to)}" data-calls-set="to" aria-label="To"></span>`)}
         ${row("Length", "", `<select data-calls-set="minutes" aria-label="Length">${[15, 20, 30, 45, 60].map((m) => `<option value="${m}" ${s.minutes === m ? "selected" : ""}>${m} minutes</option>`).join("")}</select>`)}
@@ -8728,7 +8728,7 @@ function foodForm(x0 = null) {
     }
   };
 }
-/* ── Café menu: sections and items. Saves go to Square's item library too. ── */
+/* ── Menu: sections and items. Saves go to Square's item library too. ── */
 
 const DIET = { V: "Vegetarian", VG: "Vegan", GF: "Gluten free", DF: "Dairy free" };
 const KIND_LABEL = { hot: "Hot drink", iced: "Iced drink", food: "Food" };
@@ -10102,7 +10102,7 @@ const SKILLS: [string, string, string, string, string][] = [
   ["Sell", "Mark sold out or back on sale", "Operate", "Mark a product sold out, or back on sale, for you to approve.", "Mark  as sold out"],
   ["Wholesale", "Review wholesale accounts", "Report", "Each café's discount, terms, what they owe and how late, and their last order.", "Which wholesale accounts owe us money?"],
   ["Wholesale", "Message a café", "Operate", "Draft a text or email to a wholesale account, sent once you approve.", "Write to  about "],
-  ["Wholesale", "Find wholesale prospects", "Report", "Cafés and shops in an area that could buy wholesale.", "Find cafés in  that could buy wholesale"],
+  ["Wholesale", "Find wholesale prospects", "Report", "Customers and shops in an area that could buy wholesale.", "Find customers in  that could buy wholesale"],
   ["Wholesale", "Research a business", "Report", "Its website, Instagram and Maps listing, scored for wholesale fit.", "Research  for wholesale"],
   ["Wholesale", "Move a prospect", "Operate", "Approve a prospect, mark it not a fit, or send it back to review.", "Approve the prospect "],
   ["Make", "Check stock", "Report", "What's left of each product, what's low or sold out, and who's waiting.", "What's low or sold out?"],
@@ -11025,7 +11025,7 @@ function newEmailForm() {
   };
 }
 
-// One announcement to many cafés: it lands in each café's portal chat (and their email, if
+// One announcement to many customers: it lands in each café's portal chat (and their email, if
 // ticked), each as its own conversation here that opens when they answer.
 async function announceForm() {
   let cafes = [];
@@ -11038,8 +11038,8 @@ async function announceForm() {
     <form class="panel form-stack" data-announce>
       <label class="field"><span>Title</span><input name="subject" required maxlength="160"></label>
       <label class="field"><span>Message</span><textarea name="text" rows="7" required maxlength="5000"></textarea></label>
-      <fieldset class="field"><legend>Cafés</legend>
-        ${cafes.length ? `<label class="checkbox"><input type="checkbox" data-announce-all checked><span>Select All</span></label><div class="check-grid">${cafes.map((c) => `<label class="checkbox"><input type="checkbox" name="cafes" value="${esc(c.id)}" checked><span>${esc(c.business)}</span></label>`).join("")}</div>` : `<p class="muted">No wholesale cafés yet.</p>`}
+      <fieldset class="field"><legend>Customers</legend>
+        ${cafes.length ? `<label class="checkbox"><input type="checkbox" data-announce-all checked><span>Select All</span></label><div class="check-grid">${cafes.map((c) => `<label class="checkbox"><input type="checkbox" name="cafes" value="${esc(c.id)}" checked><span>${esc(c.business)}</span></label>`).join("")}</div>` : `<p class="muted">No wholesale customers yet.</p>`}
       </fieldset>
       <label class="checkbox"><input type="checkbox" name="email"><span>Also Email Them</span></label>
       <div class="drawer-actions"><button type="submit" class="btn btn-primary" data-announce-send>${icon("send")}<span></span></button></div>
@@ -13249,7 +13249,7 @@ async function openOrder(number) {
           <dl class="totals order-totals" ${o.parent ? "hidden" : ""}>
           <dt>Subtotal</dt><dd class="sub">${items} ${items === 1 ? "item" : "items"}</dd><dd>${money(o.subtotal)}${o.giftDeliveries?.length ? ` <small class="muted">incl. gifts sent separately</small>` : ""}</dd>
           ${o.fulfilment ? `<dt>Shipping</dt><dd class="sub">${shipMethod(o) === "Shipping" ? "" : esc(shipMethod(o))}</dd><dd>${o.shipping ? money(o.shipping) : "Free"}</dd>` : ""}
-          ${o.cafeFee ? `<dt>Café delivery</dt><dd class="sub"></dd><dd>${money(o.cafeFee)}</dd>` : ""}
+          ${o.cafeFee ? `<dt>Delivery</dt><dd class="sub"></dd><dd>${money(o.cafeFee)}</dd>` : ""}
           ${o.discount ? `<dt>Discount</dt><dd class="sub">${esc(o.discount.code || o.discount.name || "")}</dd><dd>${[o.discount.freeShipping && "Free shipping", o.discount.amount && `−${money(o.discount.amount)}`].filter(Boolean).join(", ")}</dd>` : ""}
           <dt class="total">Total</dt><dd class="sub total"></dd><dd class="total">${money(o.total)}</dd>
           ${o.refunded ? `<dt>Refunded</dt><dd class="sub"></dd><dd>−${money(o.refunded)}</dd>` : ""}

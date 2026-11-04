@@ -550,7 +550,7 @@ export function createPricer({ SITE, PRODUCTS, ACCESSORIES = [], SUBSCRIPTION, L
       throw new OrderError("Add a phone number for the courier.");
     }
     if (cafe?.mode === "delivery" && cafeTotal < SITE.cafeDelivery.minimum) {
-      throw new OrderError(`Café delivery has a ${SITE.currency}${SITE.cafeDelivery.minimum} minimum.`);
+      throw new OrderError(`Delivery has a ${SITE.currency}${SITE.cafeDelivery.minimum} minimum.`);
     }
 
     const subtotal = cents(lines.reduce((n, l) => n + l.price * l.qty, 0));
