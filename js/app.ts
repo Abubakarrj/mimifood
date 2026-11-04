@@ -5089,6 +5089,68 @@ const pages = {
     giftCardsPage();
   },
 
+  // A booked video call (LiveKit): /call?c=<booking>. The booking's token comes from the server.
+  async call() {
+    const root = $("[data-call]");
+    const say = (text) => (root.innerHTML = `<p class="muted">${esc(text)}</p>`);
+    let info;
+    try {
+      info = await api(`/api/call/${encodeURIComponent(new URLSearchParams(location.search).get("c") || "")}`);
+    } catch (error) {
+      return say(error.message);
+    }
+    root.innerHTML = `<h1>${esc(info.title)}</h1><p class="muted">${esc(info.label)}</p>
+      <div class="call-grid" data-call-grid></div>
+      <p class="sub-error" data-call-error hidden></p>
+      <div class="call-bar"><button type="button" class="button" data-call-join>Join Call</button>
+        <button type="button" class="button is-outline" data-call-mic hidden aria-pressed="true">Mute</button>
+        <button type="button" class="button is-outline" data-call-cam hidden aria-pressed="true">Camera Off</button>
+        <button type="button" class="button is-outline" data-call-leave hidden>Leave</button></div>`;
+    const grid = $("[data-call-grid]", root);
+    const [join, mic, cam, leave] = ["join", "mic", "cam", "leave"].map((k) => $(`[data-call-${k}]`, root));
+    let room: any = null;
+    const tile = (el: HTMLElement, key: string) => {
+      el.classList.add("call-video");
+      el.dataset.key = key;
+      grid.append(el);
+    };
+    join.addEventListener("click", async () => {
+      join.disabled = true;
+      try {
+        const lk: any = await new Function("u", "return import(u)")("https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs");
+        room = new lk.Room({ adaptiveStream: true, dynacast: true });
+        room.on(lk.RoomEvent.TrackSubscribed, (track, _pub, participant) => tile(track.attach(), `${participant.identity}:${track.sid}`));
+        room.on(lk.RoomEvent.TrackUnsubscribed, (track) => track.detach().forEach((el) => el.remove()));
+        room.on(lk.RoomEvent.LocalTrackPublished, (pub) => pub.track?.kind === "video" && tile(pub.track.attach(), "me"));
+        room.on(lk.RoomEvent.Disconnected, () => say("You left the call. Reload this page to join again."));
+        await room.connect(info.url, info.token);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        await room.localParticipant.setCameraEnabled(true);
+        join.hidden = true;
+        [mic, cam, leave].forEach((b) => (b.hidden = false));
+      } catch (error) {
+        join.disabled = false;
+        const err = $("[data-call-error]", root);
+        err.textContent = "We couldn't start the call. Check that your camera and microphone are allowed, then try again.";
+        err.hidden = false;
+        console.error("[call]", error);
+      }
+    });
+    mic.addEventListener("click", async () => {
+      const on = mic.getAttribute("aria-pressed") !== "true";
+      await room?.localParticipant.setMicrophoneEnabled(on);
+      mic.setAttribute("aria-pressed", String(on));
+      mic.textContent = on ? "Mute" : "Unmute";
+    });
+    cam.addEventListener("click", async () => {
+      const on = cam.getAttribute("aria-pressed") !== "true";
+      await room?.localParticipant.setCameraEnabled(on);
+      cam.setAttribute("aria-pressed", String(on));
+      cam.textContent = on ? "Camera Off" : "Camera On";
+    });
+    leave.addEventListener("click", () => room?.disconnect());
+  },
+
   gift() {
     giftPage();
   },

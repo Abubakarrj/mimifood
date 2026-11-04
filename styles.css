@@ -21350,3 +21350,9 @@ body[data-page="checkout"].is-placed .header-actions {
   height: 100%;
   object-fit: contain;
 }
+
+/* ── Video call page (/call) ── */
+.call-page { max-width: 980px; margin: 0 auto; padding: 24px var(--gutter) 60px; }
+.call-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 20px 0; }
+.call-video { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--tile, #f2efe9); border-radius: 6px; }
+.call-bar { display: flex; flex-wrap: wrap; gap: 10px; }

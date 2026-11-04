@@ -6,7 +6,7 @@
 // products in js/data.js are copied in; from then on the database is the source of truth and
 // the server writes the live list into js/data.js as it serves it (see server.js).
 
-import { shopifyPrice } from "./shopify.ts";
+import { shopifyLink, shopifyPrice } from "./shopify.ts";
 import { randomBytes } from "node:crypto";
 
 export const CATALOG_PARTS = {
@@ -757,7 +757,7 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
         caffeine: t.caffeine || "",
         notes: t.notes || "",
         pack: t.pack,
-        price: t.price,
+        price: shopifyPrice(shopifyLink(t)) ?? t.price,
         art: "tin",
         ...(teaImage(t) ? { image: teaImage(t) } : {}),
         color: t.color,
@@ -765,6 +765,7 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
         description: t.description || [],
         ingredients: t.ingredients || [],
         about: t.about || "",
+        ...(shopifyLink(t) ? { shopify: shopifyLink(t) } : {}),
         ...(t.soldOut ? { soldOut: true } : {}),
       }))
       .map((x) => withLabels(x, tea(x.id)?.badges || []));
@@ -865,12 +866,12 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
         short: f.short,
         category: f.category,
         ...(f.pack ? { pack: f.pack } : {}),
-        price: shopifyPrice(f.shopify) ?? f.price,
+        price: shopifyPrice(shopifyLink(f)) ?? f.price,
         color: "#f4f2ee",
         weightOz: f.weightOz,
         ...(foodImage(f) ? { image: foodImage(f) } : {}),
         about: f.about || "",
-        ...(f.shopify ? { shopify: f.shopify } : {}),
+        ...(shopifyLink(f) ? { shopify: shopifyLink(f) } : {}),
         ...(f.soldOut ? { soldOut: true } : {}),
       }))
       .map((x) => withLabels(x, food(x.id)?.badges || []));

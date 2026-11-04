@@ -75,7 +75,8 @@ import { createMeetings, MEETING_PARTS, MeetingError, PROVIDER_NAMES } from "./s
 import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIELDS } from "./server/contracts.ts";
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
-import { cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
+import { livekitConfigured, livekitRoom, livekitToken, livekitUrl, pacificMoment } from "./server/livekit.ts";
+import { shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
 import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
@@ -191,7 +192,8 @@ async function assetVersion(rel) {
 // and the switches that change what the shop shows. Its contents are part of data.js's version
 // tag, so a browser holding data.js for a year still gets every change.
 function dataTail() {
-  return `\n// Live catalogue and café menu from the back office.\nPRODUCTS.splice(0, PRODUCTS.length, ...${JSON.stringify(DATA.PRODUCTS)});\nCAFE_MENU.splice(0, CAFE_MENU.length, ...${JSON.stringify(DATA.CAFE_MENU)});\nACCESSORIES.splice(0, ACCESSORIES.length, ...${JSON.stringify(DATA.ACCESSORIES)});\nSITE.cafesLive = ${cafesLive()};\nSITE.notes = ${notes.published().length};\nSITE.careers = ${careers.open().length};\nSITE.calendar = ${JSON.stringify(happenings.counts())};\nSITE.langs = ${JSON.stringify(LANGS.filter((l) => Object.keys(I18N_FILES[l]).length))};\nSITE.wholesaleText = ${JSON.stringify(imessageConfigured() ? textNumber() : "")};\nSITE.gaId = ${JSON.stringify(gaId())};\nSITE.chatAssistant = ${chatAssistantOn()};\nSITE.ambassadors = ${JSON.stringify(ambassadorPublic())};\nSITE.textLogin = ${twilio.configured()};\n${cafesLive() ? "" : "// The bars aren't open yet: only the roastery (for coffee pickup), and no café menu.\nLOCATIONS.splice(0, LOCATIONS.length, ...LOCATIONS.filter((l) => l.cafe === false));\nCAFE_MENU.splice(0);\n"}`;
+  return `\n// Live catalogue and café menu from the back office.\nPRODUCTS.splice(0, PRODUCTS.length, ...${JSON.stringify(DATA.PRODUCTS)});\nCAFE_MENU.splice(0, CAFE_MENU.length, ...${JSON.stringify(DATA.CAFE_MENU)});\nACCESSORIES.splice(0, ACCESSORIES.length, ...${JSON.stringify(DATA.ACCESSORIES)});\nSITE.cafesLive = ${cafesLive()};
+SITE.shopify.domain = ${JSON.stringify(shopifyDomain())};\nSITE.notes = ${notes.published().length};\nSITE.careers = ${careers.open().length};\nSITE.calendar = ${JSON.stringify(happenings.counts())};\nSITE.langs = ${JSON.stringify(LANGS.filter((l) => Object.keys(I18N_FILES[l]).length))};\nSITE.wholesaleText = ${JSON.stringify(imessageConfigured() ? textNumber() : "")};\nSITE.gaId = ${JSON.stringify(gaId())};\nSITE.chatAssistant = ${chatAssistantOn()};\nSITE.ambassadors = ${JSON.stringify(ambassadorPublic())};\nSITE.textLogin = ${twilio.configured()};\n${cafesLive() ? "" : "// The bars aren't open yet: only the roastery (for coffee pickup), and no café menu.\nLOCATIONS.splice(0, LOCATIONS.length, ...LOCATIONS.filter((l) => l.cafe === false));\nCAFE_MENU.splice(0);\n"}`;
 }
 
 // Google Analytics 4 (GA_MEASUREMENT_ID in Render overrides the default): loaded in the shop only with consent.
@@ -6212,10 +6214,12 @@ async function callBooked(b, acct) {
   const meeting = await meetings
     .create({ title: `${b.business} and ${DATA.SITE.name}`, details: [`${b.name ? `${b.name}, ` : ""}${b.email}${b.phone ? `, ${b.phone}` : ""}`, b.note && `About: ${b.note}`].filter(Boolean).join("\n"), day: b.day, time: b.time, minutes: b.minutes, guests: [b.email, host] })
     .catch((error) => (console.error("[calls] meeting:", error.message), null));
-  if (meeting?.url) {
-    b.meeting = meeting;
-    await calls.setMeeting(b.id, meeting);
-    await todos.update(t.id, { description: `${t.description}\nJoin: ${meeting.url}` }).catch(() => {});
+  // No Google Meet or Zoom connected: our own video page on LiveKit.
+  const video = meeting || (livekitConfigured() ? { provider: "livekit", id: livekitRoom(b.id), url: `${SITE_URL}/call?c=${b.id}` } : null);
+  if (video?.url) {
+    b.meeting = video;
+    await calls.setMeeting(b.id, video);
+    await todos.update(t.id, { description: `${t.description}\nJoin: ${video.url}` }).catch(() => {});
   }
   // The confirmation's button puts the call in their calendar.
   const endMin = Number(b.time.slice(0, 2)) * 60 + Number(b.time.slice(3)) + b.minutes;
@@ -15981,6 +15985,24 @@ function route(req, res) {
   {
     const m = /^\/api\/track\/(MF-[A-Z0-9]{1,12})$/.exec(pathname);
     if (m) return handleTrack(req, res, url, m[1]);
+  }
+  // Join a booked call (LiveKit): the booking id is the invitation, open from 30 minutes before to 2 hours after.
+  {
+    const m = /^\/api\/call\/([\w-]{36})$/.exec(pathname);
+    if (m && req.method === "GET") {
+      const b = livekitConfigured() ? calls.find(m[1]) : null;
+      if (!b || b.cancelled) return sendJson(res, 404, { error: "That call isn't booked any more." });
+      const start = pacificMoment(b.day, b.time);
+      const now = Date.now();
+      const label = `${callLabel(b.day, b.time)} (Pacific)`;
+      if (now < start - 30 * 60_000) return sendJson(res, 403, { error: `This call opens 30 minutes before it starts: ${label}.` });
+      if (now > start + b.minutes * 60_000 + 120 * 60_000) return sendJson(res, 403, { error: "This call has ended." });
+      const who: any = adminWho(req);
+      const host = Boolean(who);
+      const name = host ? String(who.name || "Team") : String(b.name || b.business || "Guest");
+      const identity = host ? `team-${who.id || "owner"}` : `guest-${b.id.slice(0, 8)}`;
+      return sendJson(res, 200, { url: livekitUrl(), token: livekitToken({ room: livekitRoom(b.id), identity, name, host }), title: `${b.business} and ${DATA.SITE.name}`, label }, { "Cache-Control": "no-store" });
+    }
   }
   {
     const m = /^\/api\/receipt\/(MF-[A-Z0-9]{1,12})$/.exec(pathname);

@@ -17,7 +17,7 @@ const SITE: any = {
   sameAs: [],
   // Checkout happens on Shopify: the cart goes to this store as a cart link when every item has a Shopify variant id.
   // giftCardVariants: the gift card product's variant ids by amount, e.g. { "25": "123…", "50": "456…" } (Shopify admin → the gift card product → each variant's id in its address). With these set, gift cards are paid for at Shopify's checkout.
-  shopify: { domain: "mimifoodusa.com", giftCard: "", giftCardVariants: {} as Record<string, string> },
+  shopify: { domain: "bestkfood.myshopify.com", giftCard: "", giftCardVariants: {} as Record<string, string> },
   currency: "$",
   currencyCode: "USD", // for card payments (Square)
   freeShippingOver: 60,

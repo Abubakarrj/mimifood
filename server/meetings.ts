@@ -43,7 +43,7 @@ const PROVIDERS = {
     scope: "",
   },
 };
-export const PROVIDER_NAMES = { google: "Google Meet", zoom: "Zoom" };
+export const PROVIDER_NAMES = { google: "Google Meet", zoom: "Zoom", livekit: "our video page" };
 
 export function createMeetings({ store, siteUrl, zone = "America/Los_Angeles", fetchImpl = fetch }) {
   const db = store.data;
