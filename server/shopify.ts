@@ -43,15 +43,19 @@ export async function giftCardVariants(log: (...a: any[]) => void = console.erro
   if (!shopifyConfigured()) return {};
   if (cache && Date.now() - cache.at < 10 * 60_000) return cache.value;
   try {
-    const data = await graphql(`{ products(first: 5, query: "gift_card:true status:active") { nodes { title variants(first: 50) { nodes { id price } } } } }`);
+    // Gift card products by flag, then any product titled like one (a store can make it a plain product).
+    const data = await graphql(`{ products(first: 50) { nodes { title status isGiftCard variants(first: 50) { nodes { id price } } } } }`);
+    const all: any[] = data?.products?.nodes || [];
+    const likely = all.filter((p) => p.isGiftCard || /gift\s*card|egift|e-gift/i.test(p.title));
+    const product = likely.find((p) => p.status === "ACTIVE");
+    if (!product) log(`[shopify] no active gift card product (looked at ${all.length} products; gift card-like: ${likely.map((p) => `${p.title} [${p.status}]`).join(", ") || "none"})`);
     const out: Record<string, string> = {};
-    for (const variant of data?.products?.nodes?.[0]?.variants?.nodes || []) {
+    for (const variant of product?.variants?.nodes || []) {
       const amount = Math.round(Number(variant.price));
       const id = String(variant.id).replace(/\D/g, "");
       if (amount > 0 && id) out[String(amount)] = id;
     }
     cache = { at: Date.now(), value: out };
-    if (!Object.keys(out).length) log("[shopify] no active gift card product found");
     return out;
   } catch (error) {
     log("[shopify]", error instanceof Error ? error.message : error);
