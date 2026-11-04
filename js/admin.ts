@@ -2113,8 +2113,8 @@ function documentsTab() {
     const rows = unsent.filter((a) => q(a.business, a.contactName, a.email));
     return `${head}<section class="card table-card">${
       rows.length
-        ? `<table class="table ws-agreements is-labelled"><thead><tr><th>Café</th><th class="actions-col"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows.map((a) => `<tr><td>${who(a.business, a.contactName || a.email)}</td><td class="row-actions">${agreementButtons(a.id)}</td></tr>`).join("")}</tbody></table>`
-        : `<div class="empty empty-lg">${icon("doc", "i i-xl")}<p><strong>${unsent.length ? "None match that search" : "Every café has one"}</strong></p></div>`
+        ? `<table class="table ws-agreements is-labelled"><thead><tr><th>Customer</th><th class="actions-col"><span class="sr-only">Actions</span></th></tr></thead><tbody>${rows.map((a) => `<tr><td>${who(a.business, a.contactName || a.email)}</td><td class="row-actions">${agreementButtons(a.id)}</td></tr>`).join("")}</tbody></table>`
+        : `<div class="empty empty-lg">${icon("doc", "i i-xl")}<p><strong>${unsent.length ? "None match that search" : "Every customer has one"}</strong></p></div>`
     }</section>`;
   }
   const shown = (f === "waiting" ? waiting : f === "signed" ? signed : f === "drafts" ? drafts : docs).filter((d) => q(d.business, d.title, d.signer?.name, d.signer?.email));
@@ -2125,7 +2125,7 @@ function documentsTab() {
   return `${head}<section class="card table-card">${
     shown.length
       ? `<table class="table ws-documents is-labelled">
-      <thead><tr><th>Document</th><th>Café</th><th>Status</th><th>Sent</th><th>Signed</th><th class="actions-col"><span class="sr-only">Actions</span></th></tr></thead>
+      <thead><tr><th>Document</th><th>Customer</th><th>Status</th><th>Sent</th><th>Signed</th><th class="actions-col"><span class="sr-only">Actions</span></th></tr></thead>
       <tbody>${shown
         .map((d) => {
           const [label, tone] = DOC_STATE[d.status] || [d.status, ""];
@@ -2148,8 +2148,8 @@ function docPanel(d = null) {
   const drawer = openPanel(
     d ? "Edit Document" : "New Document",
     `<form class="form-stack" id="doc-form" data-doc-form>
-      ${d ? `<p class="muted">${esc(d.business)}${d.createdBy ? ` · drafted by ${esc(d.createdBy)}` : ""}</p>` : `<label class="field"><span>Café</span><select name="accountId" required><option value="">Pick a café</option>${accounts.map((a) => `<option value="${esc(a.id)}">${esc(a.business)}</option>`).join("")}</select></label>`}
-      <label class="field"><span>Title</span><input name="docTitle" maxlength="120" required value="${esc(d?.title || "")}" placeholder="Equipment Loan Agreement"></label>
+      ${d ? `<p class="muted">${esc(d.business)}${d.createdBy ? ` · drafted by ${esc(d.createdBy)}` : ""}</p>` : `<label class="field"><span>Customer</span><select name="accountId" required><option value="">Pick a customer</option>${accounts.map((a) => `<option value="${esc(a.id)}">${esc(a.business)}</option>`).join("")}</select></label>`}
+      <label class="field"><span>Title</span><input name="docTitle" maxlength="120" required value="${esc(d?.title || "")}" placeholder="Supply Agreement"></label>
       <label class="field"><span>Document</span><textarea name="text" rows="20" class="ag-body" required>${esc(d?.text || "")}</textarea></label>
       <p class="form-error" data-doc-error role="alert"></p>
     </form>`,
@@ -2188,12 +2188,12 @@ function docPanel(d = null) {
       try {
         await save();
         const acct = state.trade.accounts.find((a) => a.id === state.contracts.documents.find((x) => x.id === id)?.accountId);
-        if (!confirm(`Send it to ${acct?.business || "the café"} to sign? We'll email their owners.`)) return;
+        if (!confirm(`Send it to ${acct?.business || "the customer"} to sign? We'll email their owners.`)) return;
         const r = await api(`/api/admin/trade/contracts/${id}/send`, { method: "POST" });
         state.contracts.documents = r.documents;
         closeDrawer();
         state.docFilter = "waiting";
-        toast(`Sent to ${acct?.business || "the café"}.`);
+        toast(`Sent to ${acct?.business || "the customer"}.`);
         render();
       } catch (error) {
         err.textContent = error.message;

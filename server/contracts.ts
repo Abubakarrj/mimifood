@@ -37,7 +37,7 @@ export const DEFAULT_TITLE = "Wholesale Agreement";
 export const DEFAULT_BODY = `This agreement is between {shop} ("we") and {business} ("you"), from {date}.
 
 1. Ordering
-You order through the wholesale portal, by email or by text. An order is confirmed once we accept it. Coffee is roasted to order and sold as whole beans.
+You order through the wholesale portal, by email or by text. An order is confirmed once we accept it.
 
 2. Pricing
 Your pricing is {pricing}. We'll give you at least 14 days' notice before a price change. Prices on an order are fixed once we confirm it.
@@ -46,13 +46,13 @@ Your pricing is {pricing}. We'll give you at least 14 days' notice before a pric
 Payment terms are {terms}, from the invoice date. We may pause orders while an invoice is overdue.
 
 4. Delivery
-We deliver to {address}, or you pick up at the roastery. Check each delivery when it arrives and tell us within 48 hours if anything is missing or damaged.
+We deliver to {address}, or you pick up from our warehouse. Check each delivery when it arrives and tell us within 48 hours if anything is missing or damaged.
 
-5. Freshness and returns
-We roast for freshness and can't take back coffee that arrived in good condition. If something isn't right, tell us and we'll make it right.
+5. Returns
+We can't take back food that arrived in good condition. If something isn't right, tell us and we'll make it right.
 
 6. Our name and brand
-You may name us as your roaster and use our logo and photos to sell our coffee. Please don't change our packaging or sell our coffee under another name.
+You may name us as your supplier and use our logo and photos to sell our products. Please don't change our packaging or sell our products under another name.
 
 7. Ending this agreement
 Either of us can end this agreement with 30 days' written notice. Invoices already sent still need to be paid.`;
