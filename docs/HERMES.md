@@ -39,16 +39,19 @@ Frames are JSON-RPC 2.0, one per text frame. Contracts:
 
 ## Run Hermes (not on the Node service)
 
-Hermes is Python and keeps state (SQLite), so it runs as its own service, never inside this one.
-Use its Dockerfile on a private network service (Render private service, Fly, a VM), reachable
-only from this server:
+Hermes is Python and keeps state (SQLite), so it runs as its own service. `render.yaml` already declares it as
+`hermes-assistant`, a private Render service built from Hermes' own Dockerfile (starter plan with a 1 GB disk, so it
+is a paid service). mimi-food gets `HERMES_URL` and `HERMES_TOKEN` from it automatically, so there is nothing to
+copy by hand. The one value to set is its Claude key:
 
-```bash
-HERMES_DASHBOARD_SESSION_TOKEN=<long random> hermes serve --host 0.0.0.0 --port 9119
-```
+1. Render → Blueprints → apply the change; it creates `hermes-assistant`.
+2. Render → hermes-assistant → Environment → set `ANTHROPIC_API_KEY`.
+3. Deploy it (auto-deploy is off on purpose, so Hermes never updates itself).
 
-A non-loopback bind makes Hermes require an auth provider; a provisioned
-`HERMES_DASHBOARD_SESSION_TOKEN` is its token mode. Keep the port off the public internet.
+Its start command writes the config on every start: Claude as the model and web lookups as the only tool
+(see the next section). To run it elsewhere instead, start `hermes serve --host 0.0.0.0 --port 9119` with a
+long random `HERMES_DASHBOARD_SESSION_TOKEN`, keep the port off the public internet, and set `HERMES_URL` and
+`HERMES_TOKEN` by hand.
 
 ## Lock it down (required before real visitors)
 

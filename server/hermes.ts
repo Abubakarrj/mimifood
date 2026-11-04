@@ -17,7 +17,11 @@ import type { Duplex } from "node:stream";
 export const HERMES_COMMIT = "919a93732a28f5cfbe82378dee1aa666004c5913";
 
 const env = (name: string) => String(process.env[name] || "").trim();
-const hermesUrl = () => env("HERMES_URL").replace(/\/+$/, "");
+// Render hands over a bare host:port for a private service; a full ws:// or wss:// URL also works.
+const hermesUrl = () => {
+  const url = env("HERMES_URL").replace(/\/+$/, "");
+  return url && !/^wss?:\/\//.test(url) ? `ws://${url}` : url;
+};
 export const hermesConfigured = () => Boolean(hermesUrl() && env("HERMES_TOKEN"));
 
 const LIMITS = {

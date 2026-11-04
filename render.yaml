@@ -18,14 +18,18 @@ services:
       # Set the value in the Render dashboard; never commit the key.
       - key: ANTHROPIC_API_KEY
         sync: false
-      # Optional: answer the site assistant with Hermes Agent running as its own service (see
-      # docs/HERMES.md). Without HERMES_URL the assistant uses ANTHROPIC_API_KEY as before.
+      # The site assistant is answered by Hermes Agent, the private service below (docs/HERMES.md).
+      # Delete these two lines (and the service) to go back to answering with ANTHROPIC_API_KEY only.
       - key: HERMES_URL
-        sync: false
+        fromService:
+          type: pserv
+          name: hermes-assistant
+          property: hostport
       - key: HERMES_TOKEN
-        sync: false
-      - key: HERMES_PROFILE
-        sync: false
+        fromService:
+          type: pserv
+          name: hermes-assistant
+          envVarKey: HERMES_DASHBOARD_SESSION_TOKEN
       # Wholesale login by text code (Twilio). Account SID and auth token, plus a Verify
       # service (VA…), or a sending number (TWILIO_FROM) / messaging service (MG…).
       - key: TWILIO_ACCOUNT_SID
@@ -198,6 +202,42 @@ services:
       - key: GOOGLE_MERCHANT_ID
         sync: false
       - key: GOOGLE_MERCHANT_KEY
+        sync: false
+
+  # Hermes Agent (github.com/NousResearch/hermes-agent), headless, for the site assistant. Private:
+  # only mimi-food can reach it. It builds Hermes' own Dockerfile from its main branch; auto-deploy
+  # is off so it only changes when you press Deploy (verified against commit 919a937).
+  # The command writes its config on every start: Claude as the model, and web lookups as its only
+  # tools (no terminal, no files), so a visitor's question can't do anything on this machine.
+  - type: pserv
+    runtime: docker
+    name: hermes-assistant
+    plan: starter
+    repo: https://github.com/NousResearch/hermes-agent
+    branch: main
+    autoDeploy: false
+    dockerCommand: |-
+      sh -c '
+      mkdir -p /opt/data
+      echo "model:" > /opt/data/config.yaml
+      echo "  default: claude-sonnet-5-5" >> /opt/data/config.yaml
+      echo "  provider: anthropic" >> /opt/data/config.yaml
+      echo "platform_toolsets:" >> /opt/data/config.yaml
+      echo "  cli: [web]" >> /opt/data/config.yaml
+      exec hermes serve --host 0.0.0.0 --port 9119
+      '
+    disk:
+      name: hermes-data
+      mountPath: /opt/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: "9119"
+      # The password mimi-food uses to connect (it reads the same value).
+      - key: HERMES_DASHBOARD_SESSION_TOKEN
+        generateValue: true
+      # Hermes' own Claude key; set the value in the Render dashboard.
+      - key: ANTHROPIC_API_KEY
         sync: false
 
 databases:
