@@ -11,6 +11,7 @@ const path = require("node:path");
 const OUT = path.join(__dirname, "..", "assets", "products", "cut");
 const CANVAS = 900; // square, transparent
 const FIT = 780; // the product fits in this much of it
+const JAR_LO = 573, JAR_HI = 1376; // where the tea jars stand in their 1914 x 1782 photos
 
 async function tidy(file) {
   const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -27,51 +28,69 @@ async function tidy(file) {
   const studio = /(beet|ginkonut|bitter-melon|horse-bean|pumpkin-red-bean|jerusalem-artichoke)-tea/.test(path.basename(file));
   const jar = /(^|-)tea(-|\.)|grain/.test(path.basename(file)) && !/hankook/.test(file) && !studio;
   const dark = (p) => data[p * 4 + 3] > 0 && Math.max(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]) < (jar ? 85 : 60);
-  const gone = new Uint8Array(w * h);
-  const q = [];
-  for (let x = 0; x < w; x++) for (const y of [0, h - 1]) q.push(y * w + x);
-  for (let y = 0; y < h; y++) for (const x of [0, w - 1]) q.push(y * w + x);
-  let darkCount = 0;
-  const reached = new Uint8Array(w * h);
-  // Spread through empty and dark pixels from the edge.
-  while (q.length) {
-    const p = q.pop();
-    if (reached[p]) continue;
-    if (data[p * 4 + 3] > 0 && !dark(p)) continue;
-    reached[p] = 1;
-    if (data[p * 4 + 3] > 0) darkCount++;
-    const x = p % w, y = (p - x) / w;
-    if (x > 0) q.push(p - 1);
-    if (x < w - 1) q.push(p + 1);
-    if (y > 0) q.push(p - w);
-    if (y < h - 1) q.push(p + w);
-  }
-  // Only the tea and grain jars, which were shot on black (a dark pouch would lose its body to this).
-  if (jar && darkCount > w * h * 0.01) for (let p = 0; p < w * h; p++) if (reached[p]) data[p * 4 + 3] = 0;
+  const peel = () => {
+    const q = [];
+    for (let x = 0; x < w; x++) for (const y of [0, h - 1]) q.push(y * w + x);
+    for (let y = 0; y < h; y++) for (const x of [0, w - 1]) q.push(y * w + x);
+    let darkCount = 0;
+    const reached = new Uint8Array(w * h);
+    // Spread through empty and dark pixels from the edge.
+    while (q.length) {
+      const p = q.pop();
+      if (reached[p]) continue;
+      if (data[p * 4 + 3] > 0 && !dark(p)) continue;
+      reached[p] = 1;
+      if (data[p * 4 + 3] > 0) darkCount++;
+      const x = p % w, y = (p - x) / w;
+      if (x > 0) q.push(p - 1);
+      if (x < w - 1) q.push(p + 1);
+      if (y > 0) q.push(p - w);
+      if (y < h - 1) q.push(p + w);
+    }
+    // Only the tea and grain jars, which were shot on black (a dark pouch would lose its body to this).
+    if (jar && darkCount > 0) for (let p = 0; p < w * h; p++) if (reached[p]) data[p * 4 + 3] = 0;
+  };
+  peel();
   if (jar) {
     // A jar is a tall block: the glow of its label color that spills sideways is cut off at the jar's own width.
-    // The width is read off the lid, a band near the top where only the jar is.
+    // The jar's width is where columns are mostly made of lit pixels (plastic, label, tea) from top to bottom; black
+    // strips and glow beside it are lit in only a few rows.
+    const lit = (p) => data[p * 4 + 3] > 128 && Math.max(data[p * 4], data[p * 4 + 1], data[p * 4 + 2]) >= 70;
     let y0 = h, y1 = 0;
-    for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] > 128) { const y = Math.floor(p / w); if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    // (only its near-white, clear-plastic pixels count, so colored glow and dark boxes don't widen it).
-    const bandTop = y0 + Math.round((y1 - y0) * 0.03), bandEnd = y0 + Math.round((y1 - y0) * 0.14);
-    const xs = [];
-    for (let y = bandTop; y <= bandEnd; y++) {
-      for (let x = 0; x < w; x++) {
-        const i = (y * w + x) * 4;
-        if (data[i + 3] > 128 && Math.min(data[i], data[i + 1], data[i + 2]) > 150) xs.push(x);
+    for (let p = 0; p < w * h; p++) if (lit(p)) { const y = Math.floor(p / w); if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    // Rows of the lid and the clear plastic below it (the first 18% of the jar): in each, the longest unbroken run of
+    // lit pixels is the jar; the median of those runs ignores specks and glow.
+    const los = [], his = [];
+    for (let y = y0 + Math.round((y1 - y0) * 0.04); y <= y0 + Math.round((y1 - y0) * 0.18); y += 3) {
+      let runStart = -1, bestLen = 0, bestLo = 0, gap = 0;
+      for (let x = 0; x <= w; x++) {
+        const on = x < w && lit(y * w + x);
+        if (on) { if (runStart < 0) runStart = x; gap = 0; }
+        else if (runStart >= 0 && ++gap > 6) {
+          const len = x - gap - runStart;
+          if (len > bestLen) { bestLen = len; bestLo = runStart; }
+          runStart = -1;
+        }
       }
+      if (bestLen > 0) { los.push(bestLo); his.push(bestLo + bestLen); }
     }
-    xs.sort((a, b) => a - b);
-    // Every jar is about two thirds as wide as it is tall; the lid gives where it sits.
-    const mid = xs.length ? (xs[Math.floor(xs.length * 0.1)] + xs[Math.floor(xs.length * 0.9)]) / 2 : w / 2;
-    const half = (y1 - y0) * 0.335;
-    const lo = Math.round(mid - half), hi = Math.round(mid + half);
+    los.sort((a, b) => a - b);
+    his.sort((a, b) => a - b);
+    let lo = los.length ? los[Math.floor(los.length / 2)] : 0;
+    let hi = his.length ? his[Math.floor(his.length / 2)] : w - 1;
+    lo -= 4;
+    hi += 4;
+    // These jars were all shot in the same frame, so they stand in the same place; the measured edges above only
+    // check that (a label as white as the backdrop, or a black circle, can fool a measurement).
+    if (process.env.DEBUG_JAR) console.log("measured", path.basename(file), lo, hi);
+    if (w === 1914 && h === 1782) { lo = JAR_LO; hi = JAR_HI; }
     if (process.env.DEBUG_JAR) console.log(path.basename(file), { w, h, y0, y1, lo, hi });
     for (let p = 0; p < w * h; p++) {
       const x = p % w;
       if (x < lo || x > hi) data[p * 4 + 3] = 0;
     }
+    // With the sides cut away, the dark corners beside the jar's rounded top and bottom now reach the edge too.
+    peel();
   }
   // Shots with extra props: keep only the part of the picture that holds the product, as a share of what's visible
   // [left, top, right, bottom]. Matcha: the bag, not the cup. Oat milks: the cartons, not the white box behind (it
@@ -113,7 +132,8 @@ async function tidy(file) {
       if (x > x0 + (x1 - x0) * cx && y > y0 + (y1 - y0) * cy) data[p * 4 + 3] = 0;
     }
   }
-  if (/mala-(stir|spicy)/.test(path.basename(file))) {
+  // (The mala packets now come from the store's packet-only photos, so this isn't needed; kept for photos with props.)
+  if (process.env.ISOLATE_PACKET && /mala-(stir|spicy)/.test(path.basename(file))) {
     // Just the silver packet: find its gray body and drop everything outside it (the food and props around it).
     const gray = new Uint8Array(w * h);
     for (let p = 0; p < w * h; p++) {
