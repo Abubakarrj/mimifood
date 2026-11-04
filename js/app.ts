@@ -3909,8 +3909,8 @@ const pages = {
       addEventListener("load", () => setTimeout(() => scrollTo({ top: 0, behavior: "instant" }), 60), { once: true });
     }
     else {
-      root.classList.add("home-intro");
-      scrollTo({ top: 0, behavior: "instant" });
+      // No photo-and-statement intro any more: the home address opens straight on the shop.
+      enterShop();
     }
     // "Shop", "Tea" … (menu, footer) while already on this page: close the menu and fade to that
     // section without loading the page again; the address follows, so Back works.
@@ -4106,12 +4106,6 @@ const pages = {
       };
       if (!slug) {
         kind();
-        if (root.classList.contains("home-shop")) {
-          root.classList.remove("home-shop");
-          root.classList.add("home-intro");
-          document.title = homeTitle;
-          scrollTo({ top: 0, behavior: "instant" });
-        }
         return;
       }
       showSection(SHOP_SECTIONS[slug]);
