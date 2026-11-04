@@ -7939,6 +7939,7 @@ h2 .reg {
   aspect-ratio: 1 / 1;
   width: min(100%, 520px);
   justify-self: center;
+  background: #fff;
 }
 
 .hero-float img {
