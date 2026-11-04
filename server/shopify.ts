@@ -127,3 +127,51 @@ export async function refreshShopifyPrices(log: (...a: any[]) => void = console.
 
 // The store's cart links go to: SHOPIFY_STORE (yourshop.myshopify.com) when set, else the site data's own domain.
 export const shopifyDomain = () => store() || "";
+
+// Makes the store's gift card product when it has none: "Gift Card", one variant per amount, active, on the
+// Online Store. Needs write_products (and write_publications to list it on the Online Store). It only ever
+// creates when no gift card product (of any status) exists.
+let creating = false;
+export async function ensureGiftCardProduct(amounts: number[], log: (...a: any[]) => void = console.error): Promise<boolean> {
+  if (!shopifyConfigured() || creating || !amounts.length) return false;
+  creating = true;
+  try {
+    const found = await graphql(`{ products(first: 5, query: "gift_card:true OR title:gift*") { nodes { id title status } } }`);
+    if ((found?.products?.nodes || []).length) return false; // one exists (maybe a draft): leave it to the owner
+    const created = await graphql(`mutation { productCreate(product: { title: "Gift Card", giftCard: true, status: ACTIVE, productOptions: [{ name: "Amount", values: [${amounts.map((a) => `{ name: "$${a}" }`).join(", ")}] }] }) { product { id variants(first: 5) { nodes { id } } } userErrors { field message } } }`);
+    const errs = created?.productCreate?.userErrors || [];
+    if (errs.length) throw new Error(`productCreate: ${errs.map((e: any) => e.message).join("; ")}`);
+    const product = created?.productCreate?.product;
+    if (!product?.id) throw new Error("productCreate returned no product");
+    const firstVariant = product.variants?.nodes?.[0]?.id;
+    // The first amount's variant exists; the others are added, and every variant gets its price.
+    const rest = amounts.slice(1);
+    if (rest.length) {
+      const bulk = await graphql(`mutation { productVariantsBulkCreate(productId: "${product.id}", variants: [${rest.map((a) => `{ optionValues: [{ optionName: "Amount", name: "$${a}" }], price: "${a}.00" }`).join(", ")}]) { userErrors { message } } }`);
+      const e2 = bulk?.productVariantsBulkCreate?.userErrors || [];
+      if (e2.length) throw new Error(`variants: ${e2.map((e: any) => e.message).join("; ")}`);
+    }
+    if (firstVariant) {
+      const upd = await graphql(`mutation { productVariantsBulkUpdate(productId: "${product.id}", variants: [{ id: "${firstVariant}", price: "${amounts[0]}.00" }]) { userErrors { message } } }`);
+      const e3 = upd?.productVariantsBulkUpdate?.userErrors || [];
+      if (e3.length) throw new Error(`price: ${e3.map((e: any) => e.message).join("; ")}`);
+    }
+    // On the Online Store, so cart links can use it.
+    try {
+      const pubs = await graphql(`{ publications(first: 20) { nodes { id name } } }`);
+      const online = (pubs?.publications?.nodes || []).find((p: any) => /online store/i.test(p.name));
+      if (online) await graphql(`mutation { publishablePublish(id: "${product.id}", input: [{ publicationId: "${online.id}" }]) { userErrors { message } } }`);
+      else log("[shopify] gift card created; list it on the Online Store in Shopify admin (no Online Store channel found)");
+    } catch (error) {
+      log("[shopify] gift card created but not listed on the Online Store (needs write_publications):", error instanceof Error ? error.message : error);
+    }
+    cache = null;
+    log(`[shopify] created the Gift Card product (${amounts.map((a) => `$${a}`).join(", ")})`);
+    return true;
+  } catch (error) {
+    log("[shopify] gift card product:", error instanceof Error ? error.message : error);
+    return false;
+  } finally {
+    creating = false;
+  }
+}

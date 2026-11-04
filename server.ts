@@ -76,7 +76,7 @@ import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIEL
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
 import { livekitConfigured, livekitRoom, livekitToken, livekitUrl, pacificMoment } from "./server/livekit.ts";
-import { normTitle, shopifyProducts, shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
+import { ensureGiftCardProduct, normTitle, shopifyProducts, shopifyDomain, cachedGiftCardVariants, giftCardVariants, refreshShopifyPrices, shopifyConfigured } from "./server/shopify.ts";
 import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
@@ -16413,7 +16413,11 @@ server.listen(PORT, () => {
   started = true;
   setTimeout(() => warmUp().catch(() => {}), 50);
   if (shopifyConfigured()) {
-    giftCardVariants().then((v) => console.log(`Shopify: ${Object.keys(v).length} gift card amounts.`));
+    giftCardVariants().then(async (v) => {
+      console.log(`Shopify: ${Object.keys(v).length} gift card amounts.`);
+      // No gift card product in the store: make one (needs the app to have write_products).
+      if (!Object.keys(v).length && (await ensureGiftCardProduct(DATA.SITE.giftCards?.amounts || [25, 50, 75, 100]))) giftCardVariants().then((n) => console.log(`Shopify: ${Object.keys(n).length} gift card amounts.`));
+    });
     // Shopify's prices win over the site's placeholders; the catalogue is rebuilt when any move.
     const pullPrices = () =>
       refreshShopifyPrices().then(async (r) => {
