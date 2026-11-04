@@ -50,17 +50,101 @@ async function tidy(file) {
     // The width is read off the lid, a band near the top where only the jar is.
     let y0 = h, y1 = 0;
     for (let p = 0; p < w * h; p++) if (data[p * 4 + 3] > 128) { const y = Math.floor(p / w); if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    const bandTop = y0 + Math.round((y1 - y0) * 0.05), bandEnd = y0 + Math.round((y1 - y0) * 0.1);
-    let lo = w, hi = 0;
+    // (only its near-white, clear-plastic pixels count, so colored glow and dark boxes don't widen it).
+    const bandTop = y0 + Math.round((y1 - y0) * 0.03), bandEnd = y0 + Math.round((y1 - y0) * 0.14);
+    const xs = [];
     for (let y = bandTop; y <= bandEnd; y++) {
       for (let x = 0; x < w; x++) {
-        if (data[(y * w + x) * 4 + 3] > 128) { if (x < lo) lo = x; if (x > hi) hi = x; }
+        const i = (y * w + x) * 4;
+        if (data[i + 3] > 128 && Math.min(data[i], data[i + 1], data[i + 2]) > 150) xs.push(x);
       }
     }
-    lo -= 6; hi += 6;
+    xs.sort((a, b) => a - b);
+    // Every jar is about two thirds as wide as it is tall; the lid gives where it sits.
+    const mid = xs.length ? (xs[Math.floor(xs.length * 0.1)] + xs[Math.floor(xs.length * 0.9)]) / 2 : w / 2;
+    const half = (y1 - y0) * 0.335;
+    const lo = Math.round(mid - half), hi = Math.round(mid + half);
+    if (process.env.DEBUG_JAR) console.log(path.basename(file), { w, h, y0, y1, lo, hi });
     for (let p = 0; p < w * h; p++) {
       const x = p % w;
       if (x < lo || x > hi) data[p * 4 + 3] = 0;
+    }
+  }
+  // Shots with extra props: keep only the part of the picture that holds the product, as a share of what's visible
+  // [left, top, right, bottom]. Matcha: the bag, not the cup. Oat milks: the cartons, not the white box behind (it
+  // vanishes on a white page).
+  const KEEP = { hankook: [0, 0, 0.6, 1], "korean-whole-oat": [0.5, 0.1, 1, 1], "whole-oat-almond": [0.5, 0.05, 1, 1] };
+  const keepKey = Object.keys(KEEP).find((k) => path.basename(file).includes(k));
+  if (keepKey) {
+    let x0 = w, x1 = 0, y0 = h, y1 = 0;
+    for (let p = 0; p < w * h; p++) {
+      if (data[p * 4 + 3] === 0) continue;
+      const x = p % w, y = (p - x) / w;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+    const [kl, kt, kr, kb] = KEEP[keepKey];
+    for (let p = 0; p < w * h; p++) {
+      const x = p % w, y = (p - x) / w;
+      if (x < x0 + (x1 - x0) * kl || x > x0 + (x1 - x0) * kr || y < y0 + (y1 - y0) * kt || y > y0 + (y1 - y0) * kb) data[p * 4 + 3] = 0;
+    }
+  }
+  // Leaves and sprigs set beside a pack go: [left, top] of the corner (as a share of the visible product) to clear.
+  const CLEAR = { "korean-beef-short-rib": [0.8, 0.6], jumulleok: [0.8, 0.6] };
+  const clearKey = Object.keys(CLEAR).find((k) => path.basename(file).includes(k));
+  if (clearKey) {
+    let x0 = w, x1 = 0, y0 = h, y1 = 0;
+    for (let p = 0; p < w * h; p++) {
+      if (data[p * 4 + 3] === 0) continue;
+      const x = p % w, y = (p - x) / w;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+    const [cx, cy] = CLEAR[clearKey];
+    for (let p = 0; p < w * h; p++) {
+      const x = p % w, y = (p - x) / w;
+      if (x > x0 + (x1 - x0) * cx && y > y0 + (y1 - y0) * cy) data[p * 4 + 3] = 0;
+    }
+  }
+  if (/mala-(stir|spicy)/.test(path.basename(file))) {
+    // Just the silver packet: find its gray body and drop everything outside it (the food and props around it).
+    const gray = new Uint8Array(w * h);
+    for (let p = 0; p < w * h; p++) {
+      const r = data[p * 4], g = data[p * 4 + 1], b = data[p * 4 + 2];
+      if (data[p * 4 + 3] > 200 && Math.max(r, g, b) - Math.min(r, g, b) < 18 && Math.min(r, g, b) > 110) gray[p] = 1;
+    }
+    const lab = new Int32Array(w * h);
+    const st = [];
+    let best = 0, bestId = 0, id = 0, bx0 = 0, bx1 = 0, by0 = 0, by1 = 0;
+    for (let s = 0; s < w * h; s++) {
+      if (!gray[s] || lab[s]) continue;
+      id++;
+      let n = 0, x0 = w, x1 = 0, y0 = h, y1 = 0;
+      lab[s] = id;
+      st.push(s);
+      while (st.length) {
+        const p = st.pop();
+        n++;
+        const x = p % w, y = (p - x) / w;
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+        for (const q of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1]) {
+          if (q >= 0 && gray[q] && !lab[q]) { lab[q] = id; st.push(q); }
+        }
+      }
+      if (n > best) { best = n; bestId = id; bx0 = x0; bx1 = x1; by0 = y0; by1 = y1; }
+    }
+    if (bestId) {
+      for (let p = 0; p < w * h; p++) {
+        const x = p % w, y = (p - x) / w;
+        if (x < bx0 - 4 || x > bx1 + (/stir/.test(file) ? Math.round((bx1 - bx0) * 0.55) : 4) || y < by0 - 4 || y > by1 + 4) data[p * 4 + 3] = 0;
+      }
     }
   }
   // Keep only the biggest connected piece (plus pieces over a tenth of its size): props that were left behind go.

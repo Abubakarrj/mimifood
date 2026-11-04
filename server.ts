@@ -16358,10 +16358,12 @@ async function useShopifyPhotos(): Promise<number> {
   const byHandle = new Map(shopifyProducts().map((p) => [p.handle, p]));
   const byName = new Map(shopifyProducts().map((p) => [normTitle(p.title), p]));
   for (const a of DATA.ACCESSORIES) {
-    const shop = byHandle.get(a.id) || byName.get(normTitle(a.name));
+    // The handle can belong to a listing with no photo, so the name's match is tried next.
+    const hasCut = (s?: { handle: string }) => !!s && existsSync(path.join(ROOT, "assets", "products", "cut", `${cutName(s.handle)}.webp`));
+    const shop = [byHandle.get(a.id), byName.get(normTitle(a.name))].find(hasCut);
     if (!shop) continue;
     const cut = `/assets/products/cut/${cutName(shop.handle)}.webp`;
-    if (a.image === cut || !existsSync(path.join(ROOT, "assets", "products", "cut", `${cutName(shop.handle)}.webp`))) continue;
+    if (a.image === cut) continue;
     await catalog.setFoodImage(a.id, cut);
     changed++;
   }
