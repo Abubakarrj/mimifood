@@ -75,6 +75,7 @@ import { createMeetings, MEETING_PARTS, MeetingError, PROVIDER_NAMES } from "./s
 import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIELDS } from "./server/contracts.ts";
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
+import { createAssistantSocket, hermesConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -15840,7 +15841,7 @@ function route(req, res) {
   if (pathname === "/api/review" || pathname === "/api/reviews") return handleReviews(req, res, url);
   if (pathname === "/api/form-token") {
     if (rateLimited(clientIp(req), "form-token", 120)) return sendJson(res, 429, { error: "Too many requests." });
-    return sendJson(res, 200, { token: issueFormToken() }, { "Cache-Control": "no-store" });
+    return sendJson(res, 200, { token: issueFormToken(), assistant: hermesConfigured() }, { "Cache-Control": "no-store" });
   }
   if (pathname === "/admin/subscribers.csv") return handleSubscribersExport(req, res, url);
   if (pathname === "/admin/subscriptions.csv") return handleSubscriptionsExport(req, res, url);
@@ -16198,12 +16199,36 @@ async function warmUp() {
   }
 }
 
+// The assistant over a WebSocket, answered by Hermes Agent when HERMES_URL is set (server/hermes.ts).
+const assistantSocket = createAssistantSocket({
+  siteUrl: SITE_URL,
+  systemPrompt: () => SYSTEM_PROMPT,
+  clientIp,
+  sameSite: (req) => sameSite(req, SITE_URL),
+  checkToken: (token) => {
+    try {
+      checkFormToken(token, "ask");
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  rateLimited,
+  logAsked: (question) => logAsked(question, "FAQ"),
+  log: console.error,
+});
+server.on("upgrade", (req, socket, head) => {
+  if (new URL(req.url || "/", "http://x").pathname === "/assistant/ws") assistantSocket.upgrade(req, socket, head);
+  else socket.destroy();
+});
+
 server.listen(PORT, () => {
   started = true;
   setTimeout(() => warmUp().catch(() => {}), 50);
   repriceSoon(); // subscriptions billed at an older price move to the current one
   console.log(`Mimi Food running on http://localhost:${PORT} (data: ${storage.describe})`);
-  if (!client) console.warn("ANTHROPIC_API_KEY is not set: the FAQ assistant will be unavailable.");
+  if (!client && !hermesConfigured()) console.warn("ANTHROPIC_API_KEY is not set: the FAQ assistant will be unavailable.");
+  if (hermesConfigured()) console.log("Assistant: Hermes Agent at /assistant/ws (falls back to /api/ask).");
   if (adminKey().length < ADMIN_KEY_MIN) console.warn(`ADMIN_KEY is ${adminKey() ? "shorter than 12 characters" : "not set"}: the back office can't be signed in to.`);
   // Prepaid gift subscriptions: check for deliveries due, now and every hour.
   sendPrepaidDeliveries();

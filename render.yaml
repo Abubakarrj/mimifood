@@ -18,6 +18,14 @@ services:
       # Set the value in the Render dashboard; never commit the key.
       - key: ANTHROPIC_API_KEY
         sync: false
+      # Optional: answer the site assistant with Hermes Agent running as its own service (see
+      # docs/HERMES.md). Without HERMES_URL the assistant uses ANTHROPIC_API_KEY as before.
+      - key: HERMES_URL
+        sync: false
+      - key: HERMES_TOKEN
+        sync: false
+      - key: HERMES_PROFILE
+        sync: false
       # Wholesale login by text code (Twilio). Account SID and auth token, plus a Verify
       # service (VA…), or a sending number (TWILIO_FROM) / messaging service (MG…).
       - key: TWILIO_ACCOUNT_SID

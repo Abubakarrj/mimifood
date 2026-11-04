@@ -1,0 +1,8 @@
+# config.yaml for the Hermes profile that answers the website assistant (see docs/HERMES.md).
+# Gateway sessions read their tools from platform_toolsets.cli (tui_gateway/agent_factory.py).
+# Keep it to web lookups: no terminal, no files, no browser, no scheduled jobs, no messaging.
+platform_toolsets:
+  cli: [web]
+
+# Set the model and provider for this profile with `hermes -p mimi-assistant model`,
+# and keep its API key in that profile's own .env, never in this repository.

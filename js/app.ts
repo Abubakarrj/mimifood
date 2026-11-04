@@ -1407,11 +1407,12 @@ function renderLayout() {
    or expired (a page left open for hours) is retried after a short wait. */
 
 let formToken = null;
+let assistantOn = false; // the server answers questions through Hermes Agent (/assistant/ws)
 let guardedStart = () => {};
 const fetchFormToken = () =>
   fetch("/api/form-token")
     .then((r) => (r.ok ? r.json() : {}))
-    .then((d: any) => (formToken = d.token || null))
+    .then((d: any) => ((assistantOn = Boolean(d.assistant)), (formToken = d.token || null)))
     .catch(() => (formToken = null));
 // Fetched once the page has settled (or as soon as a form is used), not while it's loading.
 let formTokenReady = Promise.resolve();
@@ -1447,6 +1448,76 @@ async function guardedFetch(url, init: any = {}) {
     res = await attempt();
   }
   return res;
+}
+
+/* The assistant over /assistant/ws. Resolves with the answer, or null when the socket isn't
+   available or failed before saying anything, so the page asks /api/ask the usual way instead. */
+let assistantSocket: WebSocket | null = null;
+let assistantReady: Promise<WebSocket> | null = null;
+let assistantTurn: { id: string; onText: (t: string) => void; done: (text: string | null, error?: Error) => void; started: boolean } | null = null;
+const closeAssistant = () => {
+  assistantSocket?.close();
+  assistantSocket = assistantReady = null;
+};
+function assistantConnect(): Promise<WebSocket> {
+  if (assistantSocket?.readyState === WebSocket.OPEN) return Promise.resolve(assistantSocket);
+  if (assistantReady) return assistantReady;
+  return (assistantReady = new Promise((resolve, reject) => {
+    const ws = new WebSocket(`${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/assistant/ws?t=${encodeURIComponent(formToken || "")}`);
+    const timer = setTimeout(() => ws.close(), 8000);
+    ws.addEventListener("message", (e) => {
+      let m: any;
+      try {
+        m = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (m.type === "ready") {
+        clearTimeout(timer);
+        assistantSocket = ws;
+        resolve(ws);
+        return;
+      }
+      const turn = assistantTurn;
+      if (!turn || m.id !== turn.id) return;
+      if (m.type === "delta") {
+        turn.started = true;
+        turn.onText(m.text);
+      } else if (m.type === "done") {
+        assistantTurn = null;
+        turn.done(m.text);
+      } else if (m.type === "error") {
+        assistantTurn = null;
+        turn.done(null, m.started ? new Error("") : undefined);
+      }
+    });
+    ws.addEventListener("close", () => {
+      clearTimeout(timer);
+      if (assistantSocket === ws) assistantSocket = assistantReady = null;
+      assistantReady = null;
+      reject(new Error("closed"));
+      const turn = assistantTurn;
+      assistantTurn = null;
+      turn?.done(null, turn.started ? new Error("") : undefined);
+    });
+  }));
+}
+async function assistantAsk(question: string, before: { role: string; content: string }[], onText: (t: string) => void): Promise<string | null> {
+  if (!assistantOn || !("WebSocket" in window)) return null;
+  const first = !assistantSocket;
+  let ws: WebSocket;
+  try {
+    await formTokenReady;
+    ws = await assistantConnect();
+  } catch {
+    assistantOn = false; // not reachable from here: ask the usual way from now on
+    return null;
+  }
+  return new Promise((resolve, reject) => {
+    const id = String(Date.now());
+    assistantTurn = { id, onText, started: false, done: (text, error) => (error ? reject(error) : resolve(text)) };
+    ws.send(JSON.stringify({ type: "ask", id, text: question, first: before.length === 0, history: first ? before : undefined }));
+  });
 }
 
 async function api(path: string, { method = "GET", body }: { method?: string; body?: any } = {}) {
@@ -10192,6 +10263,20 @@ const pages = {
 
       let text = "";
       try {
+        const viaSocket = await assistantAsk(question, history.slice(0, -1), (chunk) => {
+          text += chunk;
+          answer.classList.remove("is-typing");
+          answer.textContent = answerParts(text).text;
+        });
+        if (viaSocket !== null) {
+          const parts = answerParts(viaSocket);
+          answer.textContent = parts.text;
+          answer.insertAdjacentHTML("afterend", cardRail(parts.ids) + askChips(parts.asks));
+          history.push({ role: "assistant", content: parts.text });
+          input.placeholder = "Ask a follow-up or a new question…";
+          return;
+        }
+        text = "";
         const res = await guardedFetch("/api/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

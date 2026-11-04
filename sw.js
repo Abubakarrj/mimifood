@@ -3,7 +3,7 @@
 // straight away; a cached copy is only used without a connection. API calls (cart checkout,
 // account, orders) are never cached, and the back office has its own worker (admin-sw.js).
 
-const CACHE = "shop-v447-mimi17";
+const CACHE = "shop-v448-mimi18";
 const SHELL = ["/", "/shop", "/offline", "/styles.css", "/js/app.js", "/js/data.js", "/site.webmanifest", "/assets/logo.svg", "/assets/icon-192.png"];
 const STATIC = /\.(html|css|js|svg|png|jpe?g|webp|webmanifest)$/;
 
