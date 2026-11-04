@@ -6,6 +6,7 @@
 // products in js/data.js are copied in; from then on the database is the source of truth and
 // the server writes the live list into js/data.js as it serves it (see server.js).
 
+import { shopifyPrice } from "./shopify.ts";
 import { randomBytes } from "node:crypto";
 
 export const CATALOG_PARTS = {
@@ -864,7 +865,7 @@ export function createCatalog({ store, seed, menuSeed = [], roastTypes = ["Espre
         short: f.short,
         category: f.category,
         ...(f.pack ? { pack: f.pack } : {}),
-        price: f.price,
+        price: shopifyPrice(f.shopify) ?? f.price,
         color: "#f4f2ee",
         weightOz: f.weightOz,
         ...(foodImage(f) ? { image: foodImage(f) } : {}),

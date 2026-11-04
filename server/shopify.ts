@@ -68,3 +68,31 @@ export const cachedGiftCardVariants = () => {
   if (!cache || Date.now() - cache.at > 10 * 60_000) giftCardVariants().catch(() => {});
   return cache?.value || {};
 };
+
+// Prices set in Shopify win over the site's own (placeholders until Shopify has the real ones):
+// a variant at 0 means "not priced yet", so the site's price stays. variantId -> price.
+let prices = new Map<string, number>();
+export const shopifyPrice = (variantId: string | undefined): number | undefined => {
+  const price = variantId ? prices.get(String(variantId)) : undefined;
+  return price && price > 0 ? price : undefined;
+};
+// Fetches every variant's price; returns how many are at 0 (not priced) and whether any price moved.
+export async function refreshShopifyPrices(log: (...a: any[]) => void = console.error): Promise<{ total: number; unpriced: number; changed: boolean } | null> {
+  if (!shopifyConfigured()) return null;
+  try {
+    const next = new Map<string, number>();
+    let after = "";
+    for (let page = 0; page < 10; page++) {
+      const data = await graphql(`{ products(first: 100${after ? `, after: "${after}"` : ""}) { pageInfo { hasNextPage endCursor } nodes { variants(first: 100) { nodes { id price } } } } }`);
+      for (const p of data?.products?.nodes || []) for (const v of p.variants?.nodes || []) next.set(String(v.id).replace(/\D/g, ""), Number(v.price) || 0);
+      if (!data?.products?.pageInfo?.hasNextPage) break;
+      after = data.products.pageInfo.endCursor;
+    }
+    const changed = next.size !== prices.size || [...next].some(([id, price]) => prices.get(id) !== price);
+    prices = next;
+    return { total: next.size, unpriced: [...next.values()].filter((p) => !(p > 0)).length, changed };
+  } catch (error) {
+    log("[shopify] prices:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
