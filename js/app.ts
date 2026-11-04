@@ -619,10 +619,13 @@ const giftCardArt = (amount, number = "") => `
     <span class="gc-name">${esc(SITE.name)}</span>
   </div>`;
 
-function giftCardsPage() {
+// The gift card product's variants come from the server (Shopify), falling back to any set in the site data.
+async function giftCardsPage() {
+  const config: any = await getShopConfig();
+  const cards: Record<string, string> = config.giftCardVariants && Object.keys(config.giftCardVariants).length ? config.giftCardVariants : SITE.shopify?.giftCardVariants || {};
   let g = SITE.giftCards || { amounts: [25, 50, 75, 100], min: 10, max: 500 };
   // Paid for at Shopify: only the amounts that have a gift card variant there.
-  const shopifyCards: Record<string, string> = SITE.shopify?.domain ? SITE.shopify.giftCardVariants || {} : {};
+  const shopifyCards: Record<string, string> = SITE.shopify?.domain ? cards : {};
   const viaShopify = Object.keys(shopifyCards).length > 0;
   if (viaShopify) g = { ...g, amounts: Object.keys(shopifyCards).map(Number).sort((a, b) => a - b) };
   let amount = g.amounts[1] ?? g.amounts[0];

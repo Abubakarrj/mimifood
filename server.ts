@@ -75,6 +75,7 @@ import { createMeetings, MEETING_PARTS, MeetingError, PROVIDER_NAMES } from "./s
 import { createContracts, CONTRACT_PARTS, ContractError, FIELDS as CONTRACT_FIELDS } from "./server/contracts.ts";
 import * as usign from "./server/usign.ts";
 import * as nexus from "./server/nexus.ts";
+import { cachedGiftCardVariants, giftCardVariants, shopifyConfigured } from "./server/shopify.ts";
 import { createAssistantSocket, createStaffSocket, hermesConfigured, hermesStaffConfigured } from "./server/hermes.ts";
 import { issueFormToken, checkFormToken, checkEmailDomain, sameSite, looksLikeLink, tooManyLinks, SpamError } from "./server/spam.ts";
 
@@ -16046,7 +16047,7 @@ function route(req, res) {
     if (req.method !== "POST") return send(res, 405, "Method not allowed", { Allow: "POST" });
     return handleDeliveryCheck(req, res);
   }
-  if (pathname === "/api/config") return sendJson(res, 200, { payments: squareConfigured(), ...(squareConfigured() ? { square: sq.browserConfig() } : {}) });
+  if (pathname === "/api/config") return sendJson(res, 200, { giftCardVariants: cachedGiftCardVariants(), payments: squareConfigured(), ...(squareConfigured() ? { square: sq.browserConfig() } : {}) });
   if (pathname === "/api/orders/pay") {
     if (req.method !== "POST") return send(res, 405, "Method not allowed", { Allow: "POST" });
     return handlePay(req, res);
@@ -16350,6 +16351,7 @@ server.on("upgrade", (req, socket, head) => {
 server.listen(PORT, () => {
   started = true;
   setTimeout(() => warmUp().catch(() => {}), 50);
+  if (shopifyConfigured()) giftCardVariants().then((v) => console.log(`Shopify: ${Object.keys(v).length} gift card amounts.`));
   repriceSoon(); // subscriptions billed at an older price move to the current one
   console.log(`Mimi Food running on http://localhost:${PORT} (data: ${storage.describe})`);
   if (!client && !hermesConfigured()) console.warn("Neither OPENROUTER_API_KEY nor ANTHROPIC_API_KEY is set: the assistants will be unavailable.");

@@ -46,6 +46,14 @@ services:
           type: pserv
           name: hermes-staff
           envVarKey: HERMES_DASHBOARD_SESSION_TOKEN
+      # Shopify (Dev Dashboard app, read_products): finds the gift card product so /gift-cards can send
+      # gift cards to Shopify's checkout. The store is yourshop.myshopify.com.
+      - key: SHOPIFY_STORE
+        sync: false
+      - key: SHOPIFY_CLIENT_ID
+        sync: false
+      - key: SHOPIFY_CLIENT_SECRET
+        sync: false
       # Wholesale login by text code (Twilio). Account SID and auth token, plus a Verify
       # service (VA…), or a sending number (TWILIO_FROM) / messaging service (MG…).
       - key: TWILIO_ACCOUNT_SID
