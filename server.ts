@@ -1276,7 +1276,49 @@ let SYSTEM_PROMPT = buildSystemPrompt(DATA);
 
 /* ── /api/ask ─────────────────────────────────────────────── */
 
-const client = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
+// Every model call goes through OpenRouter when OPENROUTER_API_KEY is set (the FAQ, the back office
+// assistant, the texting assistant, the shop's AI helpers); with only ANTHROPIC_API_KEY it goes
+// straight to Anthropic as before. OpenRouter speaks the same Messages API, so the code below
+// is unchanged; this wrapper only swaps the model names and drops what OpenRouter doesn't take.
+const openRouterKey = () => String(process.env.OPENROUTER_API_KEY || "").trim();
+const OPENROUTER_MODELS = { [MODEL]: process.env.OPENROUTER_STRONG_MODEL || "anthropic/claude-opus-5.5", [QUICK_MODEL]: process.env.OPENROUTER_QUICK_MODEL || "anthropic/claude-haiku-5.5" };
+// OpenRouter has no output_config: a JSON schema becomes an instruction at the end of the system prompt.
+const withSchema = (system, schema) => {
+  const note = `Reply with only a JSON object that matches this JSON Schema, with no other text and no code fence:
+${JSON.stringify(schema)}`;
+  if (Array.isArray(system)) return [...system, { type: "text", text: note }];
+  return system ? `${system}
+
+${note}` : note;
+};
+const stripFence = (text) => text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "");
+function openRouterClient() {
+  const sdk: any = new Anthropic({
+    baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api",
+    apiKey: null,
+    authToken: openRouterKey(),
+    defaultHeaders: { "HTTP-Referer": process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL || "https://mimifoodusa.com", "X-Title": DATA.SITE.name },
+  });
+  const prepare = (params) => {
+    const { betas, fallbacks, output_config, cache_control, system, model, ...rest } = params;
+    const schema = output_config?.format?.schema;
+    return { schema, body: { ...rest, model: OPENROUTER_MODELS[model] || model, ...(system !== undefined || schema ? { system: schema ? withSchema(system, schema) : system } : {}) } };
+  };
+  return {
+    beta: {
+      messages: {
+        async create(params, options) {
+          const { schema, body } = prepare(params);
+          const response = await sdk.messages.create(body, options);
+          if (schema) for (const block of response.content || []) if (block.type === "text") block.text = stripFence(block.text);
+          return response;
+        },
+        stream: (params, options) => sdk.messages.stream(prepare(params).body, options),
+      },
+    },
+  } as any;
+}
+const client: any = openRouterKey() ? openRouterClient() : process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 
 const LIMITS = {
   bodyBytes: 16_000,
@@ -1351,9 +1393,8 @@ function askModel(messages) {
 
 const SORRY = `Sorry, I can't help with that one. For anything else, email us at ${DATA.SITE.email}.`;
 
-// With no Anthropic key, questions go through OpenRouter (OPENROUTER_API_KEY), which picks the model
-// itself unless OPENROUTER_MODEL names one. Same brief, same streamed plain text.
-const openRouterKey = () => String(process.env.OPENROUTER_API_KEY || "").trim();
+// FAQ answers through OpenRouter: it picks the model itself unless OPENROUTER_MODEL names one.
+// Same brief, same streamed plain text.
 async function askOpenRouter(res, messages, abort) {
   let started = false;
   try {
@@ -1429,7 +1470,8 @@ async function handleAsk(req, res) {
 
   const abort = new AbortController();
   res.on("close", () => abort.abort()); // visitor left: stop generating
-  if (!client) return askOpenRouter(res, messages, abort);
+  // The FAQ on OpenRouter lets it choose the model (OPENROUTER_MODEL names one instead).
+  if (openRouterKey() || !client) return askOpenRouter(res, messages, abort);
 
   let started = false;
   let model = askModel(messages);
@@ -1494,7 +1536,7 @@ async function handleAsk(req, res) {
   } catch (error) {
     if (abort.signal.aborted) return;
     if (error instanceof Anthropic.RateLimitError) console.error("[ask] Anthropic rate limit");
-    else if (error instanceof Anthropic.AuthenticationError) console.error("[ask] invalid ANTHROPIC_API_KEY");
+    else if (error instanceof Anthropic.AuthenticationError) console.error("[ask] invalid AI key");
     else if (error instanceof Anthropic.APIError) console.error(`[ask] API error ${error.status}: ${error.message}`);
     else console.error("[ask]", error);
 
@@ -1699,7 +1741,7 @@ async function handleFinder(req, res) {
     });
   } catch (error) {
     if (error instanceof Anthropic.RateLimitError) console.error("[finder] Anthropic rate limit");
-    else if (error instanceof Anthropic.AuthenticationError) console.error("[finder] invalid ANTHROPIC_API_KEY");
+    else if (error instanceof Anthropic.AuthenticationError) console.error("[finder] invalid AI key");
     else if (error instanceof Anthropic.APIError) console.error(`[finder] API error ${error.status}: ${error.message}`);
     else console.error("[finder]", error);
     return sendJson(res, 502, { error: "That didn't work. Try again, or answer the questions." });
@@ -16280,8 +16322,8 @@ server.listen(PORT, () => {
   setTimeout(() => warmUp().catch(() => {}), 50);
   repriceSoon(); // subscriptions billed at an older price move to the current one
   console.log(`Mimi Food running on http://localhost:${PORT} (data: ${storage.describe})`);
-  if (!client && !openRouterKey() && !hermesConfigured()) console.warn("Neither ANTHROPIC_API_KEY nor OPENROUTER_API_KEY is set: the FAQ assistant will be unavailable.");
-  else if (!client && openRouterKey()) console.log("FAQ assistant: OpenRouter.");
+  if (!client && !hermesConfigured()) console.warn("Neither OPENROUTER_API_KEY nor ANTHROPIC_API_KEY is set: the assistants will be unavailable.");
+  else if (openRouterKey()) console.log("Assistants: OpenRouter.");
   if (hermesConfigured()) console.log("Assistant: Hermes Agent at /assistant/ws (falls back to /api/ask).");
   if (adminKey().length < ADMIN_KEY_MIN) console.warn(`ADMIN_KEY is ${adminKey() ? "shorter than 12 characters" : "not set"}: the back office can't be signed in to.`);
   // Prepaid gift subscriptions: check for deliveries due, now and every hour.

@@ -18,8 +18,9 @@ services:
       # Set the value in the Render dashboard; never commit the key.
       - key: ANTHROPIC_API_KEY
         sync: false
-      # Or answer the FAQ through OpenRouter (openrouter.ai) with no Anthropic key: it picks the model
-      # (OPENROUTER_MODEL names one instead). Used only when ANTHROPIC_API_KEY isn't set.
+      # All the AI (FAQ, back office assistant, texting assistant, shop helpers) through OpenRouter, so no
+      # Anthropic key is needed. The FAQ lets OpenRouter pick the model (OPENROUTER_MODEL names one); the
+      # rest use Claude Opus and Haiku through it. Takes priority over ANTHROPIC_API_KEY when both are set.
       - key: OPENROUTER_API_KEY
         sync: false
       # The site assistant is answered by Hermes Agent, the private service below (docs/HERMES.md).
