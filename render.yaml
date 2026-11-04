@@ -220,8 +220,8 @@ services:
       sh -c '
       mkdir -p /opt/data
       echo "model:" > /opt/data/config.yaml
-      echo "  default: claude-sonnet-5-5" >> /opt/data/config.yaml
-      echo "  provider: anthropic" >> /opt/data/config.yaml
+      echo "  default: anthropic/claude-sonnet-5.5" >> /opt/data/config.yaml
+      echo "  provider: openrouter" >> /opt/data/config.yaml
       echo "platform_toolsets:" >> /opt/data/config.yaml
       echo "  cli: [web]" >> /opt/data/config.yaml
       exec hermes serve --host 0.0.0.0 --port 9119
@@ -236,8 +236,8 @@ services:
       # The password mimi-food uses to connect (it reads the same value).
       - key: HERMES_DASHBOARD_SESSION_TOKEN
         generateValue: true
-      # Hermes' own Claude key; set the value in the Render dashboard.
-      - key: ANTHROPIC_API_KEY
+      # Hermes' model access (Claude through OpenRouter); set the value in the Render dashboard.
+      - key: OPENROUTER_API_KEY
         sync: false
 
 databases:

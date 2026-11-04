@@ -42,13 +42,13 @@ Frames are JSON-RPC 2.0, one per text frame. Contracts:
 Hermes is Python and keeps state (SQLite), so it runs as its own service. `render.yaml` already declares it as
 `hermes-assistant`, a private Render service built from Hermes' own Dockerfile (starter plan with a 1 GB disk, so it
 is a paid service). mimi-food gets `HERMES_URL` and `HERMES_TOKEN` from it automatically, so there is nothing to
-copy by hand. The one value to set is its Claude key:
+copy by hand. The one value to set is its OpenRouter key:
 
 1. Render → Blueprints → apply the change; it creates `hermes-assistant`.
 2. Render → hermes-assistant → Environment → set `ANTHROPIC_API_KEY`.
 3. Deploy it (auto-deploy is off on purpose, so Hermes never updates itself).
 
-Its start command writes the config on every start: Claude as the model and web lookups as the only tool
+Its start command writes the config on every start: Claude (through OpenRouter) as the model and web lookups as the only tool
 (see the next section). To run it elsewhere instead, start `hermes serve --host 0.0.0.0 --port 9119` with a
 long random `HERMES_DASHBOARD_SESSION_TOKEN`, keep the port off the public internet, and set `HERMES_URL` and
 `HERMES_TOKEN` by hand.
