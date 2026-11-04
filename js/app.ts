@@ -607,6 +607,8 @@ const TEXT_ICON = `<span class="text-cue-icon" aria-hidden="true"><svg viewBox="
 
 // The card itself: black, the logo, the amount. Drawn in HTML so the amount can change live.
 const LOGO_MARK = `<img src="/assets/logo-mark.png" alt="" width="56" height="56">`;
+// The round logo for the chat window: a full circle, not the mark on a plate.
+const AVATAR_MARK = `<img src="/assets/logo-avatar.png" alt="" width="36" height="36">`;
 const giftCardArt = (amount, number = "") => `
   <div class="gc-card" aria-hidden="true">
     <span class="gc-mark">${LOGO_MARK}</span>
@@ -12043,7 +12045,7 @@ function renderChatShell() {
       <aside class="drawer-panel chat-panel">
         <div class="drawer-head chat-head">
           <button type="button" class="chat-back" data-chat-list aria-label="Messages" title="Messages" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <span class="chat-avatar is-head" aria-hidden="true">${LOGO_MARK}</span>
+          <span class="chat-avatar is-head" aria-hidden="true">${AVATAR_MARK}</span>
           <div class="chat-title">
             <h2>${esc(SITE.name)}</h2>
             <small class="chat-sub" data-chat-status>The team at the roastery</small>
@@ -12436,7 +12438,7 @@ function chatListView(on: boolean) {
     return m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d`;
   };
   box.innerHTML = `<ol class="chat-list-items">${chatHistory()
-    .map((x) => `<li><button type="button" class="chat-list-item${x.id === chatState.id ? " is-current" : ""}" data-chat-open-past="${esc(x.id)}">${x.by ? chatFace(x.by) : `<span class="chat-avatar" aria-hidden="true">${LOGO_MARK}</span>`}<span class="chat-list-text"><strong translate="no">${esc(x.preview || tr("Conversation"))}</strong><small>${esc(x.by?.name || SITE.name)}</small></span><small class="chat-list-when">${ago(x.at)}</small></button></li>`)
+    .map((x) => `<li><button type="button" class="chat-list-item${x.id === chatState.id ? " is-current" : ""}" data-chat-open-past="${esc(x.id)}">${x.by ? chatFace(x.by) : `<span class="chat-avatar" aria-hidden="true">${AVATAR_MARK}</span>`}<span class="chat-list-text"><strong translate="no">${esc(x.preview || tr("Conversation"))}</strong><small>${esc(x.by?.name || SITE.name)}</small></span><small class="chat-list-when">${ago(x.at)}</small></button></li>`)
     .join("")}</ol>
     <button type="button" class="button chat-list-new" data-chat-new>${tr("Send us a message")}</button>`;
 }
