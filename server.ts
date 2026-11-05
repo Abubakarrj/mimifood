@@ -708,7 +708,8 @@ function seoHead(html, req, lang = "en") {
       `<section class="pdp-page" data-gift-cards><div class="pdp-static"><h1>Gift Card</h1><p>An ${escapeHtml(DATA.SITE.name)} digital gift card, sent by email, for Mimi Food products online. It never expires.</p></div></section>`
     );
   }
-  const shopSection = SHOP_PATHS.has(at) ? { "/shop": "Shop", "/coffee": "Coffee", "/espresso": "Coffee", "/filter": "Coffee", "/decaf": "Coffee", "/accessories": "Accessories", "/tea": "Tea", "/limited": "Shop" }[at] : null;
+  const shopAt = /^\/shop\/[a-z0-9-]{1,40}$/.test(at) ? "/shop" : at;
+  const shopSection = SHOP_PATHS.has(shopAt) ? { "/shop": "Shop", "/coffee": "Coffee", "/espresso": "Coffee", "/filter": "Coffee", "/decaf": "Coffee", "/accessories": "Accessories", "/tea": "Tea", "/limited": "Shop" }[shopAt] : null;
   if (shopSection) {
     const e = escapeHtml;
     const coffees = DATA.PRODUCTS.filter((p) => !p.hidden);
@@ -1047,6 +1048,15 @@ async function serveStatic(req, res) {
   }
   // The shop's sections (/shop, /coffee, /tea …) are the home page opened on that section, and
   // /subscriptions/build and /subscriptions/gift the subscriptions page opened on its builder.
+  // A shop category is /shop/sauces; the old /?kind=sauces and /shop?kind=sauces go there.
+  if (pathname === "/" || pathname === "/shop") {
+    const kind = new URL(req.url, "http://localhost").searchParams.get("kind") || "";
+    if (/^[a-z0-9-]{1,40}$/.test(kind)) {
+      res.writeHead(301, { Location: `${langPrefix(lang)}/shop/${kind}`, "Cache-Control": "public, max-age=86400" });
+      return res.end();
+    }
+  }
+  if (/^\/shop\/[a-z0-9-]{1,40}$/.test(pathname)) pathname = "/index";
   if (SHOP_PATHS.has(pathname)) pathname = "/index";
   // A role's own page (/careers/barista): the Careers page, which opens it. Only open roles.
   if (/^\/careers\/[a-z0-9-]{1,80}$/.test(pathname)) {

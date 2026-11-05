@@ -1328,7 +1328,7 @@ function renderLayout() {
             <button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="menu-shop">Shop<span class="menu-plus" aria-hidden="true"></span></button>
             <div class="menu-sub" id="menu-shop" inert><ul>
               <li><a href="shop">Shop All</a></li>
-              ${shopCategories().map((c) => `<li><a href="shop?kind=${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}">${esc(c)}</a></li>`).join("")}
+              ${shopCategories().map((c) => `<li><a href="shop/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}">${esc(c)}</a></li>`).join("")}
               <li><a href="gift-cards">Gift Cards</a></li>
             </ul></div>
           </li>
@@ -3093,8 +3093,12 @@ const SHOP_SECTIONS = { shop: "Shop", coffee: "Coffee", espresso: "Coffee/Espres
 // The section an address is for ("/es/tea" → "tea"), or null.
 const sectionSlug = (url) => {
   const slug = new URL(url, location.href).pathname.replace(/^\/(es|ko)(?=\/|$)/, "").replace(/^\/|\/$/g, "");
+  // A category (/shop/sauces) is the Shop section with that filter.
+  if (/^shop\/[a-z0-9-]+$/.test(slug)) return "shop";
   return Object.hasOwn(SHOP_SECTIONS, slug) ? slug : null;
 };
+// The shop category an address picks: /shop/sauces, or the old ?kind=sauces.
+const kindInAddress = (): string | null => new URL(location.href).pathname.replace(/^\/(es|ko)(?=\/|$)/, "").match(/^\/shop\/([a-z0-9-]+)\/?$/)?.[1] || new URLSearchParams(location.search).get("kind");
 
 /* ── Order tracking: our own page for every order (from its emails, or the account page) ──
    Couriers and carriers stay behind the scenes: the customer sees our steps, the courier's
@@ -3932,7 +3936,7 @@ const pages = {
       if (!slug || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
       closeOverlays(false);
-      if (sectionSlug(location.href) !== slug || location.search !== link.search) history.pushState(null, "", `${prefix}/${slug}${link.search}`);
+      if (location.pathname !== link.pathname || location.search !== link.search) history.pushState(null, "", `${link.pathname}${link.search}`);
       showSection(SHOP_SECTIONS[slug]);
       const wanted = kindFromAddress();
       if (wanted) {
@@ -4044,17 +4048,23 @@ const pages = {
     // The picked filter is in the address (/coffee?kind=espresso), so Back and a shared link keep it.
     const kindSlug = (k) => k.toLowerCase().replace(/\s+/g, "-");
     const kindFromAddress = () => {
-      const want = new URLSearchParams(location.search).get("kind");
+      const want = kindInAddress();
       return (want && kindsOf(view.section).find((k) => kindSlug(k) === want)) || null;
     };
     $("[data-shop-filters]").addEventListener("click", (e) => {
       const b = e.target.closest("[data-kind]");
       if (!b) return;
       view.kind = b.dataset.kind;
-      const q = new URLSearchParams(location.search);
-      if (view.kind === "All") q.delete("kind");
-      else q.set("kind", kindSlug(view.kind));
-      history.replaceState(history.state, "", `${location.pathname}${q.size ? `?${q}` : ""}${location.hash}`);
+      if (view.section === "Shop") {
+        // Everything in the shop: the address is /shop or /shop/sauces, on any language.
+        const lang = location.pathname.match(/^\/(es|ko)(?=\/|$)/)?.[0] || "";
+        history.replaceState(history.state, "", `${lang}/shop${view.kind === "All" ? "" : `/${kindSlug(view.kind)}`}${location.hash}`);
+      } else {
+        const q = new URLSearchParams(location.search);
+        if (view.kind === "All") q.delete("kind");
+        else q.set("kind", kindSlug(view.kind));
+        history.replaceState(history.state, "", `${location.pathname}${q.size ? `?${q}` : ""}${location.hash}`);
+      }
       render();
       b.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduceMotion ? "instant" : "smooth" });
     });
@@ -12977,7 +12987,7 @@ function wireChat() {
 // origin, tasting notes, process, variety), accessories, pages and FAQ answers, all from what the
 // page already has. Enter (or →) opens the first result.
 
-const catHref = (c) => `shop?kind=${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`;
+const catHref = (c) => `shop/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`;
 const SEARCH_PICKS = () => [...shopCategories().map((c) => [c, catHref(c)]), ["Gift Cards", "gift-cards"]];
 const SEARCH_PAGES = () => [
   ["Gift Cards", "gift-cards", "gift card voucher present give balance egift"],
